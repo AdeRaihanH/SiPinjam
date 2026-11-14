@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "SiPinjam",
+    "slug": "sipinjam",
+    "version": "1.0.0",
+    "description": "Aplikasi peminjaman alat laboratorium dengan katalog, QR Code, pengingat jatuh tempo, dan pencatatan denda.",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "sipinjam",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aderaihan.sipinjam",
+      "infoPlist": {
+        "NSCameraUsageDescription": "SiPinjam memerlukan kamera untuk memindai QR code alat dan pinjaman."
+      }
+    },
+    "android": {
+      "package": "com.aderaihan.sipinjam",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A5B4B",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "SiPinjam memerlukan kamera untuk memindai QR code alat dan pinjaman.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#0A5B4B"
+        }
+      ],
+      "expo-status-bar",
+      "expo-font"
+    ],
+    "extra": {
+      "apiUrl": ""
+    }
+  }
+}

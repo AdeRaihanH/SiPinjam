@@ -1,0 +1,294 @@
+{
+  "info": {
+    "_postman_id": "9f5a8f52-6f1e-4f4f-9c4d-7a7a9c2d1b24",
+    "name": "SiPinjam API",
+    "description": "Koleksi pengujian REST API SiPinjam. Jalankan Login lebih dulu agar variabel token terisi, lalu Create Loan sebelum endpoint yang memakai {{loanId}} atau {{loanKode}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api/v1" },
+    { "key": "rootUrl", "value": "http://localhost:5000" },
+    { "key": "token", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "toolId", "value": "1" },
+    { "key": "loanId", "value": "" },
+    { "key": "loanKode", "value": "" },
+    { "key": "notificationId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [],
+        "url": "{{rootUrl}}/health",
+        "description": "Health check beserta status koneksi database."
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login demo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.token) {",
+                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "  pm.collectionVariables.set('userId', json.data.user.id);",
+                  "  console.log('Token disimpan untuk', json.data.user.nama);",
+                  "}",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@sipinjam.id\",\n  \"password\": \"sipinjam123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Menyimpan token ke variabel koleksi secara otomatis."
+          }
+        },
+        {
+          "name": "Profil saya",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Kategori",
+      "item": [
+        {
+          "name": "Daftar kategori",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/categories"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alat",
+      "item": [
+        {
+          "name": "Katalog",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tools?limit=50"
+          }
+        },
+        {
+          "name": "Cari laptop",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tools?search=laptop&tersedia=1"
+          }
+        },
+        {
+          "name": "Filter kategori",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tools?category_id=1&limit=20"
+          }
+        },
+        {
+          "name": "Detail alat",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tools/{{toolId}}"
+          }
+        },
+        {
+          "name": "Cari alat dari QR",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/tools/kode/SIPINJAM%3ATOOL%3AALT-001"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pinjaman",
+      "item": [
+        {
+          "name": "Buat pinjaman",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data) {",
+                  "  pm.collectionVariables.set('loanId', json.data.id);",
+                  "  pm.collectionVariables.set('loanKode', json.data.kode);",
+                  "}",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"tool_id\": 1, \"jumlah\": 1 }\n  ],\n  \"durasi_hari\": 2,\n  \"catatan\": \"Uji coba dari Postman\"\n}"
+            },
+            "url": "{{baseUrl}}/loans",
+            "description": "Akun demo memiliki pinjaman terlambat, jadi endpoint ini akan mengembalikan PINJAMAN_TERLAMBAT sampai pinjaman tersebut dikembalikan. Login sebagai uji@sipinjam.id untuk mencoba alur bersih."
+          }
+        },
+        {
+          "name": "Daftar berjalan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/loans?status=berjalan&limit=50"
+          }
+        },
+        {
+          "name": "Daftar terlambat",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/loans?status=terlambat"
+          }
+        },
+        {
+          "name": "Daftar selesai",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/loans?status=selesai"
+          }
+        },
+        {
+          "name": "Detail pinjaman",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/loans/{{loanId}}"
+          }
+        },
+        {
+          "name": "Cari pinjaman dari QR",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/loans/kode/SIPINJAM%3ALOAN%3A{{loanKode}}",
+            "description": "Jalankan Buat pinjaman lebih dulu agar {{loanKode}} terisi."
+          }
+        },
+        {
+          "name": "Kembalikan alat",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/loans/{{loanId}}/return",
+            "description": "Jalankan setelah Buat pinjaman. Denda dihitung server dari tanggal jatuh tempo."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifikasi",
+      "item": [
+        {
+          "name": "Daftar notifikasi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.length) {",
+                  "  pm.collectionVariables.set('notificationId', json.data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/notifications?limit=50"
+          }
+        },
+        {
+          "name": "Tandai satu dibaca",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/notifications/{{notificationId}}/read"
+          }
+        },
+        {
+          "name": "Tandai semua dibaca",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/notifications/read-all"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Statistik",
+      "item": [
+        {
+          "name": "Ringkasan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/stats/summary"
+          }
+        },
+        {
+          "name": "Alat populer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/stats/populer?limit=5"
+          }
+        }
+      ]
+    }
+  ]
+}

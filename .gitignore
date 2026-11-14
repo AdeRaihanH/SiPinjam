@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.local
+*.log
+.expo/
+dist/
+dist-test/
+dist-web-test/
+web-build/
+coverage/
+.DS_Store
+Thumbs.db
+android/
+ios/
