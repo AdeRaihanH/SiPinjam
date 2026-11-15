@@ -134,7 +134,7 @@ Base path `/api/v1`, autentikasi `Authorization: Bearer <token>`.
 
 Envelope sukses: `{ "data": ... }`. Daftar: `{ "data": [...], "meta": { "total", "limit", "offset" } }`. Error: `{ "error": { "code", "message", "fields" } }`.
 
-Dokumentasi lengkap: [`docs/API.md`](docs/API.md). Koleksi Postman: [`docs/postman_collection.json`](docs/postman_collection.json).
+Dokumentasi lengkap: [`docs/API.md`](docs/API.md). Koleksi Postman: [`docs/postman_collection.json`](docs/postman_collection.json). Panduan responsi: [`docs/PANDUAN-TA.md`](docs/PANDUAN-TA.md).
 
 ### Kode error
 

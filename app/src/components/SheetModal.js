@@ -1,13 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, shadows, type, weight } from '../theme/tokens';
 
@@ -17,35 +9,9 @@ export default function SheetModal({
   title,
   subtitle,
   children,
-  keyboard = false,
   style,
 }) {
   const insets = useSafeAreaInsets();
-
-  const panel = (
-    <View style={styles.root} pointerEvents="box-none">
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Tutup panel" />
-      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }, style]}>
-        <View style={styles.handle} />
-        <View style={styles.header}>
-          <View style={styles.titleWrap}>
-            <Text style={styles.title}>{title}</Text>
-            {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Tutup"
-            hitSlop={8}
-            onPress={onClose}
-            style={styles.close}
-          >
-            <Ionicons name="close" size={18} color={colors.muted} />
-          </Pressable>
-        </View>
-        {children}
-      </View>
-    </View>
-  );
 
   return (
     <Modal
@@ -55,14 +21,28 @@ export default function SheetModal({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      {keyboard ? (
-        <KeyboardAvoidingView
-          style={styles.root}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          {panel}
-        </KeyboardAvoidingView>
-      ) : panel}
+      <View style={styles.root} pointerEvents="box-none">
+        <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Tutup panel" />
+        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }, style]}>
+          <View style={styles.handle} />
+          <View style={styles.header}>
+            <View style={styles.titleWrap}>
+              <Text style={styles.title}>{title}</Text>
+              {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Tutup"
+              hitSlop={8}
+              onPress={onClose}
+              style={styles.close}
+            >
+              <Ionicons name="close" size={18} color={colors.muted} />
+            </Pressable>
+          </View>
+          {children}
+        </View>
+      </View>
     </Modal>
   );
 }

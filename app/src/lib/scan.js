@@ -2,10 +2,6 @@ const QR_PATTERN = /^SIPINJAM:(TOOL|LOAN):([A-Za-z0-9-]+)$/i;
 const TOOL_PATTERN = /^(ELK|JAR|ALK|KOM)-\d{3}$/i;
 const LOAN_PATTERN = /^PJM-\d{6}-\d{3}$/i;
 
-export function toToolQr(kode) {
-  return `SIPINJAM:TOOL:${kode}`;
-}
-
 export function toLoanQr(kode) {
   return `SIPINJAM:LOAN:${kode}`;
 }

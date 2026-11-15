@@ -47,5 +47,3 @@ export function formatTanggal(isoDate) {
 export function atJakartaMorning(isoDate) {
   return new Date(`${isoDate}T08:00:00+07:00`).toISOString();
 }
-
-export { DAY_MS, TIME_ZONE };
