@@ -1,10 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useState } from 'react';
-import { addDays } from 'date-fns';
+import { addDays, differenceInCalendarDays, format, parseISO, startOfDay } from 'date-fns';
+import { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,71 +12,63 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Button from '../components/Button';
+import Card from '../components/Card';
+import DatePickerField from '../components/DatePickerField';
 import FormField from '../components/FormField';
 import InlineNotice from '../components/InlineNotice';
-import { Pill } from '../components/Pill';
 import Screen from '../components/Screen';
 import SectionTitle from '../components/SectionTitle';
 import StackHeader from '../components/StackHeader';
 import Stepper from '../components/Stepper';
-import ToolGlyph from '../components/ToolGlyph';
-import { useNotifications } from '../context/NotificationContext';
-import { useResource } from '../hooks/useResource';
-import { api } from '../services/api';
-import { colors, radius, shadows } from '../theme';
-import {
-  formatRupiah,
-  formatTanggal,
-  formatTanggalPanjang,
-  labelKondisi,
-} from '../utils/format';
+import ToolPhoto from '../components/ToolPhoto';
+import { loansApi } from '../api/loans';
+import { useNotificationBadge } from '../context/NotificationContext';
+import { useToolDetail } from '../hooks/useToolDetail';
+import { formatRupiah, formatTanggal } from '../lib/format';
+import { colors, layout, shadows, type, weight } from '../theme/tokens';
 
-const DURASI = [1, 2, 3];
+function tomorrowISO() {
+  return format(addDays(new Date(), 1), 'yyyy-MM-dd');
+}
 
 export default function FormPinjamScreen({ navigation, route }) {
   const { tool: initialTool } = route.params || {};
   const insets = useSafeAreaInsets();
-  const { refresh: refreshNotifications } = useNotifications();
+  const { refresh: refreshBadge } = useNotificationBadge();
+  const toolQuery = useToolDetail(initialTool?.id, initialTool);
+  const tool = toolQuery.data || initialTool;
 
   const [jumlah, setJumlah] = useState(1);
-  const [durasi, setDurasi] = useState(1);
+  const [tanggal, setTanggal] = useState(tomorrowISO());
   const [catatan, setCatatan] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  const loadTool = useCallback(() => api.get(`/tools/${initialTool.id}`), [initialTool.id]);
-  const toolRes = useResource(loadTool, { initialData: initialTool });
-  const tool = toolRes.data || initialTool;
+  const stok = Math.max(0, Number(tool?.stok_tersedia ?? 0));
+  const jumlahDipilih = Math.max(1, Math.min(jumlah, stok || 1));
+  const durasi = Math.max(0, differenceInCalendarDays(
+    parseISO(tanggal),
+    startOfDay(new Date()),
+  ));
+  const habis = stok <= 0;
+  const minDate = addDays(startOfDay(new Date()), 1);
+  const maxDate = addDays(startOfDay(new Date()), 3);
 
-  const loadStats = useCallback(() => api.get('/stats/summary'), []);
-  const statsRes = useResource(loadStats);
-  const stats = statsRes.data;
-
-  const stok = Math.max(1, Number(tool?.stok_tersedia ?? 1));
-  const jumlahDipilih = Math.min(jumlah, stok);
-  const tanggalKembali = addDays(new Date(), durasi);
-  const dendaPerHari = Number(stats?.denda_per_hari || 2000);
-  const adaTerlambat = Number(stats?.terlambat || 0) > 0;
-  const sedangDipinjam = Boolean(tool?.dipinjam_oleh_saya);
-  const habis = Number(tool?.stok_tersedia ?? 0) <= 0;
-
-  async function handleSubmit() {
-    if (submitting) return;
-    setError(null);
+  async function submit() {
+    if (submitting || habis) return;
     setSubmitting(true);
+    setError(null);
     try {
-      const loan = await api.post('/loans', {
-        items: [{ tool_id: tool.id, jumlah: jumlahDipilih }],
-        durasi_hari: durasi,
+      const loan = await loansApi.create({
+        tanggal_kembali_rencana: tanggal,
         catatan: catatan.trim() || undefined,
+        items: [{ tool_id: tool.id, jumlah: jumlahDipilih }],
       });
-      refreshNotifications();
-      navigation.replace('SuksesPinjam', { loanId: loan.id, loan });
+      refreshBadge();
+      navigation.replace('SuksesPinjam', { loan });
     } catch (err) {
       setError(err);
-      if (err.code === 'STOK_TIDAK_CUKUP') {
-        toolRes.reload('silent');
-      }
+      if (err.code === 'STOK_TIDAK_CUKUP') toolQuery.refetch('silent');
     } finally {
       setSubmitting(false);
     }
@@ -85,125 +76,96 @@ export default function FormPinjamScreen({ navigation, route }) {
 
   return (
     <Screen padded={false}>
-      <StackHeader
-        title="Ajukan pinjaman"
-        subtitle={tool?.kode}
-        right={<Pill label="Langkah 2 dari 3" tone="primary" />}
-      />
-
+      <StackHeader title="Ajukan pinjaman" subtitle={tool?.kode} />
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
           contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <View style={styles.toolCard}>
-            <ToolGlyph tool={tool} size={58} />
+          <Card style={styles.toolCard}>
+            <ToolPhoto tool={tool} width={56} height={56} />
             <View style={styles.toolCopy}>
-              <Text style={styles.toolCategory}>{tool?.kategori_nama}</Text>
               <Text style={styles.toolName} numberOfLines={2}>{tool?.nama}</Text>
-              <View style={styles.toolMeta}>
-                <Pill label={`${tool?.stok_tersedia ?? 0} tersedia`} tone={habis ? 'danger' : 'primary'} dot />
-                <Text style={styles.condition}>{labelKondisi(tool?.kondisi)}</Text>
-              </View>
+              <Text style={styles.toolMeta}>{tool?.kode} · {tool?.kategori?.nama}</Text>
+              <Text style={[styles.toolStock, habis && { color: colors.danger }]}>
+                {habis ? 'Stok habis' : `${stok} unit tersedia`}
+              </Text>
             </View>
-          </View>
+          </Card>
 
-          {adaTerlambat ? (
+          {habis ? (
             <InlineNotice
               tone="danger"
-              title="Pinjaman terlambat harus diselesaikan"
-              message="Kamu masih memiliki pinjaman yang melewati jatuh tempo. Kembalikan dulu sebelum mengajukan pinjaman baru."
-              actionLabel="Buka daftar pinjaman"
-              onAction={() => navigation.navigate('Pinjaman')}
-            />
-          ) : null}
-
-          {sedangDipinjam ? (
-            <InlineNotice
-              tone="warn"
-              title="Alat ini sedang kamu pinjam"
-              message="Satu alat hanya boleh ada di satu pinjaman aktif. Kembalikan pinjaman sebelumnya terlebih dahulu."
-              actionLabel="Lihat pinjaman"
-              onAction={() => navigation.navigate('Pinjaman')}
+              title="Stok tidak tersedia"
+              message="Alat ini sedang dipinjam. Coba kembali setelah alat dikembalikan."
             />
           ) : null}
 
           <View style={styles.section}>
-            <SectionTitle title="Jumlah unit" subtitle={`Stok tersedia ${tool?.stok_tersedia ?? 0} unit`} />
-            <View style={styles.quantityCard}>
+            <SectionTitle title="Jumlah unit" subtitle={`Maksimal ${stok} unit`} />
+            <Card style={styles.stepperCard}>
               <Stepper
                 value={jumlahDipilih}
                 onChange={setJumlah}
                 min={1}
-                max={stok}
+                max={Math.max(1, stok)}
                 suffix="unit"
               />
-              <Text style={styles.quantityHint}>
-                Pilih jumlah alat fisik yang akan dibawa.
-              </Text>
-            </View>
+              <Text style={styles.helper}>Jumlah alat fisik yang akan dibawa.</Text>
+            </Card>
           </View>
 
-          <View style={styles.section}>
-            <SectionTitle title="Durasi pinjam" subtitle="Pilih 1 sampai 3 hari kalender" />
-            <View style={styles.durationRow}>
-              {DURASI.map((hari) => {
-                const selected = durasi === hari;
-                return (
-                  <Pressable
-                    key={hari}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected }}
-                    onPress={() => setDurasi(hari)}
-                    style={[styles.durationCard, selected && styles.durationCardActive]}
-                  >
-                    <Text style={[styles.durationValue, selected && styles.durationValueActive]}>
-                      {hari}
-                    </Text>
-                    <Text style={[styles.durationUnit, selected && styles.durationUnitActive]}>
-                      hari
-                    </Text>
-                    <Text style={[styles.durationDate, selected && styles.durationDateActive]}>
-                      {formatTanggal(addDays(new Date(), hari), 'd MMM')}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-
-          <View style={styles.returnCard}>
-            <View style={styles.returnIcon}>
-              <Ionicons name="calendar-outline" size={20} color={colors.primaryDark} />
-            </View>
-            <View style={styles.returnCopy}>
-              <Text style={styles.returnLabel}>Rencana pengembalian</Text>
-              <Text style={styles.returnValue}>{formatTanggalPanjang(tanggalKembali)}</Text>
-              <Text style={styles.returnHint}>Dihitung otomatis dari durasi pinjam.</Text>
-            </View>
-          </View>
+          <DatePickerField
+            value={tanggal}
+            onChange={setTanggal}
+            minDate={minDate}
+            maxDate={maxDate}
+            label="Tanggal kembali"
+          />
 
           <FormField
             label="Catatan"
             hint="Opsional"
-            icon="create-outline"
             value={catatan}
             onChangeText={setCatatan}
             placeholder="Contoh: untuk praktikum jaringan kelompok 3"
             multiline
-            maxLength={255}
-            style={styles.notes}
+            maxLength={500}
           />
+
+          <Card style={styles.summary}>
+            <View style={styles.summaryRow}>
+              <View style={styles.summaryItem}>
+                <Ionicons name="cube-outline" size={17} color={colors.muted} />
+                <Text style={styles.summaryLabel}>Jumlah</Text>
+                <Text style={styles.summaryValue}>{jumlahDipilih} unit</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <Ionicons name="time-outline" size={17} color={colors.muted} />
+                <Text style={styles.summaryLabel}>Durasi</Text>
+                <Text style={styles.summaryValue}>
+                  {durasi === 0 ? 'Hari ini' : `${durasi} hari`}
+                </Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <Ionicons name="calendar-outline" size={17} color={colors.muted} />
+                <Text style={styles.summaryLabel}>Kembali</Text>
+                <Text style={styles.summaryValue}>{formatTanggal(tanggal, 'd MMM')}</Text>
+              </View>
+            </View>
+          </Card>
 
           <InlineNotice
             tone="info"
-            icon="shield-checkmark"
-            title="Aturan yang berlaku"
-            message={`Denda ${formatRupiah(dendaPerHari)} per hari keterlambatan. Maksimal 3 alat dan durasi 3 hari per transaksi.`}
+            icon="shield-checkmark-outline"
+            title="Aturan peminjaman"
+            message={`Denda ${formatRupiah(2000)} per hari keterlambatan. Maksimal 3 jenis alat dan 3 hari per transaksi.`}
           />
 
           {error ? (
@@ -211,33 +173,24 @@ export default function FormPinjamScreen({ navigation, route }) {
               tone="danger"
               title="Pinjaman gagal diajukan"
               message={error.message}
-              actionLabel={error.code === 'PINJAMAN_TERLAMBAT' ? 'Lihat pinjaman' : undefined}
-              onAction={error.code === 'PINJAMAN_TERLAMBAT' ? () => navigation.navigate('Pinjaman') : undefined}
+              actionLabel={error.code === 'CONFLICT' ? 'Lihat pinjaman' : undefined}
+              onAction={error.code === 'CONFLICT' ? () => navigation.navigate('Pinjaman') : undefined}
             />
           ) : null}
         </ScrollView>
 
         <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-          <View style={styles.footerSummary}>
+          <View style={styles.footerCopy}>
             <Text style={styles.footerLabel}>Ringkasan</Text>
             <Text style={styles.footerValue}>{jumlahDipilih} unit · {durasi} hari</Text>
-            <Text style={styles.footerHint}>Biaya pinjam Rp0</Text>
           </View>
           <Button
-            title={
-              adaTerlambat
-                ? 'Selesaikan pinjaman dulu'
-                : sedangDipinjam
-                  ? 'Sudah kamu pinjam'
-                  : habis
-                    ? 'Stok habis'
-                    : 'Ajukan peminjaman'
-            }
-            icon={adaTerlambat ? 'time-outline' : 'arrow-forward'}
+            title={habis ? 'Stok habis' : 'Ajukan peminjaman'}
+            icon={habis ? undefined : 'arrow-forward'}
             loading={submitting}
-            disabled={sedangDipinjam || habis}
-            onPress={adaTerlambat ? () => navigation.navigate('Pinjaman') : handleSubmit}
-            style={styles.submit}
+            disabled={habis}
+            onPress={submit}
+            style={styles.footerButton}
           />
         </View>
       </KeyboardAvoidingView>
@@ -248,148 +201,38 @@ export default function FormPinjamScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: layout.screenPadding,
     paddingBottom: 24,
-    gap: 18,
+    gap: 16,
   },
-  toolCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 13,
-    padding: 14,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    ...shadows.soft,
-  },
-  toolCopy: { flex: 1, gap: 3 },
-  toolCategory: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.muted,
-  },
-  toolName: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '700',
-    color: colors.ink,
-  },
-  toolMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 2,
-  },
-  condition: {
-    fontSize: 10.5,
-    color: colors.muted,
-  },
-  section: { gap: 9 },
-  quantityCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 14,
-    gap: 8,
-  },
-  quantityHint: {
-    fontSize: 10.5,
-    color: colors.muted,
-  },
-  durationRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  durationCard: {
-    flex: 1,
-    borderRadius: radius.md,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingVertical: 12,
-    alignItems: 'center',
-    gap: 1,
-  },
-  durationCardActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  durationValue: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: colors.ink,
-    lineHeight: 26,
-  },
-  durationValueActive: { color: colors.white },
-  durationUnit: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.muted,
-  },
-  durationUnitActive: { color: 'rgba(255,255,255,0.7)' },
-  durationDate: {
-    fontSize: 9.5,
-    color: colors.faint,
-    marginTop: 3,
-  },
-  durationDateActive: { color: 'rgba(255,255,255,0.82)' },
-  returnCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: colors.primaryTint,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.primarySoft,
-    padding: 14,
-  },
-  returnIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  returnCopy: { flex: 1, gap: 1 },
-  returnLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: colors.primaryDark,
-    letterSpacing: 0.2,
-  },
-  returnValue: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: colors.ink,
-    lineHeight: 19,
-  },
-  returnHint: {
-    fontSize: 9.5,
-    color: colors.muted,
-  },
-  notes: { marginTop: -4 },
+  toolCard: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  toolCopy: { flex: 1, gap: 2 },
+  toolName: { fontSize: type.sm, fontWeight: weight.semibold, color: colors.text },
+  toolMeta: { fontSize: type.xs, color: colors.muted },
+  toolStock: { fontSize: type.xs, color: colors.success, fontWeight: weight.semibold },
+  section: { gap: 8 },
+  stepperCard: { gap: 8 },
+  helper: { fontSize: type.xs, color: colors.muted },
+  summary: { paddingVertical: 14 },
+  summaryRow: { flexDirection: 'row', alignItems: 'center' },
+  summaryItem: { flex: 1, alignItems: 'center', gap: 3 },
+  summaryDivider: { width: 1, height: 32, backgroundColor: colors.border },
+  summaryLabel: { fontSize: type.xs, color: colors.muted },
+  summaryValue: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.text },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingHorizontal: 20,
-    paddingTop: 11,
-    backgroundColor: colors.surface,
+    paddingHorizontal: layout.screenPadding,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: colors.border,
+    backgroundColor: colors.surface,
     ...shadows.sheet,
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.04,
   },
-  footerSummary: { width: 98, gap: 0 },
-  footerLabel: { fontSize: 9, color: colors.muted },
-  footerValue: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: colors.ink,
-  },
-  footerHint: { fontSize: 8.5, color: colors.faint },
-  submit: { flex: 1 },
+  footerCopy: { width: 96, gap: 1 },
+  footerLabel: { fontSize: type.xs, color: colors.muted },
+  footerValue: { fontSize: type.sm, fontWeight: weight.bold, color: colors.text },
+  footerButton: { flex: 1 },
 });

@@ -51,8 +51,8 @@ function Draw-Mark($g, [int]$size, [float]$cardRatio, [bool]$withCard) {
     $white.Dispose()
   }
 
-  $teal = [System.Drawing.Color]::FromArgb(255, 10, 91, 75)
-  $accent = [System.Drawing.Color]::FromArgb(255, 242, 178, 63)
+  $teal = [System.Drawing.Color]::FromArgb(255, 30, 42, 90)
+  $accent = [System.Drawing.Color]::FromArgb(255, 14, 159, 138)
   $pad = $card * 0.155
   $f = $card * 0.235
   $thick = [Math]::Max(3, $card * 0.052)
@@ -86,8 +86,8 @@ $bmp = $pair[0]; $g = $pair[1]
 $rect = New-Object System.Drawing.Rectangle(0, 0, $size, $size)
 $gradient = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
   $rect,
-  [System.Drawing.Color]::FromArgb(255, 14, 124, 102),
-  [System.Drawing.Color]::FromArgb(255, 7, 63, 52),
+  [System.Drawing.Color]::FromArgb(255, 30, 42, 90),
+  [System.Drawing.Color]::FromArgb(255, 17, 26, 58),
   45
 )
 $g.FillRectangle($gradient, $rect)
@@ -147,7 +147,7 @@ $g.Dispose(); $bmp.Dispose()
 $favSize = 64
 $pair = New-Canvas $favSize $false
 $bmp = $pair[0]; $g = $pair[1]
-$g.Clear([System.Drawing.Color]::FromArgb(255, 10, 91, 75))
+$g.Clear([System.Drawing.Color]::FromArgb(255, 30, 42, 90))
 Draw-Mark $g $favSize 0.72 $true
 $bmp.Save((Join-Path $assets 'favicon.png'), [System.Drawing.Imaging.ImageFormat]::Png)
 $g.Dispose(); $bmp.Dispose()

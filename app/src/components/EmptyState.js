@@ -1,20 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius } from '../theme';
+import { colors, radius, type, weight } from '../theme/tokens';
 import Button from './Button';
 
-export default function EmptyState({
-  icon = 'file-tray-outline',
-  title,
-  message,
-  actionLabel,
-  onAction,
-  style,
-}) {
+export default function EmptyState({ icon = 'file-tray-outline', title, message, actionLabel, onAction, style }) {
   return (
     <View style={[styles.root, style]}>
-      <View style={styles.iconWrap}>
-        <Ionicons name={icon} size={28} color={colors.primary} />
+      <View style={styles.icon}>
+        <Ionicons name={icon} size={24} color={colors.primary} />
       </View>
       <Text style={styles.title}>{title}</Text>
       {message ? <Text style={styles.message}>{message}</Text> : null}
@@ -33,35 +26,17 @@ export default function EmptyState({
 }
 
 const styles = StyleSheet.create({
-  root: {
-    alignItems: 'center',
-    paddingVertical: 34,
-    paddingHorizontal: 22,
-    gap: 8,
-  },
-  iconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.xl,
+  root: { alignItems: 'center', paddingVertical: 32, paddingHorizontal: 24, gap: 7 },
+  icon: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.md,
     backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.ink,
-    textAlign: 'center',
-  },
-  message: {
-    fontSize: 12.5,
-    lineHeight: 19,
-    color: colors.muted,
-    textAlign: 'center',
-    maxWidth: 270,
-  },
-  button: {
-    marginTop: 8,
-  },
+  title: { fontSize: type.md, fontWeight: weight.semibold, color: colors.text, textAlign: 'center' },
+  message: { fontSize: type.xs, lineHeight: 17, color: colors.muted, textAlign: 'center', maxWidth: 280 },
+  button: { marginTop: 8 },
 });

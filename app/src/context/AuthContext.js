@@ -1,39 +1,35 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { api, setToken } from '../services/api';
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { authApi } from '../api/auth';
+import { setUnauthorizedHandler, TOKEN_KEY } from '../api/client';
 
-const TOKEN_KEY = 'sipinjam.token';
-const USER_KEY = 'sipinjam.user';
+const MEMBER_KEY = 'sipinjam.member';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
-  const clearing = useRef(false);
 
   const clearSession = useCallback(async () => {
-    if (clearing.current) return;
-    clearing.current = true;
-    setToken(null);
-    setUser(null);
-    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]).catch(() => {});
-    clearing.current = false;
+    setMember(null);
+    await AsyncStorage.multiRemove([TOKEN_KEY, MEMBER_KEY]).catch(() => {});
   }, []);
 
-  const login = useCallback(async (email, password) => {
-    const result = await api.post('/auth/login', {
-      email: String(email).trim().toLowerCase(),
-      password,
-    });
-
+  const login = useCallback(async (nim, password) => {
+    const result = await authApi.login(String(nim).trim(), password);
     await AsyncStorage.multiSet([
       [TOKEN_KEY, result.token],
-      [USER_KEY, JSON.stringify(result.user)],
+      [MEMBER_KEY, JSON.stringify(result.member)],
     ]);
-    setToken(result.token);
-    setUser(result.user);
-    return result.user;
+    setMember(result.member);
+    return result.member;
   }, []);
 
   const logout = useCallback(async () => {
@@ -45,56 +41,43 @@ export function AuthProvider({ children }) {
 
     async function boot() {
       try {
-        const [[, token], [, cachedUser]] = await AsyncStorage.multiGet([TOKEN_KEY, USER_KEY]);
+        const [[, token], [, cached]] = await AsyncStorage.multiGet([TOKEN_KEY, MEMBER_KEY]);
         if (!token) return;
 
-        setToken(token);
+        if (cached) {
+          try { setMember(JSON.parse(cached)); } catch { /* abaikan cache rusak */ }
+        }
+
         try {
-          const result = await api.get('/auth/me');
+          const result = await authApi.me();
           if (!active) return;
-          setUser(result.user);
-          await AsyncStorage.setItem(USER_KEY, JSON.stringify(result.user));
+          setMember(result.member);
+          await AsyncStorage.setItem(MEMBER_KEY, JSON.stringify(result.member));
         } catch (error) {
           if (!active) return;
-          if (error.status === 401) {
-            await clearSession();
-          } else if (cachedUser) {
-            setUser(JSON.parse(cachedUser));
-          }
+          if (error.status === 401) await clearSession();
         }
-      } catch {
-        // Penyimpanan lokal gagal dibaca: mulai dari layar login.
       } finally {
         if (active) setLoading(false);
       }
     }
 
     boot();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [clearSession]);
 
   useEffect(() => {
-    api.setUnauthorizedHandler(() => {
-      clearSession();
-    });
-    return () => api.setUnauthorizedHandler(null);
+    setUnauthorizedHandler(() => { clearSession(); });
+    return () => setUnauthorizedHandler(null);
   }, [clearSession]);
 
   const value = useMemo(() => ({
-    user,
+    member,
     loading,
     login,
     logout,
-    isAuthenticated: Boolean(user),
-  }), [user, loading, login, logout]);
+    isAuthenticated: Boolean(member),
+  }), [member, loading, login, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth harus dipakai di dalam AuthProvider');
-  return context;
 }

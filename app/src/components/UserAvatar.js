@@ -1,13 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { inisial } from '../utils/format';
-import { colors } from '../theme';
+import { colors, radius, weight } from '../theme/tokens';
+import { inisial } from '../lib/format';
 
-export default function UserAvatar({
-  nama,
-  size = 44,
-  inverted = false,
-  style,
-}) {
+export default function UserAvatar({ nama, size = 40, inverted = false, style }) {
   return (
     <View
       style={[
@@ -15,10 +10,8 @@ export default function UserAvatar({
         {
           width: size,
           height: size,
-          borderRadius: size * 0.36,
-          backgroundColor: inverted ? 'rgba(255,255,255,0.16)' : colors.primarySoft,
-          borderWidth: inverted ? 1 : 0,
-          borderColor: 'rgba(255,255,255,0.24)',
+          borderRadius: radius.md,
+          backgroundColor: inverted ? 'rgba(255,255,255,0.14)' : colors.primarySoft,
         },
         style,
       ]}
@@ -26,10 +19,7 @@ export default function UserAvatar({
       <Text
         style={[
           styles.text,
-          {
-            fontSize: size * 0.34,
-            color: inverted ? colors.white : colors.primaryDark,
-          },
+          { fontSize: size * 0.34, color: inverted ? colors.white : colors.primary },
         ]}
       >
         {inisial(nama)}
@@ -39,12 +29,6 @@ export default function UserAvatar({
 }
 
 const styles = StyleSheet.create({
-  root: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    fontWeight: '800',
-    letterSpacing: 0.2,
-  },
+  root: { alignItems: 'center', justifyContent: 'center' },
+  text: { fontWeight: weight.bold, letterSpacing: 0.2 },
 });

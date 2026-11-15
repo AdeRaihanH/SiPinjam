@@ -1,26 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { colors, radius } from '../theme';
+import { colors, radius, type } from '../theme/tokens';
 
-export default function SearchBar({
-  value,
-  onChangeText,
-  placeholder = 'Cari alat, kode, atau kategori',
-  style,
-  onSubmitEditing,
-}) {
+export default function SearchBar({ value, onChangeText, placeholder = 'Cari alat atau kode', style }) {
   return (
-    <View style={[styles.wrap, style]}>
-      <Ionicons name="search-outline" size={19} color={colors.muted} />
+    <View style={[styles.root, style]}>
+      <Ionicons name="search-outline" size={18} color={colors.muted} />
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.faint}
         style={styles.input}
-        selectionColor={colors.primary}
+        selectionColor={colors.accent}
         returnKeyType="search"
-        onSubmitEditing={onSubmitEditing}
         autoCorrect={false}
       />
       {value ? (
@@ -30,7 +23,7 @@ export default function SearchBar({
           hitSlop={8}
           onPress={() => onChangeText('')}
         >
-          <Ionicons name="close-circle" size={19} color={colors.faint} />
+          <Ionicons name="close-circle" size={18} color={colors.faint} />
         </Pressable>
       ) : null}
     </View>
@@ -38,21 +31,21 @@ export default function SearchBar({
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    height: 50,
+  root: {
+    height: 48,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   input: {
     flex: 1,
-    fontSize: 14,
-    color: colors.ink,
+    fontSize: type.sm,
+    color: colors.text,
     paddingVertical: 0,
   },
 });

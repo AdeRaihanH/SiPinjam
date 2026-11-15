@@ -1,28 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, radius } from '../theme';
+import { colors, radius, type, weight } from '../theme/tokens';
 
-export default function Stepper({
-  value,
-  onChange,
-  min = 1,
-  max = 99,
-  suffix = '',
-  style,
-}) {
+export default function Stepper({ value, onChange, min = 1, max = 99, suffix = '', style }) {
   const decDisabled = value <= min;
   const incDisabled = value >= max;
 
   return (
-    <View style={[styles.wrap, style]}>
+    <View style={[styles.root, style]}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Kurangi jumlah"
         disabled={decDisabled}
         onPress={() => onChange(Math.max(min, value - 1))}
-        style={[styles.control, decDisabled && styles.disabled]}
+        style={[styles.control, decDisabled && styles.controlDisabled]}
       >
-        <Ionicons name="remove" size={20} color={decDisabled ? colors.faint : colors.primaryDark} />
+        <Ionicons name="remove" size={18} color={decDisabled ? colors.faint : colors.primary} />
       </Pressable>
       <View style={styles.valueWrap}>
         <Text style={styles.value}>{value}</Text>
@@ -33,31 +26,27 @@ export default function Stepper({
         accessibilityLabel="Tambah jumlah"
         disabled={incDisabled}
         onPress={() => onChange(Math.min(max, value + 1))}
-        style={[styles.control, incDisabled && styles.disabled]}
+        style={[styles.control, incDisabled && styles.controlDisabled]}
       >
-        <Ionicons name="add" size={20} color={incDisabled ? colors.faint : colors.primaryDark} />
+        <Ionicons name="add" size={18} color={incDisabled ? colors.faint : colors.primary} />
       </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
+  root: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   control: {
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
     borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  disabled: {
-    backgroundColor: colors.surfaceMuted,
-  },
+  controlDisabled: { backgroundColor: colors.surfaceMuted, borderColor: colors.border },
   valueWrap: {
     minWidth: 64,
     flexDirection: 'row',
@@ -65,14 +54,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
   },
-  value: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: colors.ink,
-  },
-  suffix: {
-    fontSize: 12,
-    color: colors.muted,
-    fontWeight: '600',
-  },
+  value: { fontSize: type.md, fontWeight: weight.bold, color: colors.text },
+  suffix: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.muted },
 });

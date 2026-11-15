@@ -1,71 +1,84 @@
-const express = require('express');
-const cors = require('cors');
-const config = require('./config');
-const { pool } = require('./db');
-const { notFound, errorHandler } = require('./middleware/error');
+import cors from 'cors';
+import express from 'express';
+import morgan from 'morgan';
 
-const authRoutes = require('./routes/auth');
-const categoryRoutes = require('./routes/categories');
-const toolRoutes = require('./routes/tools');
-const loanRoutes = require('./routes/loans');
-const notificationRoutes = require('./routes/notifications');
-const statsRoutes = require('./routes/stats');
+import { env } from './config/env.js';
+import { createAuthController } from './controllers/authController.js';
+import { createCategoryController } from './controllers/categoryController.js';
+import { createLoanController } from './controllers/loanController.js';
+import { createNotificationController } from './controllers/notificationController.js';
+import { createStatsController } from './controllers/statsController.js';
+import { createToolController } from './controllers/toolController.js';
+import { asyncHandler } from './lib/errors.js';
+import { errorHandler, notFound } from './middleware/error.js';
+import { createAuthRoutes } from './routes/authRoutes.js';
+import { createCategoryRoutes } from './routes/categoryRoutes.js';
+import { createLoanRoutes } from './routes/loanRoutes.js';
+import { createNotificationRoutes } from './routes/notificationRoutes.js';
+import { createStatsRoutes } from './routes/statsRoutes.js';
+import { createToolRoutes } from './routes/toolRoutes.js';
 
-const app = express();
+export function createApp(models) {
+  const app = express();
+  const controllers = {
+    auth: createAuthController(models),
+    categories: createCategoryController(models),
+    tools: createToolController(models),
+    loans: createLoanController(models),
+    notifications: createNotificationController(models),
+    stats: createStatsController(models),
+  };
 
-app.disable('x-powered-by');
-app.set('trust proxy', 1);
-app.use(cors({
-  origin: config.corsOrigin === '*' ? true : config.corsOrigin.split(',').map((item) => item.trim()),
-}));
-app.use(express.json({ limit: '100kb' }));
+  app.disable('x-powered-by');
+  app.set('trust proxy', 1);
+  app.use(cors({
+    origin: env.corsOrigin === '*' ? true : env.corsOrigin.split(',').map((item) => item.trim()),
+  }));
+  app.use(express.json({ limit: '100kb' }));
 
-if (!config.isProduction) {
-  app.use((req, res, next) => {
-    const startedAt = Date.now();
-    res.on('finish', () => {
-      console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - startedAt}ms`);
-    });
-    next();
-  });
-}
+  if (env.nodeEnv !== 'test') {
+    app.use(morgan(env.isProduction ? 'combined' : 'dev'));
+  }
 
-app.get('/', (_req, res) => {
-  res.json({
-    data: {
-      name: 'SiPinjam API',
-      version: '1.0.0',
-      description: 'REST API peminjaman alat laboratorium',
-      docs: '/api/v1',
-    },
-  });
-});
-
-app.get('/health', async (_req, res) => {
-  try {
-    await pool.query('SELECT 1');
+  app.get('/', (_req, res) => {
     res.json({
       data: {
-        status: 'ok',
-        database: 'connected',
-        time: new Date().toISOString(),
+        name: 'SiPinjam API',
+        version: '1.0.0',
+        base: '/api/v1',
       },
     });
-  } catch {
-    res.status(503).json({
-      error: { code: 'DATABASE_UNAVAILABLE', message: 'Database tidak dapat diakses' },
-    });
-  }
-});
+  });
 
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/categories', categoryRoutes);
-app.use('/api/v1/tools', toolRoutes);
-app.use('/api/v1/loans', loanRoutes);
-app.use('/api/v1/notifications', notificationRoutes);
-app.use('/api/v1/stats', statsRoutes);
+  const healthHandler = asyncHandler(async (_req, res) => {
+    try {
+      await models.categories.list();
+      res.json({
+        data: {
+          status: 'ok',
+          database: 'connected',
+          time: new Date().toISOString(),
+        },
+      });
+    } catch {
+      res.status(503).json({
+        error: { code: 'DATABASE_UNAVAILABLE', message: 'Database tidak dapat diakses' },
+      });
+    }
+  });
 
-app.use(notFound);
-app.use(errorHandler);
+  app.get('/health', healthHandler);
+  app.get('/api/v1/health', healthHandler);
 
-module.exports = app;
+  app.use('/api/v1/auth', createAuthRoutes(controllers.auth));
+  app.use('/api/v1/categories', createCategoryRoutes(controllers.categories));
+  app.use('/api/v1/tools', createToolRoutes(controllers.tools));
+  app.use('/api/v1/loans', createLoanRoutes(controllers.loans));
+  app.use('/api/v1/notifications', createNotificationRoutes(controllers.notifications));
+  app.use('/api/v1/stats', createStatsRoutes(controllers.stats));
+
+  app.use(notFound);
+  app.use(errorHandler);
+
+  return app;
+}

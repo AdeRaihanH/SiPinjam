@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useState } from 'react';
 import {
   Alert,
@@ -10,24 +9,23 @@ import {
   View,
 } from 'react-native';
 
+import Card from '../components/Card';
+import InlineNotice from '../components/InlineNotice';
 import PageHeader from '../components/PageHeader';
 import Screen from '../components/Screen';
-import SectionTitle from '../components/SectionTitle';
 import UserAvatar from '../components/UserAvatar';
-import { useAuth } from '../context/AuthContext';
-import { useFocusReload, useResource } from '../hooks/useResource';
-import { api } from '../services/api';
-import { colors, radius, shadows, text } from '../theme';
-import { formatRupiah } from '../utils/format';
+import { useAuth } from '../hooks/useAuth';
+import { useFocusRefetch } from '../hooks/useQuery';
+import { useStats } from '../hooks/useStats';
+import { APP_VERSION } from '../lib/appInfo';
+import { formatRupiah } from '../lib/format';
+import { colors, layout, radius, type, weight } from '../theme/tokens';
 
-function ProfileStat({ icon, label, value, tone = colors.primaryDark, bg = colors.primarySoft }) {
+function Metric({ label, value, tone = colors.text }) {
   return (
-    <View style={styles.statCard}>
-      <View style={[styles.statIcon, { backgroundColor: bg }]}>
-        <Ionicons name={icon} size={16} color={tone} />
-      </View>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={styles.metric}>
+      <Text style={[styles.metricValue, { color: tone }]}>{value}</Text>
+      <Text style={styles.metricLabel}>{label}</Text>
     </View>
   );
 }
@@ -39,42 +37,32 @@ function MenuRow({ icon, label, description, onPress, danger = false, last = fal
       onPress={onPress}
       style={({ pressed }) => [
         styles.menuRow,
-        !last && styles.menuRowBorder,
-        pressed && styles.pressed,
+        !last && styles.menuBorder,
+        pressed && { backgroundColor: colors.surfaceMuted },
       ]}
     >
-      <View style={[styles.menuIcon, danger && styles.menuIconDanger]}>
-        <Ionicons
-          name={icon}
-          size={18}
-          color={danger ? colors.danger : colors.primaryDark}
-        />
+      <View style={[styles.menuIcon, danger && { backgroundColor: colors.dangerSoft }]}>
+        <Ionicons name={icon} size={18} color={danger ? colors.danger : colors.primary} />
       </View>
       <View style={styles.menuCopy}>
         <Text style={[styles.menuLabel, danger && { color: colors.danger }]}>{label}</Text>
         {description ? <Text style={styles.menuDescription}>{description}</Text> : null}
       </View>
-      <Ionicons
-        name={danger ? 'log-out-outline' : 'chevron-forward'}
-        size={17}
-        color={danger ? colors.danger : colors.faint}
-      />
+      <Ionicons name="chevron-forward" size={16} color={colors.faint} />
     </Pressable>
   );
 }
 
 export default function ProfilScreen({ navigation }) {
-  const { user, logout } = useAuth();
+  const { member, logout } = useAuth();
+  const statsQuery = useStats();
   const [loggingOut, setLoggingOut] = useState(false);
+  const { refetch } = statsQuery;
+  useFocusRefetch(refetch);
 
-  const loadStats = useCallback(() => api.get('/stats/summary'), []);
-  const statsRes = useResource(loadStats);
-  useFocusReload(statsRes.reload);
+  const stats = statsQuery.data;
 
-  const stats = statsRes.data;
-  const totalDenda = Number(stats?.total_denda || 0) + Number(stats?.denda_berjalan || 0);
-
-  function confirmLogout() {
+  const confirmLogout = useCallback(() => {
     Alert.alert(
       'Keluar dari akun?',
       'Kamu perlu masuk kembali untuk melihat pinjaman.',
@@ -91,15 +79,15 @@ export default function ProfilScreen({ navigation }) {
         },
       ],
     );
-  }
+  }, [logout]);
 
-  function showFinePolicy() {
+  const showPolicy = useCallback(() => {
     Alert.alert(
-      'Kebijakan denda',
-      `Keterlambatan dikenakan denda Rp2.000 per hari per pinjaman. Denda dihitung otomatis saat alat dikembalikan. Pinjaman yang terlambat harus diselesaikan sebelum kamu bisa meminjam lagi.`,
+      'Kebijakan peminjaman',
+      'Maksimal 3 jenis alat dan 3 hari per transaksi. Denda Rp2.000 per hari keterlambatan. Pinjaman yang terlambat harus diselesaikan sebelum mengajukan pinjaman baru.',
       [{ text: 'Mengerti' }],
     );
-  }
+  }, []);
 
   return (
     <Screen
@@ -108,8 +96,8 @@ export default function ProfilScreen({ navigation }) {
       contentContainerStyle={styles.content}
       refreshControl={(
         <RefreshControl
-          refreshing={statsRes.refreshing}
-          onRefresh={() => statsRes.reload('refresh')}
+          refreshing={statsQuery.refreshing}
+          onRefresh={() => refetch('refresh')}
           tintColor={colors.primary}
           colors={[colors.primary]}
         />
@@ -118,324 +106,152 @@ export default function ProfilScreen({ navigation }) {
       <PageHeader
         eyebrow="Akun laboratorium"
         title="Profil"
-        subtitle="Kelola akun dan pahami aturan peminjaman."
+        subtitle="Kelola akun dan lihat ringkasan aktivitas."
         style={styles.header}
       />
 
-      <LinearGradient
-        colors={['#073F34', '#0E7C66']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.userCard}
-      >
-        <View style={styles.userRing} pointerEvents="none" />
-        <View style={styles.userTop}>
-          <UserAvatar nama={user?.nama} size={60} inverted />
-          <View style={styles.userCopy}>
-            <Text style={styles.userName}>{user?.nama}</Text>
-            <Text style={styles.userNim}>{user?.nim}</Text>
+      <Card style={styles.identity} padded={false}>
+        <View style={styles.identityTop}>
+          <UserAvatar nama={member?.nama} size={56} inverted />
+          <View style={styles.identityCopy}>
+            <Text style={styles.name}>{member?.nama}</Text>
+            <Text style={styles.nim}>{member?.nim}</Text>
           </View>
-          <View style={styles.rolePill}>
+          <View style={styles.role}>
             <Text style={styles.roleText}>
-              {user?.role === 'admin' ? 'Admin' : 'Peminjam'}
+              {member?.role === 'laboran' ? 'Laboran' : 'Praktikan'}
             </Text>
           </View>
         </View>
-
-        <View style={styles.userDivider} />
-
-        <View style={styles.userMetaRow}>
-          <Ionicons name="mail-outline" size={14} color="rgba(255,255,255,0.65)" />
-          <Text style={styles.userEmail}>{user?.email}</Text>
+        <View style={styles.identityFooter}>
+          <Ionicons name="mail-outline" size={14} color="rgba(255,255,255,0.7)" />
+          <Text style={styles.email}>{member?.email || '-'}</Text>
         </View>
-      </LinearGradient>
+      </Card>
 
-      <View style={styles.grid}>
-        <ProfileStat
-          icon="albums-outline"
-          label="Total pinjaman"
-          value={stats?.total_pinjaman ?? '—'}
-        />
-        <ProfileStat
-          icon="time-outline"
-          label="Sedang berjalan"
-          value={stats?.aktif ?? '—'}
-        />
-        <ProfileStat
-          icon="alert-circle-outline"
+      <Card style={styles.stats}>
+        <Metric label="Total pinjaman" value={stats?.total_pinjaman ?? '—'} />
+        <Metric label="Aktif" value={stats?.aktif ?? '—'} />
+        <Metric
           label="Terlambat"
           value={stats?.terlambat ?? '—'}
-          tone={stats?.terlambat > 0 ? colors.danger : colors.body}
-          bg={stats?.terlambat > 0 ? colors.dangerSoft : colors.surfaceMuted}
+          tone={stats?.terlambat > 0 ? colors.danger : colors.text}
         />
-        <ProfileStat
-          icon="wallet-outline"
-          label="Total denda"
-          value={formatRupiah(totalDenda)}
-          tone={totalDenda > 0 ? colors.danger : colors.body}
-          bg={totalDenda > 0 ? colors.dangerSoft : colors.surfaceMuted}
+        <Metric
+          label="Denda berjalan"
+          value={stats ? formatRupiah(stats.denda_berjalan) : '—'}
+          tone={stats?.denda_berjalan > 0 ? colors.danger : colors.text}
         />
-      </View>
+      </Card>
 
-      <View style={styles.availabilityCard}>
-        <View style={styles.availabilityIcon}>
-          <Ionicons name="cube-outline" size={18} color={colors.primaryDark} />
-        </View>
-        <View style={styles.availabilityCopy}>
-          <Text style={styles.availabilityLabel}>Ketersediaan alat</Text>
-          <Text style={styles.availabilityValue}>
-            {stats ? `${stats.alat.tersedia_unit} dari ${stats.alat.total_unit} unit` : 'Memuat data...'}
-          </Text>
-        </View>
-        <View style={styles.availabilityBadge}>
-          <Text style={styles.availabilityBadgeText}>
-            {stats?.alat?.total_judul ?? '—'} jenis
-          </Text>
-        </View>
-      </View>
+      {statsQuery.error ? (
+        <InlineNotice
+          tone="warning"
+          title="Ringkasan gagal dimuat"
+          message={statsQuery.error.message}
+          actionLabel="Coba lagi"
+          onAction={() => refetch('refresh')}
+        />
+      ) : null}
 
-      <View style={styles.section}>
-        <SectionTitle title="Pengaturan & bantuan" />
-        <View style={styles.menuCard}>
-          <MenuRow
-            icon="information-circle-outline"
-            label="Tentang aplikasi"
-            description="Visi, fitur, teknologi, dan pembuat aplikasi."
-            onPress={() => navigation.navigate('Tentang')}
-          />
-          <MenuRow
-            icon="book-outline"
-            label="Panduan & aturan"
-            description="Cara meminjam, durasi, dan batas transaksi."
-            onPress={() => navigation.navigate('Tentang', { section: 'panduan' })}
-          />
-          <MenuRow
-            icon="wallet-outline"
-            label="Kebijakan denda"
-            description="Rp2.000 per hari keterlambatan."
-            onPress={showFinePolicy}
-          />
-          <MenuRow
-            icon="log-out-outline"
-            label={loggingOut ? 'Keluar...' : 'Keluar dari akun'}
-            description="Akhiri sesi di perangkat ini."
-            onPress={confirmLogout}
-            danger
-            last
-          />
-        </View>
-      </View>
+      <Card padded={false}>
+        <MenuRow
+          icon="document-text-outline"
+          label="Kebijakan peminjaman"
+          description="Durasi, jumlah alat, dan denda."
+          onPress={showPolicy}
+        />
+        <MenuRow
+          icon="information-circle-outline"
+          label="Tentang aplikasi"
+          description="Versi, API, kredit, dan lisensi."
+          onPress={() => navigation.navigate('Tentang')}
+        />
+        <MenuRow
+          icon="log-out-outline"
+          label={loggingOut ? 'Keluar...' : 'Keluar'}
+          description="Akhiri sesi di perangkat ini."
+          onPress={confirmLogout}
+          danger
+          last
+        />
+      </Card>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerApp}>SiPinjam v1.0.0</Text>
-        <Text style={styles.footerText}>
-          Tugas Akhir Praktikum Pemrograman Perangkat Bergerak 2026
-        </Text>
-      </View>
+      <Text style={styles.footer}>SiPinjam v{APP_VERSION}</Text>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: layout.screenPadding,
+    paddingTop: 4,
     paddingBottom: 28,
     gap: 14,
   },
-  header: { marginTop: 6 },
-  userCard: {
-    borderRadius: radius.xl,
-    padding: 17,
+  header: { marginBottom: 2 },
+  identity: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
     overflow: 'hidden',
-    ...shadows.card,
   },
-  userRing: {
-    position: 'absolute',
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    right: -56,
-    top: -70,
-  },
-  userTop: {
+  identityTop: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    padding: 18,
   },
-  userCopy: { flex: 1, gap: 2 },
-  userName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: colors.white,
-    letterSpacing: -0.3,
-  },
-  userNim: {
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.62)',
-    letterSpacing: 0.4,
-  },
-  rolePill: {
-    height: 25,
-    paddingHorizontal: 10,
+  identityCopy: { flex: 1, gap: 2 },
+  name: { fontSize: type.md, fontWeight: weight.bold, color: colors.white },
+  nim: { fontSize: type.xs, color: 'rgba(255,255,255,0.66)' },
+  role: {
+    height: 24,
+    paddingHorizontal: 9,
     borderRadius: radius.pill,
     backgroundColor: 'rgba(255,255,255,0.14)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.16)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  roleText: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: colors.white,
-  },
-  userDivider: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    marginVertical: 13,
-  },
-  userMetaRow: {
+  roleText: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.white },
+  identityFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255,255,255,0.16)',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
   },
-  userEmail: {
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.7)',
-  },
-  grid: {
+  email: { fontSize: type.xs, color: 'rgba(255,255,255,0.72)' },
+  stats: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: 10,
+    paddingVertical: 6,
   },
-  statCard: {
-    width: '48.6%',
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 13,
-    gap: 2,
-    ...shadows.soft,
-  },
-  statIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 19,
-    fontWeight: '800',
-    color: colors.ink,
-    letterSpacing: -0.4,
-  },
-  statLabel: {
-    fontSize: 9.5,
-    color: colors.muted,
-    fontWeight: '600',
-  },
-  availabilityCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 11,
-    backgroundColor: colors.primaryTint,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.primarySoft,
-    padding: 13,
-  },
-  availabilityIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 13,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  availabilityCopy: { flex: 1, gap: 1 },
-  availabilityLabel: {
-    fontSize: 9.5,
-    color: colors.muted,
-    fontWeight: '600',
-  },
-  availabilityValue: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: colors.ink,
-  },
-  availabilityBadge: {
-    height: 24,
-    paddingHorizontal: 8,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  availabilityBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: colors.primaryDark,
-  },
-  section: { gap: 8, marginTop: 4 },
-  menuCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
-    ...shadows.soft,
-  },
+  metric: { width: '50%', paddingVertical: 10, gap: 1 },
+  metricValue: { fontSize: type.lg, fontWeight: weight.bold },
+  metricLabel: { fontSize: type.xs, color: colors.muted },
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 11,
-    padding: 13,
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
   },
-  menuRowBorder: {
-    borderBottomWidth: 1,
+  menuBorder: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
   },
-  pressed: { opacity: 0.82 },
   menuIcon: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: radius.md,
     backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  menuIconDanger: { backgroundColor: colors.dangerSoft },
   menuCopy: { flex: 1, gap: 2 },
-  menuLabel: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: colors.ink,
-  },
-  menuDescription: {
-    fontSize: 9.5,
-    color: colors.muted,
-    lineHeight: 14,
-  },
-  footer: {
-    alignItems: 'center',
-    gap: 2,
-    marginTop: 10,
-  },
-  footerApp: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: colors.muted,
-  },
-  footerText: {
-    ...text.tiny,
-    fontSize: 9,
-    color: colors.faint,
-    textAlign: 'center',
-  },
+  menuLabel: { fontSize: type.sm, fontWeight: weight.semibold, color: colors.text },
+  menuDescription: { fontSize: type.xs, color: colors.muted },
+  footer: { fontSize: type.xs, color: colors.faint, textAlign: 'center', marginTop: 2 },
 });

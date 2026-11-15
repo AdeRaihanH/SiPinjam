@@ -1,29 +1,26 @@
 {
   "info": {
-    "_postman_id": "9f5a8f52-6f1e-4f4f-9c4d-7a7a9c2d1b24",
-    "name": "SiPinjam API",
-    "description": "Koleksi pengujian REST API SiPinjam. Jalankan Login lebih dulu agar variabel token terisi, lalu Create Loan sebelum endpoint yang memakai {{loanId}} atau {{loanKode}}.",
+    "_postman_id": "a7c2e4d1-2f2f-4f57-9e45-8d1c7b6a5e31",
+    "name": "SiPinjam API (Supabase)",
+    "description": "Koleksi pengujian REST API SiPinjam. Jalankan Login lebih dulu agar token terisi, lalu Create Loan sebelum endpoint yang memakai {{loanId}} atau {{loanKode}}.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
     "type": "bearer",
     "bearer": [
-      {
-        "key": "token",
-        "value": "{{token}}",
-        "type": "string"
-      }
+      { "key": "token", "value": "{{token}}", "type": "string" }
     ]
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:5000/api/v1" },
     { "key": "rootUrl", "value": "http://localhost:5000" },
     { "key": "token", "value": "" },
-    { "key": "userId", "value": "" },
-    { "key": "toolId", "value": "1" },
+    { "key": "memberId", "value": "" },
+    { "key": "toolId", "value": "b0000010-0000-4000-8000-000000000010" },
     { "key": "loanId", "value": "" },
     { "key": "loanKode", "value": "" },
-    { "key": "notificationId", "value": "" }
+    { "key": "notificationId", "value": "" },
+    { "key": "tanggalKembali", "value": "" }
   ],
   "item": [
     {
@@ -33,7 +30,7 @@
         "method": "GET",
         "header": [],
         "url": "{{rootUrl}}/health",
-        "description": "Health check beserta status koneksi database."
+        "description": "Health check + koneksi Supabase."
       }
     },
     {
@@ -50,8 +47,7 @@
                   "const json = pm.response.json();",
                   "if (json.data && json.data.token) {",
                   "  pm.collectionVariables.set('token', json.data.token);",
-                  "  pm.collectionVariables.set('userId', json.data.user.id);",
-                  "  console.log('Token disimpan untuk', json.data.user.nama);",
+                  "  pm.collectionVariables.set('memberId', json.data.member.id);",
                   "}",
                   "pm.test('Status 200', () => pm.response.to.have.status(200));"
                 ]
@@ -66,10 +62,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"demo@sipinjam.id\",\n  \"password\": \"sipinjam123\"\n}"
+              "raw": "{\n  \"nim\": \"2112012414011\",\n  \"password\": \"praktikum123\"\n}"
             },
-            "url": "{{baseUrl}}/auth/login",
-            "description": "Menyimpan token ke variabel koleksi secara otomatis."
+            "url": "{{baseUrl}}/auth/login"
           }
         },
         {
@@ -103,15 +98,15 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/tools?limit=50"
+            "url": "{{baseUrl}}/tools?limit=20"
           }
         },
         {
-          "name": "Cari laptop",
+          "name": "Cari osiloskop",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/tools?search=laptop&tersedia=1"
+            "url": "{{baseUrl}}/tools?search=osilo"
           }
         },
         {
@@ -119,7 +114,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/tools?category_id=1&limit=20"
+            "url": "{{baseUrl}}/tools?category_id=33333333-3333-4333-8333-333333333333"
           }
         },
         {
@@ -135,7 +130,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/tools/kode/SIPINJAM%3ATOOL%3AALT-001"
+            "url": "{{baseUrl}}/tools/kode/SIPINJAM%3ATOOL%3AALK-002"
           }
         }
       ]
@@ -146,6 +141,16 @@
         {
           "name": "Buat pinjaman",
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = new Date(Date.now() + 86400000);",
+                  "pm.collectionVariables.set('tanggalKembali', d.toISOString().slice(0, 10));"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
@@ -168,26 +173,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [\n    { \"tool_id\": 1, \"jumlah\": 1 }\n  ],\n  \"durasi_hari\": 2,\n  \"catatan\": \"Uji coba dari Postman\"\n}"
+              "raw": "{\n  \"tanggal_kembali_rencana\": \"{{tanggalKembali}}\",\n  \"catatan\": \"Uji dari Postman\",\n  \"items\": [\n    { \"tool_id\": \"{{toolId}}\", \"jumlah\": 1 }\n  ]\n}"
             },
             "url": "{{baseUrl}}/loans",
-            "description": "Akun demo memiliki pinjaman terlambat, jadi endpoint ini akan mengembalikan PINJAMAN_TERLAMBAT sampai pinjaman tersebut dikembalikan. Login sebagai uji@sipinjam.id untuk mencoba alur bersih."
+            "description": "Akun demo tidak memiliki pinjaman terlambat. Jika alat sudah aktif, ganti toolId atau kembalikan pinjaman terlebih dahulu."
           }
         },
         {
-          "name": "Daftar berjalan",
+          "name": "Daftar aktif",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/loans?status=berjalan&limit=50"
-          }
-        },
-        {
-          "name": "Daftar terlambat",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/loans?status=terlambat"
+            "url": "{{baseUrl}}/loans?status=aktif"
           }
         },
         {
@@ -196,6 +193,14 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/loans?status=selesai"
+          }
+        },
+        {
+          "name": "Daftar semua",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/loans?status=semua"
           }
         },
         {
@@ -211,8 +216,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/loans/kode/SIPINJAM%3ALOAN%3A{{loanKode}}",
-            "description": "Jalankan Buat pinjaman lebih dulu agar {{loanKode}} terisi."
+            "url": "{{baseUrl}}/loans/kode/SIPINJAM%3ALOAN%3A{{loanKode}}"
           }
         },
         {
@@ -221,7 +225,7 @@
             "method": "POST",
             "header": [],
             "url": "{{baseUrl}}/loans/{{loanId}}/return",
-            "description": "Jalankan setelah Buat pinjaman. Denda dihitung server dari tanggal jatuh tempo."
+            "description": "Denda dihitung dari tanggal. Pengembalian kedua menghasilkan 409 CONFLICT."
           }
         }
       ]
@@ -238,9 +242,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const json = pm.response.json();",
-                  "if (json.data && json.data.length) {",
-                  "  pm.collectionVariables.set('notificationId', json.data[0].id);",
-                  "}"
+                  "if (json.data && json.data.length) pm.collectionVariables.set('notificationId', json.data[0].id);"
                 ]
               }
             }
@@ -248,7 +250,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/notifications?limit=50"
+            "url": "{{baseUrl}}/notifications?limit=20"
           }
         },
         {

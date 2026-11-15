@@ -1,14 +1,10 @@
 import { StyleSheet, View } from 'react-native';
-import { colors } from '../theme';
+import { colors } from '../theme/tokens';
 
-/**
- * Tanda aplikasi: kotak QR dengan satu titik amber. Digambar dengan View
- * supaya tetap tajam di semua ukuran dan tidak bergantung pada aset gambar.
- */
 export default function BrandMark({ size = 44, tone = 'light', style }) {
   const dark = tone === 'dark';
   const background = dark ? colors.primary : colors.white;
-  const foreground = dark ? colors.white : colors.primaryDeep;
+  const foreground = dark ? colors.white : colors.primary;
   const accent = colors.accent;
   const unit = size * 0.105;
 
@@ -56,32 +52,26 @@ export default function BrandMark({ size = 44, tone = 'light', style }) {
         {finder({ top: 0, right: 0 })}
         {finder({ bottom: 0, left: 0 })}
         <View style={styles.bottomRight}>
-          <View
-            style={{
-              width: unit,
-              height: unit,
-              backgroundColor: foreground,
-              borderRadius: 2,
-              marginRight: unit * 0.45,
-              marginBottom: unit * 0.45,
-            }}
+          <View style={[styles.dot, {
+            width: unit,
+            height: unit,
+            backgroundColor: foreground,
+            marginRight: unit * 0.45,
+            marginBottom: unit * 0.45,
+          }]}
           />
-          <View
-            style={{
-              width: unit,
-              height: unit,
-              backgroundColor: foreground,
-              borderRadius: 2,
-              marginBottom: unit * 0.45,
-            }}
+          <View style={[styles.dot, {
+            width: unit,
+            height: unit,
+            backgroundColor: foreground,
+            marginBottom: unit * 0.45,
+          }]}
           />
-          <View
-            style={{
-              width: unit,
-              height: unit,
-              backgroundColor: accent,
-              borderRadius: 2,
-            }}
+          <View style={[styles.dot, {
+            width: unit,
+            height: unit,
+            backgroundColor: accent,
+          }]}
           />
         </View>
       </View>
@@ -90,20 +80,9 @@ export default function BrandMark({ size = 44, tone = 'light', style }) {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inner: {
-    flex: 1,
-    alignSelf: 'stretch',
-    width: '100%',
-  },
-  finder: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  root: { alignItems: 'center', justifyContent: 'center' },
+  inner: { flex: 1, alignSelf: 'stretch', width: '100%' },
+  finder: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   bottomRight: {
     position: 'absolute',
     right: 0,
@@ -111,4 +90,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
   },
+  dot: { borderRadius: 2 },
 });

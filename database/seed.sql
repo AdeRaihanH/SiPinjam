@@ -1,172 +1,227 @@
--- Data awal SiPinjam untuk demo dan pengujian.
--- Tanggal dibuat relatif terhadap CURDATE() supaya status pinjaman
--- (aktif, jatuh tempo hari ini, terlambat) tetap masuk akal kapan pun seed
--- dijalankan.
+-- SiPinjam - data contoh untuk Supabase
+-- Jalankan setelah schema.sql.
+-- Tanggal dibuat relatif terhadap hari ini agar status aktif/terlambat selalu relevan.
+-- Akun demo memiliki 2 pinjaman aktif tanpa keterlambatan agar alur pinjam baru bisa didemokan.
+-- Akun Rina memiliki 2 pinjaman terlambat untuk mendemokan denda.
 
-SET time_zone = '+07:00';
+set time zone 'Asia/Jakarta';
 
-INSERT INTO users (id, nama, nim, email, password_hash, role, avatar_url) VALUES
-  (1, 'Ade Raihan', '2112012414011', 'demo@sipinjam.id',
-   '$2b$10$BFYsd6XbaREFsh2eeG5OMOh2DgvNthqRRy.atuxiiTpPy/blYj9ju',
-   'peminjam', NULL),
-  -- Akun uji tanpa pinjaman, berguna untuk mencoba alur pinjam dari nol.
-  (2, 'Rina Pratama', '2112012414099', 'uji@sipinjam.id',
-   '$2b$10$BFYsd6XbaREFsh2eeG5OMOh2DgvNthqRRy.atuxiiTpPy/blYj9ju',
-   'peminjam', NULL);
+begin;
 
-INSERT INTO categories (id, nama, slug, icon) VALUES
-  (1, 'Elektronika & Komputer', 'elektronika', 'hardware-chip-outline'),
-  (2, 'Alat Ukur', 'alat-ukur', 'speedometer-outline'),
-  (3, 'Jaringan', 'jaringan', 'git-network-outline'),
-  (4, 'Perkakas', 'perkakas', 'construct-outline');
+truncate table notifications, loan_items, loans, tools, categories, members restart identity cascade;
 
-INSERT INTO tools (id, kode, nama, category_id, deskripsi, stok_total, kondisi, foto_url) VALUES
-  (1, 'ALT-001', 'Laptop Lenovo ThinkPad T14', 1,
-   'Laptop 14 inci untuk praktikum pemrograman, pengolahan data, dan presentasi. Sudah terpasang editor kode dan browser.', 5, 'baik', NULL),
-  (2, 'ALT-002', 'Proyektor Epson EB-X06', 1,
-   'Proyektor portabel 3LCD 3600 lumen. Termasuk kabel HDMI dan remote. Cocok untuk presentasi kelompok.', 2, 'baik', NULL),
-  (3, 'ALT-003', 'Papan Arduino Uno R3', 1,
-   'Board mikrokontroler ATmega328P untuk praktikum embedded system dan prototipe IoT.', 8, 'baik', NULL),
-  (4, 'ALT-004', 'Raspberry Pi 4 Model B 4GB', 1,
-   'Single-board computer untuk proyek IoT, server mini, dan pengolahan citra. Termasuk casing dan adaptor.', 4, 'baik', NULL),
-  (5, 'ALT-005', 'Multimeter Digital Sanwa CD800a', 2,
-   'Multimeter digital untuk mengukur tegangan, arus, hambatan, dan uji kontinuitas. Termasuk probe merah dan hitam.', 3, 'baik', NULL),
-  (6, 'ALT-006', 'Osiloskop Hantek DSO2D10', 2,
-   'Osiloskop 2 kanal 100 MHz dengan generator sinyal. Kanal 2 perlu kalibrasi ulang sebelum digunakan.', 2, 'rusak_ringan', NULL),
-  (7, 'ALT-007', 'Power Supply Variable 30V 5A', 2,
-   'Catu daya DC yang dapat diatur 0-30V dan 0-5A untuk pengujian rangkaian elektronika.', 4, 'baik', NULL),
-  (8, 'ALT-008', 'Solder Station Yihua 937D', 4,
-   'Stasiun solder dengan pengatur suhu digital, stand besi, dan spons pembersih. Timah solder disediakan terpisah.', 6, 'baik', NULL),
-  (9, 'ALT-009', 'Tang Crimping RJ45', 3,
-   'Tang crimping untuk kabel UTP RJ45 dan RJ11. Dipakai pada praktikum instalasi jaringan.', 8, 'baik', NULL),
-  (10, 'ALT-010', 'LAN Tester', 3,
-   'Alat uji kabel jaringan yang menampilkan urutan pin 1-8 pada dua unit pengirim dan penerima.', 5, 'baik', NULL),
-  (11, 'ALT-011', 'Router Cisco 1941', 3,
-   'Router modular untuk praktikum routing statis, dinamis, dan konfigurasi VLAN. Termasuk kabel konsol.', 3, 'baik', NULL),
-  (12, 'ALT-012', 'Switch TP-Link 24 Port', 3,
-   'Switch manageable 24 port Gigabit untuk praktikum topologi jaringan dan konfigurasi port.', 2, 'baik', NULL),
-  (13, 'ALT-013', 'Bor Listrik Bosch GBM 350', 4,
-   'Bor listrik 350 watt untuk pekerjaan perakitan perangkat dan instalasi laboratorium.', 2, 'baik', NULL),
-  (14, 'ALT-014', 'Obeng Set 32 in 1', 4,
-   'Set obeng presisi dengan 32 mata bit untuk membongkar perangkat komputer dan elektronika.', 10, 'baik', NULL),
-  (15, 'ALT-015', 'Sensor Kit 37 in 1', 1,
-   'Paket 37 modul sensor untuk eksperimen mikrokontroler: suhu, jarak, cahaya, gerak, dan lainnya.', 6, 'baik', NULL);
+insert into categories (id, nama, slug, icon) values
+  ('11111111-1111-4111-8111-111111111111', 'Elektronika', 'elektronika', 'hardware-chip-outline'),
+  ('22222222-2222-4222-8222-222222222222', 'Jaringan', 'jaringan', 'git-network-outline'),
+  ('33333333-3333-4333-8333-333333333333', 'Alat Ukur', 'alat-ukur', 'speedometer-outline'),
+  ('44444444-4444-4444-8444-444444444444', 'Komponen', 'komponen', 'construct-outline');
 
-INSERT INTO loans
-  (id, kode, user_id, tanggal_pinjam, tanggal_kembali_rencana,
+insert into members (id, nama, nim, email, password_hash, role) values
+  ('a0000001-0000-4000-8000-000000000001', 'Ade Raihan', '2112012414011', 'demo@sipinjam.id',
+   '$2b$10$wxhtvUvn78p.7jjQr4MpaeUZvKzZVKVlw7MVKEQTb2g0QYm32tade', 'praktikan'),
+  ('a0000002-0000-4000-8000-000000000002', 'Rina Pratama', '2112012414099', 'rina@sipinjam.id',
+   '$2b$10$wxhtvUvn78p.7jjQr4MpaeUZvKzZVKVlw7MVKEQTb2g0QYm32tade', 'praktikan'),
+  ('a0000003-0000-4000-8000-000000000003', 'Bagas Nugraha', '2112012414088', 'bagas@sipinjam.id',
+   '$2b$10$wxhtvUvn78p.7jjQr4MpaeUZvKzZVKVlw7MVKEQTb2g0QYm32tade', 'praktikan');
+
+insert into tools (id, kode, nama, category_id, deskripsi, stok_total, kondisi, foto_url) values
+  ('b0000001-0000-4000-8000-000000000001', 'ELK-001', 'Laptop Lenovo ThinkPad T14',
+   '11111111-1111-4111-8111-111111111111',
+   'Laptop 14 inci untuk praktikum pemrograman, pengolahan data, dan presentasi. Sudah terpasang editor kode dan browser.',
+   5, 'baik', 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=900&q=80'),
+
+  ('b0000002-0000-4000-8000-000000000002', 'ELK-002', 'Proyektor Epson EB-X06',
+   '11111111-1111-4111-8111-111111111111',
+   'Proyektor portabel 3LCD 3600 lumen. Termasuk kabel HDMI dan remote untuk presentasi kelompok.',
+   2, 'baik', 'https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/6/6b/BenQ_DLP_projector_MP515_20101213.jpg&w=900&h=600&fit=cover'),
+
+  ('b0000003-0000-4000-8000-000000000003', 'ELK-003', 'Papan Arduino Uno R3',
+   '11111111-1111-4111-8111-111111111111',
+   'Board mikrokontroler ATmega328P untuk praktikum embedded system dan prototipe IoT.',
+   8, 'baik', 'https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Arduino_Uno_006.jpg/960px-Arduino_Uno_006.jpg&w=900&h=600&fit=cover'),
+
+  ('b0000004-0000-4000-8000-000000000004', 'ELK-004', 'Raspberry Pi 4 Model B 4GB',
+   '11111111-1111-4111-8111-111111111111',
+   'Single-board computer untuk proyek IoT, server mini, dan pengolahan citra. Termasuk casing dan adaptor.',
+   4, 'baik', 'https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/1/10/Raspberry_Pi_4_Model_B_-_Top.jpg&w=900&h=600&fit=cover'),
+
+  ('b0000005-0000-4000-8000-000000000005', 'JAR-001', 'Router Cisco 1941',
+   '22222222-2222-4222-8222-222222222222',
+   'Router modular untuk praktikum routing statis, dinamis, dan konfigurasi VLAN. Termasuk kabel konsol.',
+   3, 'baik', 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=900&q=80'),
+
+  ('b0000006-0000-4000-8000-000000000006', 'JAR-002', 'Switch TP-Link 24 Port',
+   '22222222-2222-4222-8222-222222222222',
+   'Switch manageable 24 port Gigabit untuk praktikum topologi jaringan dan konfigurasi port.',
+   2, 'baik', 'https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/e/e5/Network_switches.jpg&w=900&h=600&fit=cover'),
+
+  ('b0000007-0000-4000-8000-000000000007', 'JAR-003', 'Tang Crimping RJ45',
+   '22222222-2222-4222-8222-222222222222',
+   'Tang crimping untuk kabel UTP RJ45 dan RJ11. Dipakai pada praktikum instalasi jaringan.',
+   8, 'baik', 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=900&q=80'),
+
+  ('b0000008-0000-4000-8000-000000000008', 'JAR-004', 'LAN Tester',
+   '22222222-2222-4222-8222-222222222222',
+   'Alat uji kabel jaringan yang menampilkan urutan pin 1-8 pada dua unit pengirim dan penerima.',
+   5, 'baik', 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=900&q=80'),
+
+  ('b0000009-0000-4000-8000-000000000009', 'ALK-001', 'Multimeter Digital Sanwa CD800a',
+   '33333333-3333-4333-8333-333333333333',
+   'Multimeter digital untuk mengukur tegangan, arus, hambatan, dan uji kontinuitas. Termasuk probe merah dan hitam.',
+   3, 'baik', 'https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/2/24/Multimeter_Gossen_Metra_Hit.jpg&w=900&h=600&fit=cover'),
+
+  ('b0000010-0000-4000-8000-000000000010', 'ALK-002', 'Osiloskop Hantek DSO2D10',
+   '33333333-3333-4333-8333-333333333333',
+   'Osiloskop 2 kanal 100 MHz dengan generator sinyal. Kanal 2 perlu kalibrasi ulang sebelum digunakan.',
+   2, 'rusak_ringan', 'https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/0/0e/Tektronix_Oscilloscope_475A.jpg&w=900&h=600&fit=cover'),
+
+  ('b0000011-0000-4000-8000-000000000011', 'ALK-003', 'Power Supply Variable 30V 5A',
+   '33333333-3333-4333-8333-333333333333',
+   'Catu daya DC yang dapat diatur 0-30V dan 0-5A untuk pengujian rangkaian elektronika.',
+   4, 'baik', 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=900&q=80'),
+
+  ('b0000012-0000-4000-8000-000000000012', 'ALK-004', 'Sensor Kit 37 in 1',
+   '33333333-3333-4333-8333-333333333333',
+   'Paket 37 modul sensor untuk eksperimen mikrokontroler: suhu, jarak, cahaya, gerak, dan lainnya.',
+   6, 'baik', 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=900&q=80'),
+
+  ('b0000013-0000-4000-8000-000000000013', 'KOM-001', 'Solder Station Yihua 937D',
+   '44444444-4444-4444-8444-444444444444',
+   'Stasiun solder dengan pengatur suhu digital, stand besi, dan spons pembersih. Timah solder disediakan terpisah.',
+   6, 'baik', 'https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/5/50/Soldering_station.JPG&w=900&h=600&fit=cover'),
+
+  ('b0000014-0000-4000-8000-000000000014', 'KOM-002', 'Obeng Set 32 in 1',
+   '44444444-4444-4444-8444-444444444444',
+   'Set obeng presisi dengan 32 mata bit untuk membongkar perangkat komputer dan elektronika.',
+   10, 'baik', 'https://images.weserv.nl/?url=upload.wikimedia.org/wikipedia/commons/thumb/2/24/Precision_Screwdriver_Set_2.jpg/960px-Precision_Screwdriver_Set_2.jpg&w=900&h=600&fit=cover'),
+
+  ('b0000015-0000-4000-8000-000000000015', 'KOM-003', 'Bor Listrik Bosch GBM 350',
+   '44444444-4444-4444-8444-444444444444',
+   'Bor listrik 350 watt untuk pekerjaan perakitan perangkat dan instalasi laboratorium.',
+   2, 'baik', 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=900&q=80');
+
+insert into loans
+  (id, kode, member_id, tanggal_pinjam, tanggal_kembali_rencana,
    tanggal_kembali_aktual, status, denda, catatan, created_at)
-VALUES
-  (1,
-   CONCAT('PJM-', DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '%y%m%d'), '-001'),
-   1, DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_ADD(CURDATE(), INTERVAL 2 DAY),
-   NULL, 'dipinjam', 0, 'Untuk praktikum pemrograman mobile.',
-   DATE_SUB(NOW(), INTERVAL 1 DAY)),
+values
+  ('d0000001-0000-4000-8000-000000000001',
+   concat('PJM-', to_char(current_date - 14, 'YYMMDD'), '-001'),
+   'a0000001-0000-4000-8000-000000000001',
+   current_date - 14, current_date - 11, current_date - 11, 'dikembalikan', 0,
+   'Praktikum pemrograman mobile.', now() - interval '14 days'),
 
-  (2,
-   CONCAT('PJM-', DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 DAY), '%y%m%d'), '-002'),
-   1, DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_ADD(CURDATE(), INTERVAL 1 DAY),
-   NULL, 'dipinjam', 0, 'Presentasi proposal proyek akhir.',
-   DATE_SUB(NOW(), INTERVAL 1 DAY)),
+  ('d0000002-0000-4000-8000-000000000002',
+   concat('PJM-', to_char(current_date - 12, 'YYMMDD'), '-001'),
+   'a0000001-0000-4000-8000-000000000001',
+   current_date - 12, current_date - 9, current_date - 10, 'dikembalikan', 0,
+   'Praktikum pengukuran rangkaian.', now() - interval '12 days'),
 
-  (3,
-   CONCAT('PJM-', DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 2 DAY), '%y%m%d'), '-001'),
-   1, DATE_SUB(CURDATE(), INTERVAL 2 DAY), CURDATE(),
-   NULL, 'dipinjam', 0, 'Praktikum pengukuran rangkaian.',
-   DATE_SUB(NOW(), INTERVAL 2 DAY)),
+  ('d0000003-0000-4000-8000-000000000003',
+   concat('PJM-', to_char(current_date - 20, 'YYMMDD'), '-001'),
+   'a0000001-0000-4000-8000-000000000001',
+   current_date - 20, current_date - 16, current_date - 14, 'dikembalikan', 4000,
+   'Praktikum konfigurasi routing.', now() - interval '20 days'),
 
-  (4,
-   CONCAT('PJM-', DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 4 DAY), '%y%m%d'), '-001'),
-   1, DATE_SUB(CURDATE(), INTERVAL 4 DAY), DATE_SUB(CURDATE(), INTERVAL 1 DAY),
-   NULL, 'dipinjam', 0, 'Proyek akhir mata kuliah sistem tertanam.',
-   DATE_SUB(NOW(), INTERVAL 4 DAY)),
+  ('d0000004-0000-4000-8000-000000000004',
+   concat('PJM-', to_char(current_date - 8, 'YYMMDD'), '-001'),
+   'a0000001-0000-4000-8000-000000000001',
+   current_date - 8, current_date - 5, current_date - 5, 'dikembalikan', 0,
+   'Perbaikan rangkaian kelompok.', now() - interval '8 days'),
 
-  (5,
-   CONCAT('PJM-', DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 6 DAY), '%y%m%d'), '-001'),
-   1, DATE_SUB(CURDATE(), INTERVAL 6 DAY), DATE_SUB(CURDATE(), INTERVAL 3 DAY),
-   NULL, 'dipinjam', 0, 'Instalasi jaringan laboratorium.',
-   DATE_SUB(NOW(), INTERVAL 6 DAY)),
+  ('d0000005-0000-4000-8000-000000000005',
+   concat('PJM-', to_char(current_date - 1, 'YYMMDD'), '-001'),
+   'a0000001-0000-4000-8000-000000000001',
+   current_date - 1, current_date + 1, null, 'dipinjam', 0,
+   'Persiapan presentasi proyek akhir.', now() - interval '1 day'),
 
-  (6,
-   CONCAT('PJM-', DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 10 DAY), '%y%m%d'), '-001'),
-   1, DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_SUB(CURDATE(), INTERVAL 7 DAY),
-   DATE_SUB(CURDATE(), INTERVAL 7 DAY), 'dikembalikan', 0, 'Praktikum sinyal analog.',
-   DATE_SUB(NOW(), INTERVAL 10 DAY)),
+  ('d0000006-0000-4000-8000-000000000006',
+   concat('PJM-', to_char(current_date, 'YYMMDD'), '-001'),
+   'a0000001-0000-4000-8000-000000000001',
+   current_date, current_date + 2, null, 'dipinjam', 0,
+   'Eksperimen sensor suhu ruang server.', now()),
 
-  (7,
-   CONCAT('PJM-', DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 14 DAY), '%y%m%d'), '-001'),
-   1, DATE_SUB(CURDATE(), INTERVAL 14 DAY), DATE_SUB(CURDATE(), INTERVAL 10 DAY),
-   DATE_SUB(CURDATE(), INTERVAL 8 DAY), 'dikembalikan', 4000,
-   'Praktikum konfigurasi routing.',
-   DATE_SUB(NOW(), INTERVAL 14 DAY)),
+  ('d0000007-0000-4000-8000-000000000007',
+   concat('PJM-', to_char(current_date - 6, 'YYMMDD'), '-001'),
+   'a0000002-0000-4000-8000-000000000002',
+   current_date - 6, current_date - 2, null, 'dipinjam', 0,
+   'Praktikum sinyal analog.', now() - interval '6 days'),
 
-  (8,
-   CONCAT('PJM-', DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 12 DAY), '%y%m%d'), '-001'),
-   1, DATE_SUB(CURDATE(), INTERVAL 12 DAY), DATE_SUB(CURDATE(), INTERVAL 9 DAY),
-   DATE_SUB(CURDATE(), INTERVAL 11 DAY), 'dikembalikan', 0,
-   'Perbaikan rangkaian kelompok.',
-   DATE_SUB(NOW(), INTERVAL 12 DAY)),
+  ('d0000008-0000-4000-8000-000000000008',
+   concat('PJM-', to_char(current_date - 4, 'YYMMDD'), '-001'),
+   'a0000002-0000-4000-8000-000000000002',
+   current_date - 4, current_date - 1, null, 'dipinjam', 0,
+   'Instalasi jaringan laboratorium.', now() - interval '4 days'),
 
-  (9,
-   CONCAT('PJM-', DATE_FORMAT(CURDATE(), '%y%m%d'), '-001'),
-   1, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 3 DAY),
-   NULL, 'dipinjam', 0, 'Praktikum instalasi jaringan.',
-   NOW()),
+  ('d0000009-0000-4000-8000-000000000009',
+   concat('PJM-', to_char(current_date - 10, 'YYMMDD'), '-001'),
+   'a0000002-0000-4000-8000-000000000002',
+   current_date - 10, current_date - 7, current_date - 7, 'dikembalikan', 0,
+   'Presentasi proposal.', now() - interval '10 days'),
 
-  (10,
-   CONCAT('PJM-', DATE_FORMAT(CURDATE(), '%y%m%d'), '-002'),
-   1, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 2 DAY),
-   NULL, 'dipinjam', 0, 'Proyek monitoring suhu ruang server.',
-   NOW());
+  ('d0000010-0000-4000-8000-000000000010',
+   concat('PJM-', to_char(current_date - 9, 'YYMMDD'), '-001'),
+   'a0000003-0000-4000-8000-000000000003',
+   current_date - 9, current_date - 6, current_date - 6, 'dikembalikan', 0,
+   'Praktikum catu daya.', now() - interval '9 days');
 
-INSERT INTO loan_items (loan_id, tool_id, jumlah) VALUES
-  (1, 1, 1),
-  (2, 2, 1),
-  (3, 5, 2),
-  (4, 3, 2),
-  (5, 9, 3),
-  (6, 6, 1),
-  (7, 11, 1),
-  (8, 8, 2),
-  (9, 10, 1),
-  (10, 4, 1),
-  (10, 15, 1);
+insert into loan_items (id, loan_id, tool_id, jumlah) values
+  ('e0000001-0000-4000-8000-000000000001', 'd0000001-0000-4000-8000-000000000001', 'b0000001-0000-4000-8000-000000000001', 1),
+  ('e0000002-0000-4000-8000-000000000002', 'd0000002-0000-4000-8000-000000000002', 'b0000009-0000-4000-8000-000000000009', 1),
+  ('e0000003-0000-4000-8000-000000000003', 'd0000003-0000-4000-8000-000000000003', 'b0000005-0000-4000-8000-000000000005', 1),
+  ('e0000004-0000-4000-8000-000000000004', 'd0000004-0000-4000-8000-000000000004', 'b0000013-0000-4000-8000-000000000013', 2),
+  ('e0000005-0000-4000-8000-000000000005', 'd0000005-0000-4000-8000-000000000005', 'b0000001-0000-4000-8000-000000000001', 1),
+  ('e0000006-0000-4000-8000-000000000006', 'd0000006-0000-4000-8000-000000000006', 'b0000012-0000-4000-8000-000000000012', 1),
+  ('e0000007-0000-4000-8000-000000000007', 'd0000007-0000-4000-8000-000000000007', 'b0000010-0000-4000-8000-000000000010', 1),
+  ('e0000008-0000-4000-8000-000000000008', 'd0000008-0000-4000-8000-000000000008', 'b0000007-0000-4000-8000-000000000007', 3),
+  ('e0000009-0000-4000-8000-000000000009', 'd0000009-0000-4000-8000-000000000009', 'b0000002-0000-4000-8000-000000000002', 1),
+  ('e0000010-0000-4000-8000-000000000010', 'd0000010-0000-4000-8000-000000000010', 'b0000011-0000-4000-8000-000000000011', 1);
 
-INSERT INTO notifications
-  (id, user_id, tipe, judul, pesan, ref_type, ref_id, show_at, dibaca)
-VALUES
-  (1, 1, 'sistem', 'Selamat datang di SiPinjam',
-   'Pinjam alat laboratorium cukup dari ponsel. Pindai QR alat untuk melihat detail dan ajukan peminjaman.',
-   NULL, NULL, DATE_SUB(NOW(), INTERVAL 20 DAY), 1),
+insert into notifications
+  (id, member_id, tipe, judul, pesan, ref_type, ref_id, show_at, dibaca)
+values
+  ('f0000001-0000-4000-8000-000000000001',
+   'a0000001-0000-4000-8000-000000000001', 'jatuh_tempo', 'Pengingat pengembalian',
+   concat('Pinjaman ', (select kode from loans where id = 'd0000005-0000-4000-8000-000000000005'),
+     ' harus dikembalikan besok. Jangan lupa bawa alatnya.'),
+   'loan', 'd0000005-0000-4000-8000-000000000005', now() - interval '2 hours', false),
 
-  (2, 1, 'pengembalian', 'Pengembalian diterima',
-   'Router Cisco 1941 dikembalikan terlambat 2 hari. Denda keterlambatan Rp4.000 dicatat.',
-   'loan', 7, DATE_SUB(NOW(), INTERVAL 8 DAY), 1),
+  ('f0000002-0000-4000-8000-000000000002',
+   'a0000001-0000-4000-8000-000000000001', 'jatuh_tempo', 'Pengingat pengembalian',
+   concat('Pinjaman ', (select kode from loans where id = 'd0000006-0000-4000-8000-000000000006'),
+     ' jatuh tempo dalam dua hari.'),
+   'loan', 'd0000006-0000-4000-8000-000000000006', now() + interval '1 day', false),
 
-  (3, 1, 'jatuh_tempo', 'Jatuh tempo hari ini',
-   CONCAT((SELECT kode FROM loans WHERE id = 3),
-     ' · Multimeter Digital Sanwa CD800a ×2 jatuh tempo hari ini. Kembalikan sebelum laboratorium tutup.'),
-   'loan', 3, TIMESTAMP(CURDATE(), '08:00:00'), 0),
+  ('f0000003-0000-4000-8000-000000000003',
+   'a0000001-0000-4000-8000-000000000001', 'pengembalian', 'Pengembalian diterima',
+   'Solder Station Yihua 937D dikembalikan tepat waktu. Terima kasih!',
+   'loan', 'd0000004-0000-4000-8000-000000000004', now() - interval '3 days', true),
 
-  (4, 1, 'terlambat', 'Pinjaman terlambat',
-   CONCAT('Pinjaman ', (SELECT kode FROM loans WHERE id = 4),
-     ' terlambat 1 hari. Denda berjalan Rp2.000. Segera kembalikan alat ke laboratorium.'),
-   'loan', 4, DATE_SUB(NOW(), INTERVAL 1 DAY), 0),
+  ('f0000004-0000-4000-8000-000000000004',
+   'a0000001-0000-4000-8000-000000000001', 'sistem', 'Selamat datang di SiPinjam',
+   'Pinjam alat laboratorium cukup dari ponsel. Pindai QR alat untuk melihat detail dan mengajukan peminjaman.',
+   null, null, now() - interval '20 days', true),
 
-  (5, 1, 'terlambat', 'Pinjaman terlambat',
-   CONCAT('Pinjaman ', (SELECT kode FROM loans WHERE id = 5),
-     ' terlambat 3 hari. Denda berjalan Rp6.000. Segera kembalikan alat ke laboratorium.'),
-   'loan', 5, DATE_SUB(NOW(), INTERVAL 3 DAY), 0),
+  ('f0000005-0000-4000-8000-000000000005',
+   'a0000002-0000-4000-8000-000000000002', 'terlambat', 'Pinjaman terlambat',
+   concat('Pinjaman ', (select kode from loans where id = 'd0000007-0000-4000-8000-000000000007'),
+     ' terlambat 2 hari. Denda berjalan Rp4.000. Segera kembalikan alat.'),
+   'loan', 'd0000007-0000-4000-8000-000000000007', now() - interval '2 days', false),
 
-  (6, 1, 'jatuh_tempo', 'Pengingat pengembalian',
-   CONCAT('Laptop Lenovo ThinkPad T14 ×1 harus dikembalikan besok. Kode pinjaman ',
-     (SELECT kode FROM loans WHERE id = 1), '.'),
-   'loan', 1, TIMESTAMP(DATE_ADD(CURDATE(), INTERVAL 1 DAY), '08:00:00'), 0),
+  ('f0000006-0000-4000-8000-000000000006',
+   'a0000002-0000-4000-8000-000000000002', 'terlambat', 'Pinjaman terlambat',
+   concat('Pinjaman ', (select kode from loans where id = 'd0000008-0000-4000-8000-000000000008'),
+     ' terlambat 1 hari. Denda berjalan Rp2.000. Segera kembalikan alat.'),
+   'loan', 'd0000008-0000-4000-8000-000000000008', now() - interval '1 day', false),
 
-  (7, 1, 'sistem', 'Pinjaman berhasil dibuat',
-   CONCAT('Pinjaman ', (SELECT kode FROM loans WHERE id = 9),
-     ' berhasil dibuat. Tunjukkan QR pinjaman saat mengambil alat di laboratorium.'),
-   'loan', 9, NOW(), 0),
+  ('f0000007-0000-4000-8000-000000000007',
+   'a0000002-0000-4000-8000-000000000002', 'jatuh_tempo', 'Jatuh tempo terlewat',
+   concat('Pinjaman ', (select kode from loans where id = 'd0000007-0000-4000-8000-000000000007'),
+     ' sudah melewati jatuh tempo.'),
+   'loan', 'd0000007-0000-4000-8000-000000000007', now() - interval '3 days', true),
 
-  (8, 1, 'pengembalian', 'Pengembalian diterima',
-   'Solder Station Yihua 937D ×2 dikembalikan lebih awal. Terima kasih!',
-   'loan', 8, DATE_SUB(NOW(), INTERVAL 11 DAY), 1);
+  ('f0000008-0000-4000-8000-000000000008',
+   'a0000003-0000-4000-8000-000000000003', 'pengembalian', 'Pengembalian diterima',
+   'Power Supply Variable 30V 5A dikembalikan tepat waktu.',
+   'loan', 'd0000010-0000-4000-8000-000000000010', now() - interval '6 days', true);
+
+commit;

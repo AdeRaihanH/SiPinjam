@@ -7,133 +7,129 @@ Dokumen ini memetakan syarat tugas akhir ke implementasi, menyiapkan alur respon
 | Item | Isi |
 | --- | --- |
 | Judul | SiPinjam: Aplikasi Peminjaman Alat Laboratorium Berbasis React Native dengan Pemindaian QR Code |
-| Platform | React Native (Expo SDK 58) |
+| Platform | React Native - Expo SDK 58 |
+| Backend | Express 5 - Supabase/PostgreSQL - Vercel |
 | Nama | Ade Raihan |
 | NIM | 2112012414011 |
 | Repositori | https://github.com/AdeRaihanH/SiPinjam |
-| Asisten | Gavrila Samana Ahmad |
 
-## Pemetaan syarat TA
+## Pemetaan syarat
 
 | Syarat | Implementasi | Bukti |
 | --- | --- | --- |
-| API sendiri | Express + MySQL, 17 endpoint, JWT, transaksi stok | `backend/src/routes/`, `docs/API.md` |
-| Bottom navigation | 5 tab: Katalog, Pinjaman, Scan, Notifikasi, Profil | `app/src/navigation/TabBar.js`, `02-katalog.png` |
+| API sendiri | Express 5, 17 endpoint, JWT, Supabase | `backend/src`, `docs/API.md` |
+| API berjalan publik | Konfigurasi Vercel + `api/index.js` | langkah deploy di README |
+| Bottom navigation 5 tab | Katalog, Pinjaman, Scan, Notifikasi, Profil | `TabBar.js`, screenshot 02 |
 | Minimal 5 halaman | 11 layar | daftar di bawah |
-| 2 list → detail | Katalog → Detail Alat; Pinjaman → Detail Pinjaman | `03-detail-alat.png`, `05-detail-pinjaman.png` |
-| Halaman profil/about | Profil dan Tentang SiPinjam | `10-profil.png`, `11-tentang.png` |
-| QR Code | Scan kamera, input manual, QR alat & pinjaman | `ScanScreen.js`, `08-scan.png`, `09-hasil-scan.png` |
+| 2 list ke detail | Katalog ke Detail Alat; Pinjaman ke Detail Pinjaman | screenshot 02/03 dan 14/15 |
+| Profil + Tentang | Profil, kebijakan, Tentang | screenshot 12/13 |
+| QR Code | Kamera, input manual, QR alat/pinjaman | `ScanScreen.js`, screenshot 11/16 |
 | Source code GitHub | Repo publik | tautan di atas |
-| Judul unik per platform | SiPinjam | — |
-| Bonus APK | Profil EAS `preview` buildType `apk` | `app/eas.json` |
+| APK | Profil EAS `preview` buildType `apk` | `app/eas.json` |
+| Supabase | Tabel UUID, `members`, view `tool_stok` | `database/schema.sql` |
 
 ### 11 layar
 
-1. Login
-2. Katalog
-3. Detail Alat
-4. Form Pinjam
-5. Sukses Pinjam + QR
-6. Pinjaman
-7. Detail Pinjaman
-8. Scan QR
-9. Notifikasi
-10. Profil
-11. Tentang
+Login, Katalog, Detail Alat, Form Pinjam, Sukses Pinjam, Pinjaman, Detail Pinjaman, Scan, Notifikasi, Profil, Tentang.
 
-## Alur responsi 5 menit
+## Akun demo
 
-### Persiapan
+| Akun | NIM | Sandi | Keperluan |
+| --- | --- | --- | --- |
+| Demo | `2112012414011` | `praktikum123` | Alur pinjam normal; 2 pinjaman aktif |
+| Rina | `2112012414099` | `praktikum123` | 2 pinjaman terlambat untuk denda |
+| Bagas | `2112012414088` | `praktikum123` | Riwayat selesai |
 
-1. Nyalakan MySQL dan jalankan `npm run db:init` di folder `backend` agar data demo kembali bersih.
-2. Jalankan `npm run dev` di `backend`.
-3. Jalankan `npx expo start` di `app`; buka di Expo Go.
-4. Pastikan HP dan laptop satu jaringan. Jika gagal konek, restart Metro dengan `npx expo start -c`.
-5. Siapkan akun demo dan akun uji.
+Akun demo tidak punya pinjaman terlambat agar langkah "pinjam alat baru" pada skrip demo tidak terblokir. Keterlambatan diperagakan dengan akun Rina.
 
-### Skenario A — akun demo (menunjukkan aturan dan denda)
+## Persiapan responsi
 
-1. **Login** `demo@sipinjam.id` / `sipinjam123`.
-2. **Katalog**: tunjukkan sapaan, ringkasan 58 unit tersedia, 2 pinjaman terlambat, pencarian, chip kategori, filter “Tersedia”.
-3. Buka **Bor Listrik** atau **Laptop**. Tunjukkan QR alat, kondisi, stok, dan aturan denda. Karena ada pinjaman terlambat, CTA berbunyi “Selesaikan pinjaman dulu” — jelaskan blokir ini disengaja.
-4. **Pinjaman** → buka pinjaman **PJM-261110-001** (Arduino, terlambat 1 hari). Tunjukkan status merah, denda berjalan, QR, rincian denda, dan linimasa.
-5. Tekan **Kembalikan alat** untuk memperlihatkan sheet konfirmasi dan denda, lalu **Batal** agar data demo tidak berubah. (Kalau ingin mendemokan pengembalian, tekan “Ya, kembalikan”; denda final tercatat.)
-6. **Notifikasi**: tunjukkan pengingat jatuh tempo, keterlambatan, dan tombol “Tandai semua”.
-7. **Scan**: di perangkat, izinkan kamera lalu pindai QR alat. Jika kamera tidak memungkinkan, gunakan “Masukkan kode manual” → `ALT-001`; hasil scan membuka detail alat.
-8. **Profil → Tentang aplikasi**: tunjukkan ringkasan, aturan, teknologi, dan identitas pembuat.
+1. Buat proyek Supabase.
+2. Jalankan `database/schema.sql` lalu `database/seed.sql` di SQL Editor. `schema.sql` menghapus tabel SiPinjam lama; jangan jalankan di proyek yang menyimpan data lain.
+3. Isi `backend/.env` dari `.env.example` (`SUPABASE_URL`, `SUPABASE_KEY` anon, `JWT_SECRET`).
+4. `cd backend && npm install && npm run dev`.
+5. `cd app && npm install`, lalu set `EXPO_PUBLIC_API_URL` ke IP laptop/port 5000 dan jalankan `npx expo start -c`.
+6. Uji login demo di HP.
+7. Jika Supabase belum siap, jalankan `npm run mock` dan arahkan `EXPO_PUBLIC_API_URL=http://localhost:5000/api/v1` untuk demo UI.
 
-### Skenario B — akun uji (alur pinjam dari nol)
+## Alur responsi 7 menit
 
-1. Keluar dari akun demo, login `uji@sipinjam.id` / `sipinjam123`.
-2. Katalog → Laptop → **Pinjam alat**.
-3. Pilih jumlah unit, durasi 1–3 hari, isi catatan, lalu **Ajukan peminjaman**.
-4. Tunjukkan halaman sukses + QR pinjaman.
-5. **Lihat detail pinjaman** → tunjukkan QR, status, dan tombol kembali.
-6. **Kembalikan alat** → konfirmasi → tunjukkan banner “Pengembalian berhasil dicatat” dan status berubah menjadi “Dikembalikan”.
-7. Kembali ke **Pinjaman → Selesai** untuk menunjukkan riwayat.
+### Akun demo - alur utama
 
-> Jika waktu responsi terbatas, cukup Skenario A untuk menjelaskan aturan, lalu Skenario B sampai halaman sukses QR.
+1. **Login** dengan NIM `2112012414011` dan sandi `praktikum123`.
+2. **Katalog**: tunjukkan ringkasan stok, pencarian, chip kategori, filter "Tersedia", dan foto alat.
+3. Cari **"osilo"**, buka **Osiloskop Hantek DSO2D10**. Tunjukkan stok 1/2, kondisi rusak ringan, deskripsi, dan riwayat pinjam.
+4. **Pinjam alat** -> atur jumlah -> pilih tanggal (1-3 hari) -> isi catatan -> **Ajukan peminjaman**.
+5. Tunjukkan halaman sukses + QR `SIPINJAM:LOAN:...`.
+6. **Lihat detail pinjaman** -> tunjukkan status, item, linimasa, QR, dan tombol kembali.
+7. **Kembalikan alat** -> konfirmasi -> tunjukkan banner berhasil dan status "Dikembalikan".
+8. **Notifikasi** -> tunjukkan pengingat dan tombol **Tandai semua**.
+9. **Scan** -> izinkan kamera, pindai QR alat; jika tidak memungkinkan, ketik `ALK-002` di input manual -> hasil scan.
+10. **Profil -> Tentang aplikasi** -> tunjukkan versi, base URL API, kredit, dan lisensi.
+
+### Akun Rina - keterlambatan dan denda
+
+1. Keluar, login NIM `2112012414099`.
+2. **Pinjaman -> Aktif**: dua kartu berlabel **Terlambat**.
+3. Buka pinjaman **PJM-261111-001** (Tang Crimping): tunjukkan denda berjalan Rp2.000, rincian tarif, linimasa, dan QR.
+4. Tekan **Kembalikan alat** -> tunjukkan modal denda -> **Ya, kembalikan**.
+5. Tunjukkan denda final tercatat dan status berubah.
 
 ## Bukti pengujian
 
 | Uji | Hasil |
 | --- | --- |
-| Unit test logika tanggal, denda, kode, QR | `npm test` — lihat output terbaru |
-| Bundle Android | `npx expo export --platform android` berhasil |
-| Bundle web | `npx expo export --platform web` berhasil |
-| Login + auto-login token | Berhasil |
-| Stok real-time | Laptop 5 → 4 setelah satu unit dipinjam |
-| Stok kurang | `409 STOK_TIDAK_CUKUP` dengan detail unit tersisa |
-| Alat ganda | `409 SUDAH_DIPINJAM` |
-| Pinjaman terlambat | `409 PINJAMAN_TERLAMBAT` untuk akun demo |
-| Denda | 1 hari → Rp2.000; 2 hari → Rp4.000 |
-| Scan QR | `ALT-001`, `PJM-...`, dan prefix asing ditolak |
-| Notifikasi tanpa cron | Hanya baris `show_at <= NOW()` yang tampil; notifikasi terlambat dibuat saat daftar dibuka |
-| Tangkapan layar | 15 gambar 390×844 di `docs/screenshots/` |
+| Unit + integration test backend | **18/18 lulus** (`npm test`) |
+| Login NIM, JWT, auto-login | lulus |
+| Katalog, pencarian, filter, detail + 5 riwayat | lulus |
+| Buat pinjaman, stok berkurang | lulus |
+| Stok kurang / alat ganda / pinjaman terlambat | 409 sesuai kode |
+| Pengembalian tepat waktu & terlambat | denda 0 / Rp2.000 per hari |
+| Pengembalian kedua | 409 `CONFLICT` |
+| Batas kepemilikan pinjaman | 403 `FORBIDDEN` |
+| Notifikasi `show_at` | hanya yang sudah lewat tampil |
+| Statistik & alat populer | lulus |
+| `npx expo lint` | bersih |
+| `npx expo-doctor` | 20/20 |
+| Export Android & web | berhasil |
+| Screenshot | 17 gambar 390x844 |
 
-Contoh hasil unit test:
+## Yang belum diverifikasi / batasan
 
-```
-$ npm test
-# tests 10
-# pass 10
-# fail 0
-```
-
-## Batas yang perlu disebutkan
-
-Bagian ini penting agar klaim tidak berlebihan saat ditanya asisten.
-
-1. **Layar admin belum ada.** Skema mengenal role `admin`, dan API mengizinkan admin melihat/mengembalikan pinjaman, tetapi tidak ada antarmuka admin. Ini berada di P2.
-2. **Notifikasi in-app, bukan push notification.** Tidak memakai FCM/APNs dan tidak ada cron. Pengingat H-1 dan hari-H ditulis saat pinjaman dibuat dengan kolom `show_at`.
-3. **Pembayaran denda tidak terintegrasi.** Denda hanya dicatat di database.
-4. **Tangkapan layar dibuat di web** (Chrome headless 390×844) karena kamera tidak tersedia di lingkungan build. Tampilan kamera pada Scan harus diuji di HP Android/iOS. Layout, tipografi, dan komponen lain identik; rasio perangkat asli bisa sedikit berbeda.
-5. **APK belum dibangun di mesin ini.** Konfigurasi EAS sudah siap, tetapi build memerlukan akun Expo dan koneksi ke EAS.
-6. **Belum ada dark mode, i18n, atau grafik statistik.** Semua itu P2 dan tidak dijanjikan pada rancangan awal.
-7. **Pengujian concurrency** stok mengandalkan `SELECT ... FOR UPDATE`, tetapi belum diuji dengan ribuan permintaan paralel. Untuk skala laboratorium, pendekatan ini memadai.
+1. **Supabase live belum dibuat dari mesin ini.** Schema dan query sudah disiapkan; integrasi database nyata baru bisa diuji setelah proyek Supabase dan `.env` dibuat. Pengujian end-to-end saat ini memakai model in-memory dengan controller dan route yang sama.
+2. **Vercel belum di-deploy.** Konfigurasi `backend/vercel.json` dan `api/index.js` sudah siap.
+3. **APK belum dibangun.** `eas.json` sudah siap; build memerlukan akun Expo/EAS.
+4. **Kamera hanya di perangkat.** Screenshot web menampilkan keadaan izin kamera dan input manual; pemindaian kamera perlu diuji di HP.
+5. **Layar admin/laboran belum ada.** Role tersedia di database; antarmuka admin tidak termasuk cakupan.
+6. **Notifikasi in-app**, bukan push notification.
+7. **Denda belum terhubung pembayaran.**
+8. **Foto alat memakai URL eksternal** (Unsplash/Wikimedia melalui proxy). Butuh internet; kredit ada di `docs/PHOTO-CREDITS.md`.
 
 ## Troubleshooting
 
-| Gejala | Penyebab umum | Solusi |
+| Gejala | Penyebab | Solusi |
 | --- | --- | --- |
-| `ECONNREFUSED 127.0.0.1:3306` | MySQL mati | Start MySQL di XAMPP Control Panel |
-| `Tidak dapat terhubung ke server` di HP | IP API salah / firewall | Pastikan satu Wi-Fi, izinkan port 5000, cek alamat di bawah form login (`__DEV__`) |
-| Perubahan `app.json` tidak terbaca | Metro cache | `npx expo start -c` |
-| Kamera hitam | Izin belum diberikan | Izinkan kamera, atau gunakan input manual |
-| `PINJAMAN_TERLAMBAT` saat mau pinjam | Akun demo punya 2 pinjaman terlambat | Kembalikan dulu, atau login akun uji |
-| Data demo berubah setelah responsi | Sudah ada pinjaman/pengembalian baru | Jalankan ulang `npm run db:init` |
-| `eas build` minta login | Belum masuk akun Expo | `npx eas-cli login` |
+| `SUPABASE_URL dan SUPABASE_KEY wajib diisi` | `.env` belum diisi | Salin `.env.example`, isi anon key |
+| `database tidak dapat diakses` | Schema belum dijalankan / URL salah | Jalankan `schema.sql`, cek URL & key |
+| Aplikasi tidak bisa login | `EXPO_PUBLIC_API_URL` salah | Set ke `http://<IP>:5000/api/v1`, restart `expo start -c` |
+| `CONFLICT` saat pinjam | Akun punya pinjaman lewat tenggat | Gunakan akun demo, atau kembalikan dulu |
+| `STOK_TIDAK_CUKUP` | Jumlah > stok tersedia | Kurangi jumlah; detail otomatis dimuat ulang |
+| QR tidak dikenali | Prefix bukan SiPinjam | Gunakan `ELK-001`, `JAR-001`, `ALK-001`, `KOM-001`, atau QR pinjaman |
+| Izin kamera ditolak permanen | Izin perangkat | Buka pengaturan atau pakai input manual |
+| Date picker tidak muncul di web | Web memakai pemilih tanggal pengganti | Gunakan pilihan tanggal di bottom sheet |
+| RLS error setelah mengaktifkan RLS | RLS hidup tanpa policy | Biarkan RLS mati sesuai ketentuan |
 
 ## Checklist sebelum mengumpulkan
 
 - [ ] `npm test` lulus.
-- [ ] `npm run db:init` berhasil dan data demo sesuai.
-- [ ] Backend jalan di port 5000 dan `/health` mengembalikan `database: connected`.
-- [ ] Aplikasi bisa login di HP.
+- [ ] `schema.sql` dan `seed.sql` sudah dijalankan di Supabase.
+- [ ] `/health` mengembalikan `database: connected`.
+- [ ] Login demo dan Rina berhasil.
+- [ ] Alur pinjam + kembali diuji di HP.
 - [ ] Scan kamera diuji di HP.
-- [ ] Alur pinjam + kembali diuji dengan akun uji.
-- [ ] QR pada halaman sukses dipindai dari tab Scan.
-- [ ] Screenshot terbaru tersedia di `docs/screenshots/`.
-- [ ] Repo GitHub publik dan commit terbaru sudah di-push.
-- [ ] APK/tautan EAS siap (opsional).
-- [ ] `README.md` menjelaskan cara menjalankan.
+- [ ] QR halaman sukses bisa dipindai.
+- [ ] `expo-doctor` 20/20.
+- [ ] Screenshot terbaru ada di `docs/screenshots/`.
+- [ ] Repo GitHub publik dan commit terbaru di-push.
+- [ ] APK/tautan EAS siap.
+- [ ] README menjelaskan setup Supabase, Vercel, dan akun demo.

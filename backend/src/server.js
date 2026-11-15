@@ -1,9 +1,13 @@
-const app = require('./app');
-const config = require('./config');
+import { createApp } from './app.js';
+import { env } from './config/env.js';
+import { supabase } from './config/supabaseClient.js';
+import { createModels } from './models/index.js';
 
-const server = app.listen(config.port, '0.0.0.0', () => {
-  console.log(`[sipinjam] API berjalan di http://localhost:${config.port}`);
-  console.log(`[sipinjam] Health check: http://localhost:${config.port}/health`);
+const app = createApp(createModels(supabase));
+
+const server = app.listen(env.port, '0.0.0.0', () => {
+  console.log(`[sipinjam] API berjalan di http://localhost:${env.port}`);
+  console.log(`[sipinjam] Health check: http://localhost:${env.port}/health`);
 });
 
 function shutdown(signal) {

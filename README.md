@@ -1,276 +1,214 @@
 # SiPinjam
 
-Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemindaian QR Code, didukung REST API Express dan MySQL.
+Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemindaian QR Code, REST API Express, dan database Supabase/PostgreSQL.
 
 **Tugas Akhir Praktikum Pemrograman Perangkat Bergerak 2026**  
-Ade Raihan · NIM 2112012414011
+Ade Raihan - NIM 2112012414011
 
 ![Katalog SiPinjam](docs/screenshots/02-katalog.png)
 
-## Daftar isi
-
-- [Fitur](#fitur)
-- [Akun demo](#akun-demo)
-- [Arsitektur](#arsitektur)
-- [Menjalankan proyek](#menjalankan-proyek)
-- [Aturan bisnis](#aturan-bisnis)
-- [API](#api)
-- [Database](#database)
-- [Pengujian](#pengujian)
-- [Build APK](#build-apk)
-- [Deploy API](#deploy-api)
-- [Tangkapan layar](#tangkapan-layar)
-- [Struktur folder](#struktur-folder)
-
 ## Fitur
 
-- **Katalog alat** dengan pencarian, filter kategori, dan filter stok tersedia. Stok dihitung dari pinjaman aktif, bukan angka statis.
-- **Detail alat** berisi kondisi, stok, deskripsi, dan QR alat.
-- **Pengajuan pinjaman** dengan jumlah unit, durasi 1–3 hari, dan catatan. Maksimal 3 jenis alat per transaksi.
-- **QR Code** untuk alat (`SIPINJAM:TOOL:ALT-001`) dan pinjaman (`SIPINJAM:LOAN:PJM-261114-001`). QR dibaca lewat kamera atau dimasukkan manual.
-- **Daftar pinjaman** dengan filter berjalan, terlambat, dan selesai; lengkap dengan status dan denda.
-- **Detail pinjaman** berisi QR, daftar alat, linimasa, rincian denda, dan tombol pengembalian.
-- **Notifikasi** pengingat H-1, jatuh tempo, keterlambatan, dan pengembalian. Tanpa cron: baris notifikasi memiliki `show_at` dan hanya ditampilkan setelah waktunya tiba.
-- **Profil dan halaman Tentang** berisi ringkasan aktivitas, aturan, teknologi, dan info pembuat.
-- **Denda otomatis** Rp2.000 per hari keterlambatan, dihitung server saat pengembalian.
-- **Blokir pinjaman baru** bila pengguna masih memiliki pinjaman terlambat.
+- Katalog alat dengan pencarian, filter kategori, filter stok, dan foto alat.
+- Detail alat: stok real-time, kondisi, deskripsi, dan 5 riwayat peminjaman terakhir.
+- Pengajuan pinjaman dengan stepper jumlah, pemilih tanggal (1-3 hari), dan catatan.
+- QR Code alat (`SIPINJAM:TOOL:ELK-001`) dan pinjaman (`SIPINJAM:LOAN:PJM-...`), bisa dipindai atau diketik manual.
+- Daftar pinjaman dengan tab Aktif, Selesai, dan Semua; keterlambatan dihitung otomatis.
+- Detail pinjaman: status, daftar alat, linimasa, denda berjalan, QR, dan pengembalian.
+- Notifikasi pengingat H-1, hari jatuh tempo, keterlambatan, dan pengembalian.
+- Profil, kebijakan peminjaman, Tentang aplikasi, versi, base URL API, kredit, dan lisensi.
+- Empat keadaan layar: loading, kosong, error dengan tombol coba lagi, dan berisi.
 
-## Akun demo
+## Akun
 
-| Akun | Email | Kata sandi | Isi |
+| Akun | NIM | Kata sandi | Isi seed |
 | --- | --- | --- | --- |
-| Demo | `demo@sipinjam.id` | `sipinjam123` | 10 pinjaman: 7 berjalan, 2 terlambat, 3 selesai |
-| Uji bersih | `uji@sipinjam.id` | `sipinjam123` | Belum punya pinjaman |
+| Demo | `2112012414011` | `praktikum123` | 2 pinjaman aktif, tanpa keterlambatan |
+| Rina | `2112012414099` | `praktikum123` | 2 pinjaman terlambat, 1 selesai |
+| Bagas | `2112012414088` | `praktikum123` | 1 pinjaman selesai |
 
-Akun demo sengaja memiliki **2 pinjaman terlambat** untuk memperagakan denda dan aturan blokir. Untuk mencoba alur pinjam dari nol tanpa mengembalikan pinjaman lama, masuk dengan akun uji.
+Akun demo sengaja tidak punya pinjaman terlambat agar alur pinjam baru bisa didemokan. Gunakan akun **Rina** untuk memperagakan status terlambat dan denda.
 
-## Arsitektur
+## Tumpukan
+
+- **App**: React Native 0.88, Expo SDK 58, React Navigation 7, `expo-camera`, `react-native-qrcode-svg`, `@react-native-community/datetimepicker`, AsyncStorage, axios, date-fns.
+- **Backend**: Express 5, `@supabase/supabase-js`, JWT, bcryptjs, zod, cors, dotenv, morgan. Deploy Vercel.
+- **Database**: Supabase/PostgreSQL, UUID, view `tool_stok`, RLS tidak diaktifkan (sesuai ketentuan tugas).
+
+Aplikasi **hanya** memanggil Express. Tidak ada `@supabase/supabase-js` di folder `app/` dan tidak ada `service_role` key di repo.
+
+## Struktur
 
 ```
-Expo App (React Native)
-   │  axios + Bearer JWT
-   ▼
-Express REST API (/api/v1)
-   │  mysql2 pool + transaksi
-   ▼
-MySQL / MariaDB
+SiPinjam/
+  app/
+    App.js
+    app.json
+    eas.json
+    src/
+      api/              client.js + satu modul per endpoint
+      components/       Screen, Button, Card, StatusPill, StockBadge, dll.
+      context/          AuthProvider, NotificationProvider
+      hooks/            useAuth, useTools, useLoans, useNotifications, useStats
+      lib/              format tanggal/rupiah, parser QR, info aplikasi
+      navigation/       root stack, bottom tabs, tab bar
+      screens/          11 layar
+      theme/tokens.js   token warna, spasi, radius, tipografi
+  backend/
+    api/index.js        entry point Vercel
+    src/
+      config/           env + supabaseClient
+      controllers/      auth, category, tool, loan, notification, stats
+      lib/              tanggal, denda, serializer, error
+      middleware/       JWT, error handler
+      models/           query Supabase per entitas
+      routes/           router Express
+      validators/       skema zod
+    test/               unit + integration test (in-memory)
+    vercel.json
+  database/
+    schema.sql          jalankan di SQL Editor Supabase
+    seed.sql
+  docs/
+    API.md
+    PANDUAN-TA.md
+    PHOTO-CREDITS.md
+    postman_collection.json
+    screenshots/
+  LICENSE
+  README.md
 ```
 
-- Aplikasi: React Native 0.88, Expo SDK 58, React Navigation 7, `expo-camera`, `react-native-qrcode-svg`, `date-fns`.
-- Backend: Express 4, mysql2, JWT (7 hari), bcryptjs, zod.
-- Database: MySQL 8 / MariaDB 10.4+, InnoDB, utf8mb4.
+## Menjalankan tanpa Supabase (mode mock)
 
-## Menjalankan proyek
-
-### Prasyarat
-
-- Node.js 18+ (diuji di Node 24)
-- MySQL 8 / MariaDB (XAMPP juga cukup)
-- Expo Go di ponsel, atau emulator Android
-- HP dan komputer berada di jaringan yang sama (untuk Expo Go)
-
-### 1. Database
-
-Nyalakan MySQL, lalu dari folder `backend`:
+Cocok untuk mengembangkan UI dan mencoba semua alur sebelum proyek Supabase dibuat. Server mock memakai model in-memory tetapi **controller dan route yang sama** dengan produksi.
 
 ```bash
-npm install
-cp .env.example .env      # Windows: copy .env.example .env
-npm run db:init
+npm run install:all
+npm run mock
 ```
 
-`db:init` membaca `database/schema.sql` dan `database/seed.sql`. **Skrip ini menghapus tabel lama** dan membuat ulang data demo.
+Di terminal lain:
 
-### 2. Backend
+```bash
+cd app
+$env:EXPO_PUBLIC_API_URL="http://localhost:5000/api/v1"
+npx expo start -c
+```
+
+Mode mock hanya untuk pengembangan. Data kembali ke seed setiap server mock dijalankan ulang.
+
+## Setup Supabase
+
+1. Buat proyek baru di [Supabase](https://supabase.com).
+2. Buka **SQL Editor**, jalankan isi `database/schema.sql`. **Perhatian:** file ini menghapus tabel SiPinjam yang sudah ada lalu membuatnya ulang.
+3. Masih di SQL Editor, jalankan `database/seed.sql` untuk mengisi data contoh.
+4. Salin `backend/.env.example` menjadi `backend/.env`, lalu isi:
+   - `SUPABASE_URL` dari Project Settings > API.
+   - `SUPABASE_KEY` dengan **anon/public key**. Jangan memakai `service_role`.
+   - `JWT_SECRET` dengan string acak panjang.
+5. Jalankan backend:
 
 ```bash
 cd backend
+npm install
 npm run dev
 ```
 
-API berjalan di `http://localhost:5000`. Cek `http://localhost:5000/health`.
+Cek `http://localhost:5000/health` sampai muncul `{ "data": { "status": "ok", "database": "connected" } }`.
 
-### 3. Aplikasi
+Catatan: **RLS sengaja tidak diaktifkan**. Autentikasi dilakukan Express; jangan mengaktifkan RLS tanpa menulis policy karena aplikasi akan kehilangan akses.
+
+## Menjalankan aplikasi
 
 ```bash
 cd app
 npm install
-npx expo start
+$env:EXPO_PUBLIC_API_URL="http://<IP-komputer>:5000/api/v1"
+npx expo start -c
 ```
 
-Buka QR Expo Go di ponsel. Alamat API diturunkan otomatis dari host Metro (`http://<IP-komputer>:5000/api/v1`), jadi tidak perlu mengubah IP manual saat jaringan berubah.
+Buka Expo Go di HP (satu Wi-Fi dengan laptop) atau emulator. Untuk Android emulator, gunakan `http://10.0.2.2:5000/api/v1`.
 
-Bila backend berada di alamat lain:
-
-```bash
-# PowerShell
-$env:EXPO_PUBLIC_API_URL="http://192.168.1.10:5000/api/v1"; npx expo start -c
-```
-
-atau isi `expo.extra.apiUrl` di `app/app.json`, lalu jalankan `npx expo start -c`.
-
-> Android emulator memakai `10.0.2.2`, bukan `localhost`. Fallback ini sudah ditangani otomatis bila `hostUri` tidak tersedia.
-
-### Perintah singkat dari root
-
-```bash
-npm run install:all   # install backend + app
-npm run db:init       # buat ulang database & seed
-npm run backend       # jalankan API (watch mode)
-npm run app           # jalankan Expo
-npm test              # unit test backend
-```
-
-## Aturan bisnis
-
-| Aturan | Nilai |
-| --- | --- |
-| Durasi pinjam | 1–3 hari kalender, dihitung dari tanggal pinjam |
-| Maksimal jenis alat per transaksi | 3 |
-| Denda | Rp2.000 per hari keterlambatan per pinjaman |
-| Status tersimpan | `dipinjam`, `dikembalikan` |
-| Status tampilan | `dipinjam`, `terlambat`, `dikembalikan` |
-| Keterlambatan | Dihitung date-only: `tanggal_kembali_rencana < hari ini` |
-| Alat sama | Tidak boleh muncul di dua pinjaman aktif milik pengguna yang sama |
-| Pinjaman terlambat | Pengguna diblokir dari pinjaman baru sampai semuanya dikembalikan |
-| Stok | `stok_total - SUM(loan_items.jumlah)` dari pinjaman berstatus `dipinjam` |
-| Notifikasi | Tanpa cron; dibuat saat pinjaman dibuat dan saat notifikasi dibuka |
+`EXPO_PUBLIC_API_URL` wajib diisi saat build APK karena aplikasi tidak menebak alamat backend.
 
 ## API
 
-Base URL: `http://localhost:5000/api/v1`  
-Autentikasi: `Authorization: Bearer <token>`  
-Envelope sukses: `{ "data": ... }`; daftar menambahkan `meta`. Error: `{ "error": { "code", "message" } }`.
+Base path `/api/v1`, autentikasi `Authorization: Bearer <token>`.
 
-| Method | Endpoint | Keterangan |
+| Method | Path | Keterangan |
 | --- | --- | --- |
-| POST | `/auth/login` | Login email + kata sandi |
-| GET | `/auth/me` | Profil pengguna dari token |
-| GET | `/categories` | Daftar kategori + jumlah alat |
-| GET | `/tools` | Katalog; query `search`, `category_id`, `tersedia`, `limit`, `offset` |
-| GET | `/tools/:id` | Detail alat |
-| GET | `/tools/kode/:kode` | Cari alat dari kode/QR |
-| POST | `/loans` | Buat pinjaman |
-| GET | `/loans` | Daftar pinjaman; `status=berjalan\|aktif\|terlambat\|selesai\|semua` |
-| GET | `/loans/:id` | Detail pinjaman |
-| GET | `/loans/kode/:kode` | Cari pinjaman dari kode/QR |
-| POST | `/loans/:id/return` | Kembalikan alat |
-| GET | `/notifications` | Notifikasi yang sudah waktunya tampil |
-| PATCH | `/notifications/:id/read` | Tandai satu dibaca |
-| PATCH | `/notifications/read-all` | Tandai semua dibaca |
-| GET | `/stats/summary` | Ringkasan pinjaman, denda, alat, notifikasi |
-| GET | `/stats/populer` | Alat paling sering dipinjam |
-| GET | `/health` | Health check + koneksi database |
+| POST | `/auth/login` | Body `{ nim, password }`; balas `{ token, member }` |
+| GET | `/auth/me` | Profil dari token |
+| GET | `/categories` | Daftar kategori |
+| GET | `/tools` | Baca view `tool_stok`; `search`, `category_id`, `tersedia`, `limit`, `offset` |
+| GET | `/tools/:id` | Detail + 5 riwayat pinjam |
+| GET | `/tools/kode/:kode` | Lookup QR alat |
+| POST | `/loans` | Body `{ tanggal_kembali_rencana, catatan, items[] }` |
+| GET | `/loans` | `status=aktif` / `selesai` / `semua` |
+| GET | `/loans/:id` | Detail + item + denda berjalan |
+| GET | `/loans/kode/:kode` | Lookup QR pinjaman |
+| POST | `/loans/:id/return` | Kembalikan + hitung denda |
+| GET | `/notifications` | Hanya `show_at <= now()` |
+| PATCH | `/notifications/:id/read` | Tandai satu |
+| PATCH | `/notifications/read-all` | Tandai semua |
+| GET | `/stats/summary` | Ringkasan stok dan pinjaman |
+| GET | `/stats/populer` | 5 alat paling sering dipinjam |
 
-Contoh:
-
-```bash
-curl -X POST http://localhost:5000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d "{\"email\":\"demo@sipinjam.id\",\"password\":\"sipinjam123\"}"
-
-curl http://localhost:5000/api/v1/tools?search=laptop \
-  -H "Authorization: Bearer <token>"
-
-curl -X POST http://localhost:5000/api/v1/loans \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d "{\"items\":[{\"tool_id\":1,\"jumlah\":1}],\"durasi_hari\":2,\"catatan\":\"Praktikum\"}"
-```
+Envelope sukses: `{ "data": ... }`. Daftar: `{ "data": [...], "meta": { "total", "limit", "offset" } }`. Error: `{ "error": { "code", "message", "fields" } }`.
 
 Dokumentasi lengkap: [`docs/API.md`](docs/API.md). Koleksi Postman: [`docs/postman_collection.json`](docs/postman_collection.json).
 
 ### Kode error
 
-`VALIDATION_ERROR`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `CONFLICT`, `STOK_TIDAK_CUKUP`, `SUDAH_DIPINJAM`, `PINJAMAN_TERLAMBAT`, `SUDAH_DIKEMBALIKAN`, `INVALID_CODE`, `DATABASE_UNAVAILABLE`, `INTERNAL_ERROR`.
+`VALIDATION_ERROR` (422), `UNAUTHORIZED` (401), `FORBIDDEN` (403), `NOT_FOUND` (404), `CONFLICT` (409), `STOK_TIDAK_CUKUP` (409), `SUDAH_DIPINJAM` (409).
 
-## Database
+## Aturan bisnis
 
-```mermaid
-erDiagram
-    USERS ||--o{ LOANS : "mengajukan"
-    USERS ||--o{ NOTIFICATIONS : "menerima"
-    CATEGORIES ||--o{ TOOLS : "mengelompokkan"
-    TOOLS ||--o{ LOAN_ITEMS : "dipinjam"
-    LOANS ||--o{ LOAN_ITEMS : "berisi"
+| Aturan | Nilai |
+| --- | --- |
+| Durasi | 1-3 hari kalender |
+| Baris alat per pinjaman | 1-3 |
+| Jumlah per alat | 1 sampai `stok_tersedia` |
+| Denda | Rp2.000 per hari per pinjaman |
+| Status tersimpan | `dipinjam`, `dikembalikan` |
+| Terlambat | Dihitung dari tanggal, bukan disimpan |
+| Pengembalian | Hanya pemilik, hanya sekali; kedua kali `409 CONFLICT` |
+| Pinjaman baru | Diblokir selama ada pinjaman lewat tenggat |
+| Kode pinjaman | `PJM-YYMMDD-NNN`, urut per hari |
+| Notifikasi | Dua baris saat pinjaman dibuat: H-1 dan hari jatuh tempo |
 
-    USERS {
-        int id PK
-        varchar nama
-        varchar nim UK
-        varchar email UK
-        varchar password_hash
-        enum role
-    }
-    CATEGORIES {
-        int id PK
-        varchar nama
-        varchar slug UK
-        varchar icon
-    }
-    TOOLS {
-        int id PK
-        varchar kode UK
-        varchar nama
-        int category_id FK
-        int stok_total
-        enum kondisi
-    }
-    LOANS {
-        int id PK
-        varchar kode UK
-        int user_id FK
-        date tanggal_pinjam
-        date tanggal_kembali_rencana
-        date tanggal_kembali_aktual
-        enum status
-        int denda
-    }
-    LOAN_ITEMS {
-        int id PK
-        int loan_id FK
-        int tool_id FK
-        int jumlah
-    }
-    NOTIFICATIONS {
-        int id PK
-        int user_id FK
-        enum tipe
-        varchar judul
-        varchar pesan
-        enum ref_type
-        int ref_id
-        datetime show_at
-        boolean dibaca
-    }
-```
-
-Seed berisi 4 kategori, 15 alat, 2 akun, 10 pinjaman lintas status, dan 8 notifikasi. Semua tanggal dibuat relatif terhadap `CURDATE()` agar status keterlambatan tetap relevan kapan pun seed dijalankan.
-
-## Pengujian
+## Testing
 
 ```bash
 cd backend
 npm test
 ```
 
-Unit test mencakup perhitungan tanggal WIB, denda, status pinjaman, pembentukan kode, dan parser QR. Selain itu sudah diverifikasi secara manual:
+18 test lulus: validasi tanggal, denda, status, kode, parser QR, login NIM, katalog, filter, detail + riwayat, pembuatan pinjaman, stok kurang, alat ganda, blokir keterlambatan, kepemilikan, pengembalian denda, notifikasi, dan statistik. Test integrasi memakai model in-memory sehingga tidak memerlukan Supabase.
 
-- Login, katalog, pencarian, detail alat, dan stok real-time.
-- Buat pinjaman, blokir stok kurang, blokir alat ganda, dan blokir pinjaman terlambat.
-- Pengembalian tepat waktu dan terlambat (denda Rp2.000/hari).
-- Filter pinjaman, notifikasi, tandai dibaca, dan statistik.
-- `npx expo export --platform android` berhasil (Metro, 2.287 modul).
-- Tangkapan layar 390×844 dari render web; kamera hanya aktif di perangkat Android/iOS.
+Pemeriksaan lain yang sudah dilakukan:
 
-Checklist responsi dan pemetaan syarat tugas akhir ada di [`docs/PANDUAN-TA.md`](docs/PANDUAN-TA.md).
+- `npx expo lint` bersih.
+- `npx expo-doctor` 20/20.
+- `npx expo export --platform android` berhasil.
+- `npx expo export --platform web` berhasil.
+- 17 screenshot 390x844 di `docs/screenshots/`. Tampilan kamera hanya bisa diuji di perangkat Android/iOS.
+
+## Deploy backend ke Vercel
+
+1. Import repo ke Vercel.
+2. Root directory: `backend`.
+3. Environment:
+   - `SUPABASE_URL`
+   - `SUPABASE_KEY` (anon key)
+   - `JWT_SECRET`
+   - `CORS_ORIGIN=*`
+4. Deploy. `backend/vercel.json` mengarahkan request ke `api/index.js`.
+5. Uji `https://<domain>/health` dan login.
+6. Set `EXPO_PUBLIC_API_URL=https://<domain>/api/v1` saat build aplikasi.
 
 ## Build APK
-
-`app/eas.json` sudah menyiapkan profil `preview` dengan `buildType: apk`.
-
-1. Ganti `EXPO_PUBLIC_API_URL` di `app/eas.json` dengan URL API hasil deploy.
-2. Login dan build:
 
 ```bash
 cd app
@@ -278,18 +216,7 @@ npx eas-cli login
 npx eas-cli build --platform android --profile preview
 ```
 
-3. Unduh APK dari tautan EAS, lalu uji di perangkat. Untuk demo di jaringan lokal, isi `EXPO_PUBLIC_API_URL` dengan `http://<IP-komputer>:5000/api/v1` dan pastikan firewall mengizinkan port 5000.
-
-## Deploy API
-
-Blueprint Render tersedia di [`render.yaml`](render.yaml). Ringkasan:
-
-1. Buat database MySQL di Aiven/Railway, pilih database tersebut, lalu impor `database/schema.sql` dan `database/seed.sql` (keduanya tidak membuat database).
-2. Deploy repository ke Render dengan root directory `backend`.
-3. Isi environment: `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SSL=true`, `JWT_SECRET` (acak panjang), `CORS_ORIGIN=*`.
-4. Verifikasi `https://<service>.onrender.com/health`.
-5. Set `EXPO_PUBLIC_API_URL` di `app/eas.json` ke `https://<service>.onrender.com/api/v1`.
-6. Render free tier tidur saat idle; pasang UptimeRobot untuk ping `/health` tiap 5 menit.
+Profil `preview` memakai `android.buildType: apk`. Isi `EXPO_PUBLIC_API_URL` dengan URL backend Vercel di environment EAS.
 
 ## Tangkapan layar
 
@@ -297,53 +224,26 @@ Blueprint Render tersedia di [`render.yaml`](render.yaml). Ringkasan:
 | --- | --- | --- |
 | ![](docs/screenshots/01-login.png) | ![](docs/screenshots/02-katalog.png) | ![](docs/screenshots/03-detail-alat.png) |
 
-| Pinjaman | Detail pinjaman | Konfirmasi kembali |
+| Form pinjam | Sukses + QR | Detail pinjaman |
 | --- | --- | --- |
-| ![](docs/screenshots/04-pinjaman.png) | ![](docs/screenshots/05-detail-pinjaman.png) | ![](docs/screenshots/06-konfirmasi-pengembalian.png) |
+| ![](docs/screenshots/04-form-pinjam.png) | ![](docs/screenshots/05-sukses-pinjam.png) | ![](docs/screenshots/06-detail-pinjaman.png) |
 
-| Notifikasi | Scan QR | Hasil scan |
+| Notifikasi | Profil | Tentang |
 | --- | --- | --- |
-| ![](docs/screenshots/07-notifikasi.png) | ![](docs/screenshots/08-scan.png) | ![](docs/screenshots/09-hasil-scan.png) |
+| ![](docs/screenshots/10-notifikasi.png) | ![](docs/screenshots/12-profil.png) | ![](docs/screenshots/13-tentang.png) |
 
-| Profil | Tentang | Form pinjam |
+| Pinjaman terlambat | Detail terlambat | Pilih tanggal |
 | --- | --- | --- |
-| ![](docs/screenshots/10-profil.png) | ![](docs/screenshots/11-tentang.png) | ![](docs/screenshots/12-form-pinjam.png) |
+| ![](docs/screenshots/14-pinjaman-terlambat.png) | ![](docs/screenshots/15-detail-terlambat.png) | ![](docs/screenshots/17-pilih-tanggal.png) |
 
-| Sukses | Detail aktif | Setelah kembali |
-| --- | --- | --- |
-| ![](docs/screenshots/13-sukses-pinjam.png) | ![](docs/screenshots/14-detail-pinjam-aktif.png) | ![](docs/screenshots/15-pengembalian-sukses.png) |
+## Batasan
 
-## Struktur folder
-
-```
-SiPinjam/
-├── app/                     # Expo / React Native
-│   ├── src/
-│   │   ├── components/      # komponen UI
-│   │   ├── context/         # Auth & Notification
-│   │   ├── hooks/           # useResource, debounce, focus reload
-│   │   ├── navigation/      # root stack, tabs, custom tab bar
-│   │   ├── screens/         # 11 layar
-│   │   ├── services/        # axios client
-│   │   ├── theme/           # token warna, tipografi, bayangan
-│   │   └── utils/           # format tanggal/rupiah, parser QR
-│   ├── assets/              # ikon & splash
-│   └── eas.json             # profil build APK
-├── backend/
-│   ├── src/
-│   │   ├── routes/          # auth, categories, tools, loans, notifications, stats
-│   │   ├── middleware/      # auth JWT, error handler
-│   │   └── lib/             # tanggal, denda, serializer, validasi
-│   ├── scripts/init-db.js   # schema + seed
-│   └── test/                # unit test node:test
-├── database/                # schema.sql, seed.sql
-├── docs/                    # API, Postman, panduan TA, screenshot
-└── render.yaml
-```
-
-## Catatan
-
-- Aplikasi ini fokus pada peran **peminjam**. Tabel `users` sudah mengenal peran `admin`, tetapi layar admin berada di luar cakupan P0/P1.
+- Layar admin/laboran belum dibuat; role tersedia di database.
 - Notifikasi bersifat in-app, bukan push notification.
-- Denda belum terhubung ke pembayaran; pencatatan dilakukan di data pinjaman.
-- Data demo hanya untuk pembelajaran. Jangan gunakan kata sandi demo di produksi.
+- Denda belum terhubung ke pembayaran.
+- Foto contoh memakai URL eksternal (Unsplash/Wikimedia via proxy); kredit di [`docs/PHOTO-CREDITS.md`](docs/PHOTO-CREDITS.md).
+- APK dan deployment belum dibuat dari mesin ini; konfigurasi sudah disiapkan.
+
+## Lisensi
+
+MIT - lihat [`LICENSE`](LICENSE).

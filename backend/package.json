@@ -2,24 +2,29 @@
   "name": "sipinjam-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "REST API aplikasi peminjaman alat laboratorium SiPinjam",
+  "type": "module",
+  "description": "REST API SiPinjam (Express 5 + Supabase)",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "db:init": "node scripts/init-db.js",
-    "test": "node --test test/logic.test.js"
+    "mock": "node test/support/mockServer.js",
+    "test": "node --test test/logic.test.js test/api.test.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.113.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2",
+    "express": "^5.2.1",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.14.1",
+    "morgan": "^1.10.0",
     "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.1"
   }
 }

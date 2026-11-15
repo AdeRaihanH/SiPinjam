@@ -1,23 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius } from '../theme';
+import { colors, radius, type, weight } from '../theme/tokens';
 import Button from './Button';
 
 export default function ErrorState({ error, onRetry, style }) {
-  const isNetwork = error?.code === 'NETWORK_ERROR';
-  const message = error?.message || 'Terjadi kesalahan saat memuat data.';
-
+  const network = error?.code === 'NETWORK_ERROR';
   return (
     <View style={[styles.root, style]}>
-      <View style={styles.iconWrap}>
+      <View style={styles.icon}>
         <Ionicons
-          name={isNetwork ? 'cloud-offline-outline' : 'alert-circle-outline'}
-          size={28}
+          name={network ? 'cloud-offline-outline' : 'alert-circle-outline'}
+          size={24}
           color={colors.danger}
         />
       </View>
-      <Text style={styles.title}>{isNetwork ? 'Tidak terhubung' : 'Gagal memuat'}</Text>
-      <Text style={styles.message}>{message}</Text>
+      <Text style={styles.title}>{network ? 'Tidak terhubung' : 'Gagal memuat'}</Text>
+      <Text style={styles.message}>{error?.message || 'Terjadi kesalahan saat memuat data.'}</Text>
       {onRetry ? (
         <Button
           title="Coba lagi"
@@ -34,32 +32,17 @@ export default function ErrorState({ error, onRetry, style }) {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    alignItems: 'center',
-    paddingVertical: 30,
-    paddingHorizontal: 22,
-    gap: 8,
-  },
-  iconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.xl,
+  root: { alignItems: 'center', paddingVertical: 30, paddingHorizontal: 24, gap: 7 },
+  icon: {
+    width: 48,
+    height: 48,
+    borderRadius: radius.md,
     backgroundColor: colors.dangerSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.ink,
-  },
-  message: {
-    fontSize: 12.5,
-    lineHeight: 19,
-    color: colors.muted,
-    textAlign: 'center',
-    maxWidth: 290,
-  },
+  title: { fontSize: type.md, fontWeight: weight.semibold, color: colors.text },
+  message: { fontSize: type.xs, lineHeight: 17, color: colors.muted, textAlign: 'center', maxWidth: 290 },
   button: { marginTop: 8 },
 });

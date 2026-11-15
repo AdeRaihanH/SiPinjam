@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme';
+import { colors, text, type, weight } from '../theme/tokens';
 
 export default function PageHeader({ eyebrow, title, subtitle, right, style }) {
   return (
@@ -15,29 +15,14 @@ export default function PageHeader({ eyebrow, title, subtitle, right, style }) {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  copy: { flex: 1, gap: 3 },
+  root: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  copy: { flex: 1, gap: 2 },
   eyebrow: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1.3,
+    fontSize: type.xs,
+    fontWeight: weight.semibold,
     color: colors.primary,
-    textTransform: 'uppercase',
+    letterSpacing: 0.2,
   },
-  title: {
-    fontSize: 27,
-    lineHeight: 33,
-    fontWeight: '800',
-    color: colors.ink,
-    letterSpacing: -0.7,
-  },
-  subtitle: {
-    fontSize: 12.5,
-    lineHeight: 18,
-    color: colors.muted,
-  },
+  title: text.h1,
+  subtitle: { fontSize: type.xs, lineHeight: 17, color: colors.muted },
 });

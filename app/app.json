@@ -18,7 +18,7 @@
     "android": {
       "package": "com.aderaihan.sipinjam",
       "adaptiveIcon": {
-        "backgroundColor": "#0A5B4B",
+        "backgroundColor": "#1E2A5A",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -42,14 +42,12 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 160,
           "resizeMode": "contain",
-          "backgroundColor": "#0A5B4B"
+          "backgroundColor": "#1E2A5A"
         }
       ],
       "expo-status-bar",
-      "expo-font"
-    ],
-    "extra": {
-      "apiUrl": ""
-    }
+      "expo-font",
+      "@react-native-community/datetimepicker"
+    ]
   }
 }

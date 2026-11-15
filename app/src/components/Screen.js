@@ -1,6 +1,6 @@
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, layout } from '../theme';
+import { colors, layout } from '../theme/tokens';
 
 export default function Screen({
   children,
@@ -16,10 +16,7 @@ export default function Screen({
     <ScrollView
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={[
-        padded && styles.padded,
-        contentContainerStyle,
-      ]}
+      contentContainerStyle={[padded && styles.padded, contentContainerStyle]}
       refreshControl={refreshControl}
     >
       {children}
@@ -37,6 +34,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   padded: {
     paddingHorizontal: layout.screenPadding,
-    paddingBottom: 36,
+    paddingBottom: 32,
   },
 });

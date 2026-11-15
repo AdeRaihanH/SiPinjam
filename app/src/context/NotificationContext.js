@@ -7,39 +7,36 @@ import {
   useState,
 } from 'react';
 import { AppState } from 'react-native';
-import { api } from '../services/api';
-import { useAuth } from './AuthContext';
+import { notificationsApi } from '../api/notifications';
+import { useAuth } from '../hooks/useAuth';
 
 const NotificationContext = createContext(null);
 
 export function NotificationProvider({ children }) {
-  const { user } = useAuth();
+  const { member } = useAuth();
   const [unread, setUnread] = useState(0);
 
   const refresh = useCallback(async () => {
-    if (!user) {
+    if (!member) {
       setUnread(0);
       return;
     }
     try {
-      const result = await api.getList('/notifications', { params: { limit: 1 } });
+      const result = await notificationsApi.list({ limit: 1 });
       setUnread(Number(result.meta?.belum_dibaca || 0));
     } catch {
-      // Badge notifikasi bersifat sekunder; kegagalan jaringan tidak boleh
-      // mengganggu layar utama.
+      // Badge bersifat sekunder; jangan ganggu layar utama saat jaringan gagal.
     }
-  }, [user]);
+  }, [member]);
 
-  const markAllRead = useCallback(async () => {
-    await api.patch('/notifications/read-all');
+  const markAll = useCallback(async () => {
+    await notificationsApi.markAll();
     setUnread(0);
   }, []);
 
   useEffect(() => {
     const kickoff = setTimeout(refresh, 0);
-    if (!user) {
-      return () => clearTimeout(kickoff);
-    }
+    if (!member) return () => clearTimeout(kickoff);
 
     const interval = setInterval(refresh, 60000);
     const subscription = AppState.addEventListener('change', (state) => {
@@ -51,14 +48,14 @@ export function NotificationProvider({ children }) {
       clearInterval(interval);
       subscription.remove();
     };
-  }, [user, refresh]);
+  }, [member, refresh]);
 
   const value = useMemo(() => ({
     unread,
     refresh,
-    markAllRead,
+    markAll,
     setUnread,
-  }), [unread, refresh, markAllRead]);
+  }), [unread, refresh, markAll]);
 
   return (
     <NotificationContext.Provider value={value}>
@@ -67,8 +64,8 @@ export function NotificationProvider({ children }) {
   );
 }
 
-export function useNotifications() {
+export function useNotificationBadge() {
   const context = useContext(NotificationContext);
-  if (!context) throw new Error('useNotifications harus dipakai di dalam NotificationProvider');
+  if (!context) throw new Error('useNotificationBadge harus dipakai di dalam NotificationProvider');
   return context;
 }

@@ -1,59 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo } from 'react';
-import {
-  Animated,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Button from '../components/Button';
+import Card from '../components/Card';
 import InlineNotice from '../components/InlineNotice';
 import QRCodeCard from '../components/QRCodeCard';
 import Screen from '../components/Screen';
-import { colors, radius, shadows, text } from '../theme';
-import { formatRupiah, formatTanggalPanjang } from '../utils/format';
-import { toLoanQr } from '../utils/scan';
-
-function DetailRow({ icon, label, value, last = false }) {
-  return (
-    <View style={[styles.detailRow, !last && styles.detailRowBorder]}>
-      <View style={styles.detailIcon}>
-        <Ionicons name={icon} size={16} color={colors.primaryDark} />
-      </View>
-      <View style={styles.detailCopy}>
-        <Text style={styles.detailLabel}>{label}</Text>
-        <Text style={styles.detailValue} numberOfLines={2}>{value}</Text>
-      </View>
-    </View>
-  );
-}
+import { formatRupiah, formatTanggalPanjang } from '../lib/format';
+import { toLoanQr } from '../lib/scan';
+import { colors, layout, text, type, weight } from '../theme/tokens';
 
 export default function SuksesPinjamScreen({ navigation, route }) {
   const { loan } = route.params || {};
   const insets = useSafeAreaInsets();
-  const scale = useMemo(() => new Animated.Value(0.65), []);
-  const opacity = useMemo(() => new Animated.Value(0), []);
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.spring(scale, {
-        toValue: 1,
-        friction: 6,
-        tension: 90,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 260,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [scale, opacity]);
 
   const goHome = () => {
     navigation.reset({
@@ -81,95 +42,65 @@ export default function SuksesPinjamScreen({ navigation, route }) {
           onPress={goHome}
           style={styles.close}
         >
-          <Ionicons name="close" size={20} color={colors.ink} />
+          <Ionicons name="close" size={19} color={colors.text} />
         </Pressable>
-        <View style={styles.stepPill}>
-          <Ionicons name="checkmark-circle" size={13} color={colors.primary} />
-          <Text style={styles.stepText}>Langkah 3 dari 3</Text>
-        </View>
+        <Text style={styles.topTitle}>Pinjaman dibuat</Text>
         <View style={styles.closeSpacer} />
       </View>
 
       <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: Math.max(insets.bottom, 24) + 12 },
-        ]}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.content, { paddingBottom: Math.max(insets.bottom, 24) }]}
       >
-        <Animated.View style={[styles.hero, { opacity, transform: [{ scale }] }]}>
-          <View style={styles.checkOuter}>
-            <View style={styles.checkInner}>
-              <Ionicons name="checkmark" size={38} color={colors.white} />
-            </View>
+        <View style={styles.hero}>
+          <View style={styles.check}>
+            <Ionicons name="checkmark" size={30} color={colors.success} />
           </View>
-          <Text style={styles.title}>Pinjaman diajukan!</Text>
+          <Text style={styles.title}>Pinjaman berhasil diajukan</Text>
           <Text style={styles.subtitle}>
             Tunjukkan QR di bawah ke laboran saat mengambil alat.
           </Text>
-        </Animated.View>
+        </View>
 
         <QRCodeCard
           value={toLoanQr(loan.kode)}
           code={loan.kode}
-          label="Simpan tangkapan layar ini sebagai bukti pinjam"
-          size={184}
+          label="Simpan QR ini sampai alat dikembalikan"
+          size={176}
         />
 
-        <View style={styles.detailCard}>
-          <DetailRow
-            icon="cube-outline"
-            label="Alat yang dipinjam"
-            value={loan.ringkasan_alat}
-          />
-          <DetailRow
-            icon="calendar-outline"
-            label="Jatuh tempo"
-            value={formatTanggalPanjang(loan.tanggal_kembali_rencana)}
-          />
-          <DetailRow
-            icon="time-outline"
-            label="Durasi"
-            value={`${Math.max(
-              1,
-              Math.round(
-                (new Date(loan.tanggal_kembali_rencana) - new Date(loan.tanggal_pinjam))
-                  / 86400000,
-              ),
-            )} hari · ${loan.total_unit} unit`}
-          />
-          <DetailRow
-            icon="cash-outline"
-            label="Biaya pinjam"
-            value="Rp0 · denda Rp2.000/hari jika terlambat"
-            last
-          />
-        </View>
+        <Card style={styles.detailCard}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Alat</Text>
+            <Text style={styles.detailValue} numberOfLines={2}>{loan.ringkasan_alat}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Jatuh tempo</Text>
+            <Text style={styles.detailValue}>{formatTanggalPanjang(loan.tanggal_kembali_rencana)}</Text>
+          </View>
+          <View style={[styles.detailRow, styles.detailRowLast]}>
+            <Text style={styles.detailLabel}>Jumlah</Text>
+            <Text style={styles.detailValue}>{loan.total_unit} unit</Text>
+          </View>
+        </Card>
 
         <InlineNotice
-          tone="warn"
+          tone="warning"
           icon="alarm-outline"
-          title="Jangan lupa jatuh tempo"
+          title="Perhatikan jatuh tempo"
           message={`Kembalikan paling lambat ${formatTanggalPanjang(loan.tanggal_kembali_rencana)}. Denda ${formatRupiah(2000)} per hari keterlambatan.`}
         />
 
-        <View style={styles.actions}>
-          <Button
-            title="Lihat detail pinjaman"
-            icon="document-text-outline"
-            onPress={() => navigation.replace('DetailPinjaman', { loanId: loan.id })}
-          />
-          <Button
-            title="Kembali ke katalog"
-            variant="secondary"
-            icon="grid-outline"
-            onPress={goHome}
-          />
-        </View>
-
-        <Text style={styles.note}>
-          Notifikasi pengingat akan muncul satu hari sebelum jatuh tempo.
-        </Text>
+        <Button
+          title="Lihat detail pinjaman"
+          icon="arrow-forward"
+          onPress={() => navigation.replace('DetailPinjaman', { loanId: loan.id })}
+        />
+        <Button
+          title="Kembali ke katalog"
+          variant="secondary"
+          onPress={goHome}
+        />
       </ScrollView>
     </Screen>
   );
@@ -180,119 +111,51 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 6,
+    paddingHorizontal: layout.screenPadding,
+    paddingTop: 4,
     paddingBottom: 4,
   },
   close: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  closeSpacer: { width: 40 },
-  stepPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    height: 27,
-    paddingHorizontal: 10,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primarySoft,
-  },
-  stepText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: colors.primaryDark,
-  },
+  closeSpacer: { width: 36 },
+  topTitle: { fontSize: type.sm, fontWeight: weight.semibold, color: colors.text },
   content: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingHorizontal: layout.screenPadding,
+    paddingTop: 12,
     gap: 16,
   },
-  fallback: {
-    ...text.body,
-    marginBottom: 16,
-  },
-  hero: {
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 12,
-  },
-  checkOuter: {
-    width: 104,
-    height: 104,
-    borderRadius: 52,
-    backgroundColor: colors.primarySoft,
+  hero: { alignItems: 'center', gap: 6, paddingVertical: 8 },
+  check: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: colors.successSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  checkInner: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shadows.fab,
-  },
-  title: {
-    ...text.h1,
-    fontSize: 27,
-  },
-  subtitle: {
-    ...text.small,
-    textAlign: 'center',
-    maxWidth: 280,
-  },
-  detailCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
-    ...shadows.soft,
-  },
+  title: { ...text.h2, textAlign: 'center' },
+  subtitle: { fontSize: type.xs, lineHeight: 17, color: colors.muted, textAlign: 'center', maxWidth: 300 },
+  detailCard: { paddingVertical: 6 },
   detailRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 11,
-    padding: 13,
-  },
-  detailRowBorder: {
-    borderBottomWidth: 1,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 16,
+    paddingVertical: 11,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
   },
-  detailIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 11,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  detailCopy: { flex: 1, gap: 2 },
-  detailLabel: {
-    fontSize: 9.5,
-    color: colors.muted,
-    fontWeight: '600',
-  },
-  detailValue: {
-    fontSize: 12.5,
-    lineHeight: 17,
-    fontWeight: '700',
-    color: colors.ink,
-  },
-  actions: { gap: 9, marginTop: 2 },
-  note: {
-    fontSize: 10,
-    color: colors.faint,
-    textAlign: 'center',
-    paddingHorizontal: 16,
-  },
+  detailRowLast: { borderBottomWidth: 0 },
+  detailLabel: { fontSize: type.xs, color: colors.muted },
+  detailValue: { flex: 1, textAlign: 'right', fontSize: type.xs, fontWeight: weight.semibold, color: colors.text },
+  fallback: { ...text.body, marginBottom: 16 },
 });

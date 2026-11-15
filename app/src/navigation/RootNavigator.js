@@ -1,8 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import {
-  DefaultTheme,
-  NavigationContainer,
-} from '@react-navigation/native';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -10,8 +7,8 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BrandMark from '../components/BrandMark';
-import { useAuth } from '../context/AuthContext';
-import { colors, text } from '../theme';
+import { useAuth } from '../hooks/useAuth';
+import { colors, text } from '../theme/tokens';
 import TabBar from './TabBar';
 
 import LoginScreen from '../screens/LoginScreen';
@@ -35,7 +32,7 @@ const navigationTheme = {
     ...DefaultTheme.colors,
     background: colors.bg,
     card: colors.surface,
-    text: colors.ink,
+    text: colors.text,
     border: colors.border,
     primary: colors.primary,
   },
@@ -63,7 +60,7 @@ function BootScreen() {
   return (
     <SafeAreaView style={styles.boot} edges={['top', 'bottom']}>
       <View style={styles.bootInner}>
-        <BrandMark size={76} tone="light" />
+        <BrandMark size={68} tone="light" />
         <View style={styles.bootText}>
           <Text style={styles.bootTitle}>SiPinjam</Text>
           <Text style={styles.bootSubtitle}>Menyiapkan laboratorium...</Text>
@@ -75,12 +72,10 @@ function BootScreen() {
 }
 
 export default function RootNavigator() {
-  const { user, loading } = useAuth();
+  const { member, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading) {
-      SplashScreen.hideAsync().catch(() => {});
-    }
+    if (!loading) SplashScreen.hideAsync().catch(() => {});
   }, [loading]);
 
   if (loading) return <BootScreen />;
@@ -94,19 +89,11 @@ export default function RootNavigator() {
           animation: 'slide_from_right',
         }}
       >
-        {!user ? (
-          <Stack.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{ animation: 'fade' }}
-          />
+        {!member ? (
+          <Stack.Screen name="Login" component={LoginScreen} options={{ animation: 'fade' }} />
         ) : (
           <>
-            <Stack.Screen
-              name="Main"
-              component={MainTabs}
-              options={{ animation: 'fade' }}
-            />
+            <Stack.Screen name="Main" component={MainTabs} options={{ animation: 'fade' }} />
             <Stack.Screen name="DetailAlat" component={DetailAlatScreen} />
             <Stack.Screen name="FormPinjam" component={FormPinjamScreen} />
             <Stack.Screen name="SuksesPinjam" component={SuksesPinjamScreen} />
@@ -122,23 +109,13 @@ export default function RootNavigator() {
 const styles = StyleSheet.create({
   boot: {
     flex: 1,
-    backgroundColor: colors.primaryDeep,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 34,
+    gap: 28,
   },
-  bootInner: {
-    alignItems: 'center',
-    gap: 18,
-  },
-  bootText: { alignItems: 'center', gap: 5 },
-  bootTitle: {
-    ...text.h1,
-    color: colors.white,
-    fontSize: 28,
-  },
-  bootSubtitle: {
-    ...text.small,
-    color: 'rgba(255,255,255,0.66)',
-  },
+  bootInner: { alignItems: 'center', gap: 16 },
+  bootText: { alignItems: 'center', gap: 4 },
+  bootTitle: { ...text.h1, color: colors.white },
+  bootSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.66)' },
 });

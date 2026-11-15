@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, shadows } from '../theme';
-import { useNotifications } from '../context/NotificationContext';
+import { useNotificationBadge } from '../context/NotificationContext';
+import { colors, shadows, type, weight } from '../theme/tokens';
 
 const ICONS = {
   Katalog: ['grid-outline', 'grid'],
-  Pinjaman: ['albums-outline', 'albums'],
+  Pinjaman: ['document-text-outline', 'document-text'],
   Scan: ['scan-outline', 'scan'],
   Notifikasi: ['notifications-outline', 'notifications'],
   Profil: ['person-outline', 'person'],
@@ -22,14 +22,14 @@ const LABELS = {
 
 export default function TabBar({ state, navigation }) {
   const insets = useSafeAreaInsets();
-  const { unread } = useNotifications();
+  const { unread } = useNotificationBadge();
 
   return (
-    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 6) }]}>
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         const isScan = route.name === 'Scan';
-        const [idleIcon, activeIcon] = ICONS[route.name] || ['ellipse-outline', 'ellipse'];
+        const [idle, active] = ICONS[route.name] || ['ellipse-outline', 'ellipse'];
         const label = LABELS[route.name] || route.name;
 
         const onPress = () => {
@@ -38,9 +38,7 @@ export default function TabBar({ state, navigation }) {
             target: route.key,
             canPreventDefault: true,
           });
-          if (!focused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
-          }
+          if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
         };
 
         if (isScan) {
@@ -54,11 +52,9 @@ export default function TabBar({ state, navigation }) {
               style={styles.item}
             >
               <View style={[styles.scanButton, focused && styles.scanButtonActive]}>
-                <Ionicons name="scan" size={27} color={colors.white} />
+                <Ionicons name="scan" size={25} color={colors.white} />
               </View>
-              <Text style={[styles.label, styles.scanLabel, focused && styles.labelActive]}>
-                {label}
-              </Text>
+              <Text style={[styles.label, focused && styles.labelActive]}>{label}</Text>
             </Pressable>
           );
         }
@@ -74,7 +70,7 @@ export default function TabBar({ state, navigation }) {
           >
             <View style={styles.iconWrap}>
               <Ionicons
-                name={focused ? activeIcon : idleIcon}
+                name={focused ? active : idle}
                 size={21}
                 color={focused ? colors.primary : colors.muted}
               />
@@ -99,54 +95,36 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    paddingTop: 9,
+    paddingTop: 7,
     paddingHorizontal: 4,
     ...shadows.sheet,
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 12,
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: -2 },
+    elevation: 10,
   },
   item: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    gap: 4,
-    minHeight: 50,
+    gap: 3,
+    minHeight: 48,
   },
-  iconWrap: {
-    width: 34,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  label: {
-    fontSize: 9.5,
-    fontWeight: '600',
-    color: colors.muted,
-    letterSpacing: 0.1,
-  },
-  labelActive: {
-    color: colors.primaryDark,
-    fontWeight: '800',
-  },
+  iconWrap: { width: 32, height: 24, alignItems: 'center', justifyContent: 'center' },
+  label: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.muted },
+  labelActive: { color: colors.primary, fontWeight: weight.bold },
   scanButton: {
     width: 56,
     height: 56,
-    borderRadius: 20,
+    borderRadius: 18,
     backgroundColor: colors.primary,
     borderWidth: 4,
     borderColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -32,
-    ...shadows.fab,
+    marginTop: -30,
+    ...shadows.floating,
   },
-  scanButtonActive: {
-    backgroundColor: colors.primaryDark,
-  },
-  scanLabel: {
-    marginTop: 1,
-  },
+  scanButtonActive: { backgroundColor: colors.accent },
   badge: {
     position: 'absolute',
     top: -4,
@@ -161,9 +139,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  badgeText: {
-    fontSize: 8.5,
-    fontWeight: '800',
-    color: colors.white,
-  },
+  badgeText: { fontSize: 9, fontWeight: weight.bold, color: colors.white },
 });

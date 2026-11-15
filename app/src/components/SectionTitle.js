@@ -1,14 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { colors, type, weight } from '../theme/tokens';
 
-export default function SectionTitle({
-  title,
-  subtitle,
-  actionLabel,
-  onAction,
-  style,
-}) {
+export default function SectionTitle({ title, subtitle, actionLabel, onAction, style }) {
   return (
     <View style={[styles.root, style]}>
       <View style={styles.copy}>
@@ -18,7 +12,7 @@ export default function SectionTitle({
       {actionLabel ? (
         <Pressable onPress={onAction} hitSlop={8} style={styles.action}>
           <Text style={styles.actionText}>{actionLabel}</Text>
-          <Ionicons name="arrow-forward" size={13} color={colors.primary} />
+          <Ionicons name="arrow-forward" size={12} color={colors.primary} />
         </Pressable>
       ) : null}
     </View>
@@ -26,30 +20,10 @@ export default function SectionTitle({
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  copy: { flex: 1, gap: 2 },
-  title: {
-    fontSize: 16.5,
-    fontWeight: '800',
-    color: colors.ink,
-    letterSpacing: -0.25,
-  },
-  subtitle: {
-    fontSize: 11.5,
-    color: colors.muted,
-  },
-  action: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  actionText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: colors.primary,
-  },
+  root: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  copy: { flex: 1, gap: 1 },
+  title: { fontSize: type.md, fontWeight: weight.bold, color: colors.text },
+  subtitle: { fontSize: type.xs, color: colors.muted },
+  action: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  actionText: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.primary },
 });

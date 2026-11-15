@@ -1,29 +1,21 @@
 import { StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { colors, radius } from '../theme';
-
-function Corner({ style }) {
-  return <View style={[styles.corner, style]} />;
-}
+import { colors, radius, shadows, type, weight } from '../theme/tokens';
 
 export default function QRCodeCard({
   value,
   code,
   label = 'Tunjukkan QR ini ke laboran',
-  size = 184,
+  size = 176,
   style,
 }) {
   return (
     <View style={[styles.card, style]}>
-      <View style={[styles.qrBox, { width: size + 24, height: size + 24 }]}>
-        <Corner style={styles.tl} />
-        <Corner style={styles.tr} />
-        <Corner style={styles.bl} />
-        <Corner style={styles.br} />
+      <View style={styles.qrBox}>
         <QRCode
           value={value}
           size={size}
-          color={colors.ink}
+          color={colors.text}
           backgroundColor={colors.white}
           quietZone={6}
         />
@@ -36,65 +28,32 @@ export default function QRCodeCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
-    borderRadius: radius.xl,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     paddingVertical: 20,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     alignItems: 'center',
     gap: 8,
+    ...shadows.card,
   },
   qrBox: {
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: colors.white,
-    marginBottom: 4,
-  },
-  corner: {
-    position: 'absolute',
-    width: 18,
-    height: 18,
-    borderColor: colors.primary,
-  },
-  tl: {
-    top: 0,
-    left: 0,
-    borderTopWidth: 2.5,
-    borderLeftWidth: 2.5,
-    borderTopLeftRadius: 8,
-  },
-  tr: {
-    top: 0,
-    right: 0,
-    borderTopWidth: 2.5,
-    borderRightWidth: 2.5,
-    borderTopRightRadius: 8,
-  },
-  bl: {
-    bottom: 0,
-    left: 0,
-    borderBottomWidth: 2.5,
-    borderLeftWidth: 2.5,
-    borderBottomLeftRadius: 8,
-  },
-  br: {
-    bottom: 0,
-    right: 0,
-    borderBottomWidth: 2.5,
-    borderRightWidth: 2.5,
-    borderBottomRightRadius: 8,
+    padding: 8,
+    borderRadius: radius.md,
+    marginBottom: 2,
   },
   code: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: colors.ink,
-    letterSpacing: 0.8,
+    fontSize: type.md,
+    fontWeight: weight.bold,
+    color: colors.text,
+    letterSpacing: 0.6,
   },
   label: {
-    fontSize: 11.5,
+    fontSize: type.xs,
     color: colors.muted,
     textAlign: 'center',
+    lineHeight: 17,
   },
 });
