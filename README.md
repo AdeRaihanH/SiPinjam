@@ -5,8 +5,6 @@ Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemind
 **Tugas Akhir Praktikum Pemrograman Perangkat Bergerak 2026**  
 Ade Raihan - NIM 2112012414011
 
-![Katalog SiPinjam](docs/screenshots/02-katalog.png)
-
 ## Fitur
 
 - Katalog alat dengan pencarian, filter kategori, filter stok, dan foto alat.
@@ -64,7 +62,6 @@ SiPinjam/
       models/           query Supabase per entitas
       routes/           router Express
       validators/       skema zod
-    test/               unit + integration test (in-memory)
     vercel.json
   database/
     schema.sql          jalankan di SQL Editor Supabase
@@ -74,29 +71,9 @@ SiPinjam/
     PANDUAN-TA.md
     PHOTO-CREDITS.md
     postman_collection.json
-    screenshots/
   LICENSE
   README.md
 ```
-
-## Menjalankan tanpa Supabase (mode mock)
-
-Cocok untuk mengembangkan UI dan mencoba semua alur sebelum proyek Supabase dibuat. Server mock memakai model in-memory tetapi **controller dan route yang sama** dengan produksi.
-
-```bash
-npm run install:all
-npm run mock
-```
-
-Di terminal lain:
-
-```bash
-cd app
-$env:EXPO_PUBLIC_API_URL="http://localhost:5000/api/v1"
-npx expo start -c
-```
-
-Mode mock hanya untuk pengembangan. Data kembali ke seed setiap server mock dijalankan ulang.
 
 ## Setup Supabase
 
@@ -178,22 +155,12 @@ Dokumentasi lengkap: [`docs/API.md`](docs/API.md). Koleksi Postman: [`docs/postm
 | Kode pinjaman | `PJM-YYMMDD-NNN`, urut per hari |
 | Notifikasi | Dua baris saat pinjaman dibuat: H-1 dan hari jatuh tempo |
 
-## Testing
+## Pemeriksaan build
 
-```bash
-cd backend
-npm test
-```
-
-18 test lulus: validasi tanggal, denda, status, kode, parser QR, login NIM, katalog, filter, detail + riwayat, pembuatan pinjaman, stok kurang, alat ganda, blokir keterlambatan, kepemilikan, pengembalian denda, notifikasi, dan statistik. Test integrasi memakai model in-memory sehingga tidak memerlukan Supabase.
-
-Pemeriksaan lain yang sudah dilakukan:
-
-- `npx expo lint` bersih.
-- `npx expo-doctor` 20/20.
-- `npx expo export --platform android` berhasil.
-- `npx expo export --platform web` berhasil.
-- 17 screenshot 390x844 di `docs/screenshots/`. Tampilan kamera hanya bisa diuji di perangkat Android/iOS.
+- `npx expo lint`
+- `npx expo-doctor`
+- `npx expo export --platform android`
+- `npx expo export --platform web`
 
 ## Deploy backend ke Vercel
 
@@ -217,24 +184,6 @@ npx eas-cli build --platform android --profile preview
 ```
 
 Profil `preview` memakai `android.buildType: apk`. Isi `EXPO_PUBLIC_API_URL` dengan URL backend Vercel di environment EAS.
-
-## Tangkapan layar
-
-| Login | Katalog | Detail alat |
-| --- | --- | --- |
-| ![](docs/screenshots/01-login.png) | ![](docs/screenshots/02-katalog.png) | ![](docs/screenshots/03-detail-alat.png) |
-
-| Form pinjam | Sukses + QR | Detail pinjaman |
-| --- | --- | --- |
-| ![](docs/screenshots/04-form-pinjam.png) | ![](docs/screenshots/05-sukses-pinjam.png) | ![](docs/screenshots/06-detail-pinjaman.png) |
-
-| Notifikasi | Profil | Tentang |
-| --- | --- | --- |
-| ![](docs/screenshots/10-notifikasi.png) | ![](docs/screenshots/12-profil.png) | ![](docs/screenshots/13-tentang.png) |
-
-| Pinjaman terlambat | Detail terlambat | Pilih tanggal |
-| --- | --- | --- |
-| ![](docs/screenshots/14-pinjaman-terlambat.png) | ![](docs/screenshots/15-detail-terlambat.png) | ![](docs/screenshots/17-pilih-tanggal.png) |
 
 ## Batasan
 

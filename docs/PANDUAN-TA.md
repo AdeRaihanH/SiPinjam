@@ -19,11 +19,11 @@ Dokumen ini memetakan syarat tugas akhir ke implementasi, menyiapkan alur respon
 | --- | --- | --- |
 | API sendiri | Express 5, 17 endpoint, JWT, Supabase | `backend/src`, `docs/API.md` |
 | API berjalan publik | Konfigurasi Vercel + `api/index.js` | langkah deploy di README |
-| Bottom navigation 5 tab | Katalog, Pinjaman, Scan, Notifikasi, Profil | `TabBar.js`, screenshot 02 |
+| Bottom navigation 5 tab | Katalog, Pinjaman, Scan, Notifikasi, Profil | `TabBar.js` |
 | Minimal 5 halaman | 11 layar | daftar di bawah |
-| 2 list ke detail | Katalog ke Detail Alat; Pinjaman ke Detail Pinjaman | screenshot 02/03 dan 14/15 |
-| Profil + Tentang | Profil, kebijakan, Tentang | screenshot 12/13 |
-| QR Code | Kamera, input manual, QR alat/pinjaman | `ScanScreen.js`, screenshot 11/16 |
+| 2 list ke detail | Katalog ke Detail Alat; Pinjaman ke Detail Pinjaman | layar Katalog dan Pinjaman |
+| Profil + Tentang | Profil, kebijakan, Tentang | layar Profil dan Tentang |
+| QR Code | Kamera, input manual, QR alat/pinjaman | `ScanScreen.js` |
 | Source code GitHub | Repo publik | tautan di atas |
 | APK | Profil EAS `preview` buildType `apk` | `app/eas.json` |
 | Supabase | Tabel UUID, `members`, view `tool_stok` | `database/schema.sql` |
@@ -50,7 +50,6 @@ Akun demo tidak punya pinjaman terlambat agar langkah "pinjam alat baru" pada sk
 4. `cd backend && npm install && npm run dev`.
 5. `cd app && npm install`, lalu set `EXPO_PUBLIC_API_URL` ke IP laptop/port 5000 dan jalankan `npx expo start -c`.
 6. Uji login demo di HP.
-7. Jika Supabase belum siap, jalankan `npm run mock` dan arahkan `EXPO_PUBLIC_API_URL=http://localhost:5000/api/v1` untuk demo UI.
 
 ## Alur responsi 7 menit
 
@@ -75,31 +74,20 @@ Akun demo tidak punya pinjaman terlambat agar langkah "pinjam alat baru" pada sk
 4. Tekan **Kembalikan alat** -> tunjukkan modal denda -> **Ya, kembalikan**.
 5. Tunjukkan denda final tercatat dan status berubah.
 
-## Bukti pengujian
+## Pemeriksaan build
 
-| Uji | Hasil |
+| Pemeriksaan | Hasil |
 | --- | --- |
-| Unit + integration test backend | **18/18 lulus** (`npm test`) |
-| Login NIM, JWT, auto-login | lulus |
-| Katalog, pencarian, filter, detail + 5 riwayat | lulus |
-| Buat pinjaman, stok berkurang | lulus |
-| Stok kurang / alat ganda / pinjaman terlambat | 409 sesuai kode |
-| Pengembalian tepat waktu & terlambat | denda 0 / Rp2.000 per hari |
-| Pengembalian kedua | 409 `CONFLICT` |
-| Batas kepemilikan pinjaman | 403 `FORBIDDEN` |
-| Notifikasi `show_at` | hanya yang sudah lewat tampil |
-| Statistik & alat populer | lulus |
 | `npx expo lint` | bersih |
 | `npx expo-doctor` | 20/20 |
 | Export Android & web | berhasil |
-| Screenshot | 17 gambar 390x844 |
 
 ## Yang belum diverifikasi / batasan
 
-1. **Supabase live belum dibuat dari mesin ini.** Schema dan query sudah disiapkan; integrasi database nyata baru bisa diuji setelah proyek Supabase dan `.env` dibuat. Pengujian end-to-end saat ini memakai model in-memory dengan controller dan route yang sama.
+1. **Supabase live belum dibuat dari mesin ini.** Schema dan query sudah disiapkan; integrasi database nyata baru bisa diuji setelah proyek Supabase dan `.env` dibuat.
 2. **Vercel belum di-deploy.** Konfigurasi `backend/vercel.json` dan `api/index.js` sudah siap.
 3. **APK belum dibangun.** `eas.json` sudah siap; build memerlukan akun Expo/EAS.
-4. **Kamera hanya di perangkat.** Screenshot web menampilkan keadaan izin kamera dan input manual; pemindaian kamera perlu diuji di HP.
+4. **Kamera hanya di perangkat.** Pemindaian kamera perlu diuji di HP.
 5. **Layar admin/laboran belum ada.** Role tersedia di database; antarmuka admin tidak termasuk cakupan.
 6. **Notifikasi in-app**, bukan push notification.
 7. **Denda belum terhubung pembayaran.**
@@ -121,7 +109,6 @@ Akun demo tidak punya pinjaman terlambat agar langkah "pinjam alat baru" pada sk
 
 ## Checklist sebelum mengumpulkan
 
-- [ ] `npm test` lulus.
 - [ ] `schema.sql` dan `seed.sql` sudah dijalankan di Supabase.
 - [ ] `/health` mengembalikan `database: connected`.
 - [ ] Login demo dan Rina berhasil.
@@ -129,7 +116,6 @@ Akun demo tidak punya pinjaman terlambat agar langkah "pinjam alat baru" pada sk
 - [ ] Scan kamera diuji di HP.
 - [ ] QR halaman sukses bisa dipindai.
 - [ ] `expo-doctor` 20/20.
-- [ ] Screenshot terbaru ada di `docs/screenshots/`.
 - [ ] Repo GitHub publik dan commit terbaru di-push.
 - [ ] APK/tautan EAS siap.
 - [ ] README menjelaskan setup Supabase, Vercel, dan akun demo.

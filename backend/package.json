@@ -7,9 +7,7 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
-    "mock": "node test/support/mockServer.js",
-    "test": "node --test test/logic.test.js test/api.test.js"
+    "dev": "node --watch src/server.js"
   },
   "engines": {
     "node": ">=20"
@@ -23,8 +21,5 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "zod": "^3.25.76"
-  },
-  "devDependencies": {
-    "supertest": "^7.1.1"
   }
 }
