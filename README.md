@@ -10,7 +10,7 @@ Ade Raihan Hanafi - NIM 21120124140118
 | Bentuk | Alamat | Catatan |
 | --- | --- | --- |
 | Web / PWA (PC dan Android) | <https://sipinjam-web.vercel.app> | Buka di Chrome/Edge, lalu **Install app** untuk memasangnya seperti aplikasi desktop |
-| APK Android | [Unduh APK](https://expo.dev/artifacts/eas/uYVmw-ydpPC1GTMHpa-_wwwg2vnKFCBNVmkLTKg0ekw.apk) · [halaman build](https://expo.dev/accounts/aderaihanhanafi/projects/sipinjam/builds/0b6f7f7b-78d2-452a-90db-3714d61b6658) | Profil `preview`, build type `apk`, versi 1.0.0 (versionCode 1) |
+| APK Android | [Unduh APK](https://expo.dev/artifacts/eas/cnhzBGzjVDpaiPKB1YFJgt6mAOwNNV0E2s4RhUA_t7I.apk) · [halaman build](https://expo.dev/accounts/aderaihanhanafi/projects/sipinjam/builds/9658091b-9c2a-4c93-84c4-e0018ec06d6b) | Profil `preview`, build type `apk`, versi 1.0.0 (versionCode 2) |
 | API produksi | <https://sipinjam-api.vercel.app> | Cek <https://sipinjam-api.vercel.app/health> |
 | Desktop Windows | `desktop/release/SiPinjam-1.0.0-Windows.exe` | Dibangun lokal dengan Electron; tidak di-commit karena berukuran ±107 MB |
 
@@ -258,7 +258,7 @@ npx eas-cli login
 npx eas-cli build --platform android --profile preview
 ```
 
-Profil `preview` memakai `android.buildType: apk` dan `EXPO_PUBLIC_API_URL` produksi. Build terakhir: versi 1.0.0 (versionCode 1), commit `a83703f` — [unduh APK](https://expo.dev/artifacts/eas/uYVmw-ydpPC1GTMHpa-_wwwg2vnKFCBNVmkLTKg0ekw.apk).
+Profil `preview` memakai `android.buildType: apk`, `autoIncrement: true`, dan `EXPO_PUBLIC_API_URL` produksi. Build terakhir: versi 1.0.0 (versionCode 2), commit `40ef63d` — [unduh APK](https://expo.dev/artifacts/eas/cnhzBGzjVDpaiPKB1YFJgt6mAOwNNV0E2s4RhUA_t7I.apk).
 
 Pasang di HP dengan membuka tautan APK, atau di emulator dengan:
 
