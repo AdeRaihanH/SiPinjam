@@ -32,6 +32,10 @@ Dokumen ini memetakan syarat tugas akhir ke implementasi, menyiapkan alur respon
 
 Login, Katalog, Detail Alat, Form Pinjam, Sukses Pinjam, Pinjaman, Detail Pinjaman, Scan, Notifikasi, Profil, Tentang, Kelola Alat, Form Alat, QR Alat.
 
+### Arah desain
+
+Redesign 2026 memakai **Forest & Sage**: forest `#0E2A20`, sage `#B9CD9A`, kanvas `#F4F5F2`. Semua warna, tipografi, spacing, radius, dan shadow berada di `app/src/theme/tokens.js`. Navigasi memakai dock gelap dengan Scan di tengah, Home memakai katalog grid dua kolom, dan seluruh konfirmasi/pesan memakai modal in-app (`DialogProvider`) — bukan alert browser.
+
 ## Akun demo
 
 | Akun | NIM | Sandi | Keperluan |
@@ -120,5 +124,6 @@ Ade dipakai untuk alur peminjaman. Admin dipakai untuk mengelola alat dan mencet
 - [ ] Repo GitHub publik dan commit terbaru di-push.
 - [ ] APK/tautan EAS siap.
 - [ ] Web/PWA dan APK bisa login ke API produksi.
+- [ ] Dialog Keluar/Hapus tampil sebagai modal in-app, bukan alert browser.
 - [ ] Exe Windows dijalankan minimal sekali (opsional).
 - [ ] README menjelaskan setup Neon, Vercel, dan akun demo.
