@@ -4,9 +4,11 @@
   "private": true,
   "description": "SiPinjam - aplikasi peminjaman alat laboratorium dengan QR Code",
   "scripts": {
-    "install:all": "npm --prefix backend install && npm --prefix app install",
+    "install:all": "npm --prefix backend install && npm --prefix app install && npm --prefix desktop install",
     "backend": "npm --prefix backend run dev",
     "app": "npm --prefix app start",
-    "export:android": "npm --prefix app run export:android"
+    "export:android": "npm --prefix app run export:android",
+    "export:web": "npm --prefix app run export:web",
+    "desktop": "npm --prefix desktop run build"
   }
 }

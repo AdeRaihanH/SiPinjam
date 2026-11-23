@@ -1,9 +1,18 @@
 # SiPinjam
 
-Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemindaian QR Code, REST API Express, dan database PostgreSQL (Neon).
+Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemindaian QR Code, REST API Express, dan database PostgreSQL (Neon). Satu basis kode menghasilkan **APK Android**, **PWA untuk PC/HP**, dan **aplikasi Windows**.
 
 **Tugas Akhir Praktikum Pemrograman Perangkat Bergerak 2026**  
 Ade Raihan Hanafi - NIM 21120124140118
+
+## Aplikasi live
+
+| Bentuk | Alamat | Catatan |
+| --- | --- | --- |
+| Web / PWA (PC dan Android) | <https://sipinjam-web.vercel.app> | Buka di Chrome/Edge, lalu **Install app** untuk memasangnya seperti aplikasi desktop |
+| APK Android | [Unduh APK](https://expo.dev/artifacts/eas/uYVmw-ydpPC1GTMHpa-_wwwg2vnKFCBNVmkLTKg0ekw.apk) · [halaman build](https://expo.dev/accounts/aderaihanhanafi/projects/sipinjam/builds/0b6f7f7b-78d2-452a-90db-3714d61b6658) | Profil `preview`, build type `apk`, versi 1.0.0 (versionCode 1) |
+| API produksi | <https://sipinjam-api.vercel.app> | Cek <https://sipinjam-api.vercel.app/health> |
+| Desktop Windows | `desktop/release/SiPinjam-1.0.0-Windows.exe` | Dibangun lokal dengan Electron; tidak di-commit karena berukuran ±107 MB |
 
 ## Fitur
 
@@ -43,6 +52,8 @@ SiPinjam/
     App.js
     app.json
     eas.json
+    .env.production     EXPO_PUBLIC_API_URL untuk build APK/web
+    public/             template index.html, manifest PWA, service worker, ikon
     src/
       api/              client.js + satu modul per endpoint
       components/       Screen, Button, Card, StatusPill, StockBadge, dll.
@@ -52,6 +63,11 @@ SiPinjam/
       navigation/       root stack, bottom tabs, tab bar
       screens/          14 layar
       theme/tokens.js   token warna, spasi, radius, tipografi
+  desktop/
+    main.js             jendela Electron + server statis lokal
+    scripts/copy-web.mjs  menyalin app/dist ke desktop/web
+    icon.ico
+    release/            hasil build .exe (diabaikan git)
   backend/
     api/index.js        entry point Vercel
     src/
@@ -108,6 +124,26 @@ npx expo start -c
 ```
 
 Buka Expo Go di HP (satu Wi-Fi dengan laptop) atau emulator. Di development, alamat API **dideteksi otomatis** dari host Metro/browser: web memakai `localhost`, HP memakai IP laptop dari Metro. `EXPO_PUBLIC_API_URL` hanya diperlukan untuk build APK/production.
+
+## Menjalankan aplikasi di PC
+
+### PWA (tanpa build tambahan)
+
+1. Buka <https://sipinjam-web.vercel.app> di Chrome atau Edge.
+2. Klik ikon **Install** di address bar, lalu **Install**. SiPinjam muncul di Start Menu dan berjalan di jendela sendiri.
+3. Pemindaian QR memakai webcam. Browser meminta izin kamera; ini berfungsi karena situs sudah HTTPS.
+
+### Aplikasi Windows (Electron)
+
+```bash
+cd app
+npx expo export --platform web
+cd ../desktop
+npm install
+npm run build
+```
+
+Hasil build: `desktop/release/SiPinjam-1.0.0-Windows.exe` (portable, tanpa installer). `npm start` menjalankan versi dev. Exe belum ditandatangani, jadi SmartScreen bisa menampilkan **More info → Run anyway**.
 
 ## Label QR alat
 
@@ -174,15 +210,45 @@ Dokumentasi lengkap: [`docs/API.md`](docs/API.md). Koleksi Postman: [`docs/postm
 
 ## Deploy backend ke Vercel
 
-1. Import repo ke Vercel.
-2. Root directory: `backend`.
-3. Environment:
-   - `DATABASE_URL`
-   - `JWT_SECRET`
+Proyek produksi: `sipinjam-api` → <https://sipinjam-api.vercel.app>.
+
+1. Root directory proyek Vercel: `backend`.
+2. Environment production:
+   - `DATABASE_URL` (connection string Neon, host `-pooler`)
+   - `JWT_SECRET` (acak, minimal 32 byte)
    - `CORS_ORIGIN=*`
-4. Deploy. `backend/vercel.json` mengarahkan request ke `api/index.js`.
-5. Uji `https://<domain>/health` dan login.
-6. Set `EXPO_PUBLIC_API_URL=https://<domain>/api/v1` saat build aplikasi.
+3. Push ke `main`, atau jalankan dari root repo:
+
+   ```bash
+   npx vercel --prod --project sipinjam-api
+   ```
+
+4. `backend/vercel.json` mengarahkan semua request ke `api/index.js`.
+5. Uji `https://sipinjam-api.vercel.app/health` dan login.
+
+File `.vercelignore` di root mencegah `node_modules`, `dist`, dan hasil build desktop ikut terunggah.
+
+## Deploy web / PWA
+
+Proyek produksi: `sipinjam-web` → <https://sipinjam-web.vercel.app>.
+
+Setting proyek Vercel:
+
+| Setting | Nilai |
+| --- | --- |
+| Root Directory | `app` |
+| Framework Preset | Other |
+| Build Command | `npx expo export --platform web` |
+| Output Directory | `dist` |
+| Environment | `EXPO_PUBLIC_API_URL=https://sipinjam-api.vercel.app/api/v1` |
+
+Deploy manual dari root repo:
+
+```bash
+npx vercel --prod --project sipinjam-web
+```
+
+File `app/public/index.html`, `manifest.webmanifest`, `sw.js`, dan `icons/` disalin Expo ke `dist/`, sehingga hasilnya bisa di-install sebagai PWA.
 
 ## Build APK
 
@@ -192,7 +258,13 @@ npx eas-cli login
 npx eas-cli build --platform android --profile preview
 ```
 
-Profil `preview` memakai `android.buildType: apk`. Isi `EXPO_PUBLIC_API_URL` dengan URL backend Vercel di environment EAS.
+Profil `preview` memakai `android.buildType: apk` dan `EXPO_PUBLIC_API_URL` produksi. Build terakhir: versi 1.0.0 (versionCode 1), commit `a83703f` — [unduh APK](https://expo.dev/artifacts/eas/uYVmw-ydpPC1GTMHpa-_wwwg2vnKFCBNVmkLTKg0ekw.apk).
+
+Pasang di HP dengan membuka tautan APK, atau di emulator dengan:
+
+```bash
+npx eas-cli build:run -p android --latest
+```
 
 ## Batasan
 
@@ -200,7 +272,8 @@ Profil `preview` memakai `android.buildType: apk`. Isi `EXPO_PUBLIC_API_URL` den
 - Notifikasi bersifat in-app, bukan push notification.
 - Denda belum terhubung ke pembayaran.
 - Foto contoh memakai URL eksternal (Unsplash/Wikimedia via proxy); kredit di [`docs/PHOTO-CREDITS.md`](docs/PHOTO-CREDITS.md).
-- Database Neon sudah dibuat dan di-seed; APK dan deployment Vercel belum dibuat dari mesin ini.
+- APK memakai keystore preview EAS dan belum diunggah ke Play Store; exe Windows belum ditandatangani.
+- Pemindaian QR di PC memerlukan webcam dan izin kamera browser/Windows.
 
 ## Lisensi
 

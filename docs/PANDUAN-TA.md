@@ -85,10 +85,11 @@ Ade dipakai untuk alur peminjaman. Admin dipakai untuk mengelola alat dan mencet
 ## Yang belum diverifikasi / batasan
 
 1. **Database Neon sudah aktif dan di-seed.** Schema, seed, dan pengujian endpoint/UI lolos pada 23 November 2026.
-2. **Vercel belum di-deploy.** Konfigurasi `backend/vercel.json` dan `api/index.js` sudah siap.
-3. **APK belum dibangun.** `eas.json` sudah siap; build memerlukan akun Expo/EAS.
-4. **Kamera hanya di perangkat.** Pemindaian kamera perlu diuji di HP.
-5. **Layar admin sudah ada.** CRUD alat dan QR tersedia untuk role admin; layar khusus laboran belum dibuat.
+2. **Vercel sudah live.** API <https://sipinjam-api.vercel.app> dan web/PWA <https://sipinjam-web.vercel.app> dideploy 23 November 2026; login produksi sudah diuji lewat browser.
+3. **APK sudah dibangun.** Profil `preview`, versi 1.0.0 (versionCode 1): [unduh APK](https://expo.dev/artifacts/eas/uYVmw-ydpPC1GTMHpa-_wwwg2vnKFCBNVmkLTKg0ekw.apk).
+4. **Aplikasi Windows sudah dibangun** dengan Electron (`desktop/release/SiPinjam-1.0.0-Windows.exe`); exe tidak di-commit dan belum ditandatangani.
+5. **Kamera perlu diuji di perangkat nyata.** Pemindaian kamera belum diuji di HP; di PC memakai webcam.
+6. **Layar admin sudah ada.** CRUD alat dan QR tersedia untuk role admin; layar khusus laboran belum dibuat.
 6. **Notifikasi in-app**, bukan push notification.
 7. **Denda belum terhubung pembayaran.**
 8. **Foto alat memakai URL eksternal** (Unsplash/Wikimedia melalui proxy). Butuh internet; kredit ada di `docs/PHOTO-CREDITS.md`.
@@ -118,4 +119,6 @@ Ade dipakai untuk alur peminjaman. Admin dipakai untuk mengelola alat dan mencet
 - [ ] `expo-doctor` 20/20.
 - [ ] Repo GitHub publik dan commit terbaru di-push.
 - [ ] APK/tautan EAS siap.
+- [ ] Web/PWA dan APK bisa login ke API produksi.
+- [ ] Exe Windows dijalankan minimal sekali (opsional).
 - [ ] README menjelaskan setup Neon, Vercel, dan akun demo.
