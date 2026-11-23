@@ -3,6 +3,7 @@ import { requireAuth } from '../middleware/auth.js';
 
 export function createAuthRoutes(controller) {
   const router = Router();
+  router.post('/register', controller.register);
   router.post('/login', controller.login);
   router.get('/me', requireAuth, controller.me);
   return router;

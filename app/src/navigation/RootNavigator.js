@@ -12,6 +12,7 @@ import { colors, text } from '../theme/tokens';
 import TabBar from './TabBar';
 
 import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 import KatalogScreen from '../screens/KatalogScreen';
 import PinjamanScreen from '../screens/PinjamanScreen';
 import ScanScreen from '../screens/ScanScreen';
@@ -95,7 +96,10 @@ export default function RootNavigator() {
             }}
           >
             {!member ? (
-              <Stack.Screen name="Login" component={LoginScreen} options={{ animation: 'fade' }} />
+              <>
+                <Stack.Screen name="Login" component={LoginScreen} options={{ animation: 'fade' }} />
+                <Stack.Screen name="Register" component={RegisterScreen} />
+              </>
             ) : (
               <>
                 <Stack.Screen name="Main" component={MainTabs} options={{ animation: 'fade' }} />

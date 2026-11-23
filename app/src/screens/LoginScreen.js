@@ -34,7 +34,7 @@ const FEATURES = [
   { icon: 'wallet-outline', label: 'Denda jelas' },
 ];
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) {
   const { login } = useAuth();
   const insets = useSafeAreaInsets();
   const [nim, setNim] = useState('');
@@ -197,6 +197,18 @@ export default function LoginScreen() {
                   Akun dikelola laboran. Hubungi laboran jika kata sandi bermasalah.
                 </Text>
 
+                <View style={styles.registerRow}>
+                  <Text style={styles.registerText}>Belum punya akun?</Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => navigation.navigate('Register')}
+                    style={({ pressed }) => [styles.registerLinkWrap, pressed && { opacity: 0.7 }]}
+                  >
+                    <Text style={styles.registerLink}>Daftar praktikan</Text>
+                    <Ionicons name="arrow-forward" size={13} color={colors.accentInk} />
+                  </Pressable>
+                </View>
+
                 <View style={styles.divider}>
                   <View style={styles.dividerLine} />
                   <Text style={styles.dividerText}>atau coba dulu</Text>
@@ -343,6 +355,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
   },
+  registerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 12,
+  },
+  registerText: { fontSize: type.xs, color: colors.muted },
+  registerLinkWrap: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  registerLink: { fontSize: type.xs, fontWeight: weight.bold, color: colors.accentInk },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',

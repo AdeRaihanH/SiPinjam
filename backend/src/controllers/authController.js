@@ -4,11 +4,43 @@ import { env } from '../config/env.js';
 import { ApiError, asyncHandler } from '../lib/errors.js';
 import { sendData } from '../lib/response.js';
 import { memberPublic } from '../lib/serializers.js';
-import { loginSchema } from '../validators/authValidator.js';
+import { loginSchema, registerSchema } from '../validators/authValidator.js';
 import { validate } from '../validators/validate.js';
+
+function buatToken(member) {
+  return jwt.sign(
+    { sub: member.id, role: member.role },
+    env.jwtSecret,
+    { expiresIn: env.jwtExpiresIn },
+  );
+}
 
 export function createAuthController({ members }) {
   return {
+    register: asyncHandler(async (req, res) => {
+      const { nama, nim, password } = validate(registerSchema, req.body);
+      const existing = await members.findByNim(nim);
+      if (existing) {
+        throw new ApiError(409, 'CONFLICT', 'NIM sudah terdaftar');
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+      let member;
+      try {
+        member = await members.create({ nama, nim, passwordHash });
+      } catch (error) {
+        if (error.code === '23505') {
+          throw new ApiError(409, 'CONFLICT', 'NIM sudah terdaftar');
+        }
+        throw error;
+      }
+
+      return sendData(res, {
+        token: buatToken(member),
+        member: memberPublic(member),
+      }, 201);
+    }),
+
     login: asyncHandler(async (req, res) => {
       const { nim, password } = validate(loginSchema, req.body);
       const member = await members.findByNim(nim);
@@ -18,13 +50,7 @@ export function createAuthController({ members }) {
         throw new ApiError(401, 'UNAUTHORIZED', 'NIM atau kata sandi salah');
       }
 
-      const token = jwt.sign(
-        { sub: member.id, role: member.role },
-        env.jwtSecret,
-        { expiresIn: env.jwtExpiresIn },
-      );
-
-      return sendData(res, { token, member: memberPublic(member) });
+      return sendData(res, { token: buatToken(member), member: memberPublic(member) });
     }),
 
     me: asyncHandler(async (req, res) => {

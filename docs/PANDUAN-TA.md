@@ -17,7 +17,8 @@ Dokumen ini memetakan syarat tugas akhir ke implementasi, menyiapkan alur respon
 
 | Syarat | Implementasi | Bukti |
 | --- | --- | --- |
-| API sendiri | Express 5, 21 endpoint, JWT, Neon PostgreSQL | `backend/src`, `docs/API.md` |
+| API sendiri | Express 5, 22 endpoint, JWT, Neon PostgreSQL | `backend/src`, `docs/API.md` |
+| Registrasi praktikan | Nama lengkap + NIM + sandi, auto-login role praktikan | layar Register |
 | API berjalan publik | Konfigurasi Vercel + `api/index.js` | langkah deploy di README |
 | Bottom navigation 5 tab | Katalog, Pinjaman, Scan, Notifikasi, Profil | `TabBar.js` |
 | Minimal 5 halaman | 14 layar | daftar di bawah |

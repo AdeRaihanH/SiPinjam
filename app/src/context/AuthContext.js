@@ -32,6 +32,20 @@ export function AuthProvider({ children }) {
     return result.member;
   }, []);
 
+  const register = useCallback(async (nama, nim, password) => {
+    const result = await authApi.register(
+      String(nama).trim(),
+      String(nim).trim(),
+      password,
+    );
+    await AsyncStorage.multiSet([
+      [TOKEN_KEY, result.token],
+      [MEMBER_KEY, JSON.stringify(result.member)],
+    ]);
+    setMember(result.member);
+    return result.member;
+  }, []);
+
   const logout = useCallback(async () => {
     await clearSession();
   }, [clearSession]);
@@ -60,9 +74,10 @@ export function AuthProvider({ children }) {
     member,
     loading,
     login,
+    register,
     logout,
     isAuthenticated: Boolean(member),
-  }), [member, loading, login, logout]);
+  }), [member, loading, login, register, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -28,6 +28,7 @@ Ade Raihan Hanafi - NIM 21120124140118
 - Admin melihat seluruh pinjaman praktikan (nama/NIM peminjam tampil di daftar dan detail) serta bisa memproses pengembalian.
 - Empat keadaan layar: loading, kosong, error dengan tombol coba lagi, dan berisi.
 - Dialog konfirmasi dan pesan memakai modal in-app yang konsisten di web, Android, dan Windows (bukan alert browser).
+- Registrasi mandiri praktikan: nama lengkap, NIM, kata sandi, konfirmasi sandi, lalu auto-login sebagai `praktikan`.
 
 ## Arah desain
 
@@ -48,7 +49,7 @@ Redesign 2026 memakai arah **“Forest & Sage”**: hijau pinus dalam sebagai wa
 | Ade Raihan Hanafi | `21120124140118` | `praktikum123` | Praktikan; 2 pinjaman aktif |
 | Admin Laboratorium | `2112012414000` | `admin123` | Admin; kelola alat/QR dan melihat semua pinjaman praktikan |
 
-Ade dipakai untuk alur peminjaman. Admin dipakai untuk menambah, mengedit, menghapus alat, dan membuat QR alat.
+Ade dipakai untuk alur peminjaman. Admin dipakai untuk menambah, mengedit, menghapus alat, membuat QR alat, dan memantau semua pinjaman. Praktikan baru dapat mendaftar sendiri dari layar Login → **Daftar praktikan**; akun admin/laboran tetap dibuat oleh pengelola.
 
 ## Tumpukan
 
@@ -172,6 +173,7 @@ Base path `/api/v1`, autentikasi `Authorization: Bearer <token>`.
 | Method | Path | Keterangan |
 | --- | --- | --- |
 | POST | `/auth/login` | Body `{ nim, password }`; balas `{ token, member }` |
+| POST | `/auth/register` | Body `{ nama, nim, password }`; daftar praktikan + auto-login |
 | GET | `/auth/me` | Profil dari token |
 | GET | `/categories` | Daftar kategori |
 | GET | `/tools` | Baca view `tool_stok`; `search`, `category_id`, `tersedia`, `limit`, `offset` |

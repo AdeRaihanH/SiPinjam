@@ -68,6 +68,38 @@ Endpoint lookup menerima QR lengkap maupun kode polos. Prefix lain ditolak `404 
 
 ## Auth
 
+### POST `/auth/register`
+
+Pendaftaran mandiri **khusus praktikan**. Nama lengkap, NIM, dan kata sandi wajib diisi; role selalu `praktikan` dan email boleh kosong.
+
+```json
+{
+  "nama": "Ade Raihan Hanafi",
+  "nim": "21120124140118",
+  "password": "rahasia123"
+}
+```
+
+Aturan: nama 3–100 karakter, NIM 8–20 digit angka dan unik, kata sandi 8–72 karakter. `201` membuat akun sekaligus mengembalikan token (auto-login):
+
+```json
+{
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "member": {
+      "id": "...",
+      "nama": "Ade Raihan Hanafi",
+      "nim": "21120124140118",
+      "email": null,
+      "role": "praktikan",
+      "avatar_url": null
+    }
+  }
+}
+```
+
+NIM yang sudah dipakai menghasilkan `409 CONFLICT`. Body tidak valid menghasilkan `422 VALIDATION_ERROR` dengan `fields`.
+
 ### POST `/auth/login`
 
 ```json
