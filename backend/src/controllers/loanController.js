@@ -126,19 +126,8 @@ export function createLoanController({ loans, tools, notifications }) {
         }
       }
 
-      const sudahAktif = await loans.activeToolIds(req.auth.id, toolIds);
-      if (sudahAktif.length) {
-        const nama = sudahAktif
-          .map((id) => toolMap.get(id)?.nama)
-          .filter(Boolean)
-          .join(', ');
-        throw new ApiError(
-          409,
-          'SUDAH_DIPINJAM',
-          `${nama} masih ada di pinjaman aktif Anda`,
-        );
-      }
-
+      // Alat yang sama boleh dipinjam lagi di transaksi terpisah selama stok
+      // tersedia masih cukup. Stok sudah memperhitungkan seluruh pinjaman aktif.
       const prefix = `PJM-${today.slice(2).replace(/-/g, '')}-`;
       const lastCode = await loans.lastCode(prefix);
       const urutan = lastCode ? Number(lastCode.slice(prefix.length)) + 1 : 1;

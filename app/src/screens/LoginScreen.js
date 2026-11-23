@@ -25,6 +25,8 @@ import { colors, gradients, radius, shadows, type, weight } from '../theme/token
 
 const DEMO_NIM = '21120124140118';
 const DEMO_PASSWORD = 'praktikum123';
+const DEMO_ADMIN_NIM = '2112012414000';
+const DEMO_ADMIN_PASSWORD = 'admin123';
 
 const FEATURES = [
   { icon: 'scan-outline', label: 'QR Code' },
@@ -60,9 +62,9 @@ export default function LoginScreen() {
     }
   }
 
-  function fillDemo() {
-    setNim(DEMO_NIM);
-    setPassword(DEMO_PASSWORD);
+  function fillDemo(nimValue, passwordValue) {
+    setNim(nimValue);
+    setPassword(passwordValue);
     setError(null);
   }
 
@@ -203,7 +205,8 @@ export default function LoginScreen() {
 
                 <Pressable
                   accessibilityRole="button"
-                  onPress={fillDemo}
+                  accessibilityLabel="Isi akun demo praktikan"
+                  onPress={() => fillDemo(DEMO_NIM, DEMO_PASSWORD)}
                   style={({ pressed }) => [styles.demo, pressed && { opacity: 0.8 }]}
                 >
                   <View style={styles.demoIcon}>
@@ -216,6 +219,25 @@ export default function LoginScreen() {
                   <View style={styles.demoAction}>
                     <Text style={styles.demoActionText}>Isi otomatis</Text>
                     <Ionicons name="arrow-forward" size={13} color={colors.accentInk} />
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Isi akun demo admin"
+                  onPress={() => fillDemo(DEMO_ADMIN_NIM, DEMO_ADMIN_PASSWORD)}
+                  style={({ pressed }) => [styles.demo, styles.demoAdmin, pressed && { opacity: 0.8 }]}
+                >
+                  <View style={[styles.demoIcon, styles.demoIconAdmin]}>
+                    <Ionicons name="shield-checkmark-outline" size={17} color={colors.primary} />
+                  </View>
+                  <View style={styles.demoCopy}>
+                    <Text style={styles.demoLabel}>Akun demo admin</Text>
+                    <Text style={styles.demoText}>{DEMO_ADMIN_NIM} · {DEMO_ADMIN_PASSWORD}</Text>
+                  </View>
+                  <View style={styles.demoAction}>
+                    <Text style={[styles.demoActionText, styles.demoActionTextAdmin]}>Isi otomatis</Text>
+                    <Ionicons name="arrow-forward" size={13} color={colors.primary} />
                   </View>
                 </Pressable>
 
@@ -338,6 +360,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  demoAdmin: {
+    marginTop: 8,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
   demoIcon: {
     width: 36,
     height: 36,
@@ -346,11 +374,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  demoIconAdmin: { backgroundColor: colors.primarySoft },
   demoCopy: { flex: 1, gap: 2 },
   demoLabel: { fontSize: type.xs, fontWeight: weight.bold, color: colors.text },
   demoText: { fontSize: type.xxs, color: colors.muted },
   demoAction: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   demoActionText: { fontSize: type.xxs, fontWeight: weight.bold, color: colors.accentInk },
+  demoActionTextAdmin: { color: colors.primary },
   footer: {
     marginTop: 'auto',
     paddingTop: 22,

@@ -197,7 +197,7 @@ Dokumentasi lengkap: [`docs/API.md`](docs/API.md). Koleksi Postman: [`docs/postm
 
 ### Kode error
 
-`VALIDATION_ERROR` (422), `UNAUTHORIZED` (401), `FORBIDDEN` (403), `NOT_FOUND` (404), `CONFLICT` (409), `STOK_TIDAK_CUKUP` (409), `SUDAH_DIPINJAM` (409).
+`VALIDATION_ERROR` (422), `UNAUTHORIZED` (401), `FORBIDDEN` (403), `NOT_FOUND` (404), `CONFLICT` (409), `STOK_TIDAK_CUKUP` (409).
 
 ## Aturan bisnis
 
@@ -211,6 +211,7 @@ Dokumentasi lengkap: [`docs/API.md`](docs/API.md). Koleksi Postman: [`docs/postm
 | Terlambat | Dihitung dari tanggal, bukan disimpan |
 | Pengembalian | Hanya pemilik, hanya sekali; kedua kali `409 CONFLICT` |
 | Pinjaman baru | Diblokir selama ada pinjaman lewat tenggat |
+| Alat sama | Boleh dipinjam lagi di transaksi terpisah selama stok tersedia |
 | Kode pinjaman | `PJM-YYMMDD-NNN`, urut per hari |
 | Notifikasi | Dua baris saat pinjaman dibuat: H-1 dan hari jatuh tempo |
 

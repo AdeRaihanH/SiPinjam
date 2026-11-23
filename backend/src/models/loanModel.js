@@ -72,20 +72,6 @@ export function createLoanModel(db) {
       return rows[0]?.count || 0;
     },
 
-    async activeToolIds(memberId, toolIds) {
-      if (!toolIds.length) return [];
-      const placeholders = toolIds.map((_, index) => `$${index + 2}`).join(', ');
-      const rows = await db.query(
-        `select distinct li.tool_id
-         from loans l
-         join loan_items li on li.loan_id = l.id
-         where l.member_id = $1 and l.status = 'dipinjam'
-           and li.tool_id in (${placeholders})`,
-        [memberId, ...toolIds],
-      );
-      return rows.map((row) => row.tool_id);
-    },
-
     async lastCode(prefix) {
       const rows = await db.query(
         `select kode

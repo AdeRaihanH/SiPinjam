@@ -44,7 +44,6 @@ Error:
 | `NOT_FOUND` | 404 | Data/endpoint tidak ditemukan |
 | `CONFLICT` | 409 | Duplikasi, pinjaman terlambat, atau pengembalian kedua |
 | `STOK_TIDAK_CUKUP` | 409 | Jumlah melebihi `stok_tersedia` |
-| `SUDAH_DIPINJAM` | 409 | Alat masih ada di pinjaman aktif member |
 | `DATABASE_UNAVAILABLE` | 503 | Database tidak dapat diakses |
 | `INTERNAL_ERROR` | 500 | Kesalahan server |
 
@@ -240,7 +239,7 @@ Aturan:
 - `jumlah` 1–99 dan ≤ `stok_tersedia`.
 - `tanggal_kembali_rencana` minimal besok, maksimal 3 hari dari hari ini.
 - Ditolak `CONFLICT` bila member masih punya pinjaman lewat tenggat.
-- Ditolak `SUDAH_DIPINJAM` bila alat sama masih aktif di pinjaman member.
+- Alat yang sama boleh dipinjam lagi di transaksi terpisah selama `stok_tersedia` masih mencukupi. Dalam satu transaksi, `tool_id` tetap harus unik.
 - `tanggal_pinjam` dan kode dibuat server (WIB).
 - Setelah header dibuat, item dimasukkan. Jika insert item gagal, header dihapus sebagai kompensasi.
 - Dua notifikasi dibuat: H-1 pukul 08.00 WIB dan hari tenggat pukul 08.00 WIB.
