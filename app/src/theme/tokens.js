@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export const colors = {
   // Brand — deep forest, quiet and grounded
   primary: '#0E2A20',
@@ -214,3 +216,8 @@ export const layout = {
   gap: 16,
   tabBarHeight: 64,
 };
+
+// Chrome/Edge menambahkan outline fokus ganda pada input; wrapper sudah punya state fokus.
+export const webInputReset = Platform.OS === 'web'
+  ? { outlineStyle: 'none', outlineWidth: 0 }
+  : undefined;

@@ -27,7 +27,7 @@ import { loansApi } from '../api/loans';
 import { toolsApi } from '../api/tools';
 import { formatRupiah, formatTanggal } from '../lib/format';
 import { parseKode, parseQr } from '../lib/scan';
-import { colors, radius, type, weight } from '../theme/tokens';
+import { colors, radius, type, webInputReset, weight } from '../theme/tokens';
 
 const FRAME = 236;
 
@@ -256,7 +256,7 @@ export default function ScanScreen({ navigation }) {
               placeholderTextColor={colors.faint}
               autoCapitalize="characters"
               autoCorrect={false}
-              style={styles.input}
+              style={[styles.input, webInputReset]}
               selectionColor={colors.accent}
               returnKeyType="go"
               onSubmitEditing={submitManual}

@@ -31,6 +31,20 @@
       }
     </style>
     <link rel="icon" href="/favicon.ico" />
+    <style>
+      /* Field sudah punya border fokus sendiri; hilangkan outline ganda bawaan browser. */
+      input,
+      textarea,
+      select {
+        outline: none !important;
+      }
+      input:focus,
+      input:focus-visible,
+      textarea:focus,
+      textarea:focus-visible {
+        outline: none !important;
+      }
+    </style>
   </head>
 
   <body>

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Platform, StyleSheet, TextInput, View } from 'react-native';
 
 import PressableScale from './PressableScale';
-import { colors, radius, shadows, type } from '../theme/tokens';
+import { colors, radius, shadows, type, webInputReset } from '../theme/tokens';
 
 const webTransition = Platform.OS === 'web'
   ? { transitionProperty: 'border-color, background-color, box-shadow', transitionDuration: '160ms' }
@@ -26,7 +26,7 @@ export default function SearchBar({ value, onChangeText, placeholder = 'Cari ala
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.faint}
-        style={styles.input}
+        style={[styles.input, webInputReset]}
         selectionColor={colors.primary}
         returnKeyType="search"
         autoCorrect={false}

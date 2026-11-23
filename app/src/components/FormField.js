@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { colors, radius, shadows, type, weight } from '../theme/tokens';
+import { colors, radius, shadows, type, webInputReset, weight } from '../theme/tokens';
 
 const webTransition = Platform.OS === 'web'
   ? { transitionProperty: 'border-color, background-color, box-shadow', transitionDuration: '160ms' }
@@ -58,7 +58,7 @@ export default function FormField({
           onChangeText={onChangeText}
           placeholder={placeholder}
           placeholderTextColor={colors.faint}
-          style={[styles.input, multiline && styles.inputMultiline]}
+          style={[styles.input, multiline && styles.inputMultiline, webInputReset]}
           secureTextEntry={secureTextEntry}
           multiline={multiline}
           keyboardType={keyboardType}
