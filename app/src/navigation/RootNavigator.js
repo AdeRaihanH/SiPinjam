@@ -3,7 +3,7 @@ import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import BrandMark from '../components/BrandMark';
@@ -81,32 +81,48 @@ export default function RootNavigator() {
   if (loading) return <BootScreen />;
 
   return (
-    <NavigationContainer theme={navigationTheme}>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.bg },
-          animation: 'slide_from_right',
-        }}
-      >
-        {!member ? (
-          <Stack.Screen name="Login" component={LoginScreen} options={{ animation: 'fade' }} />
-        ) : (
-          <>
-            <Stack.Screen name="Main" component={MainTabs} options={{ animation: 'fade' }} />
-            <Stack.Screen name="DetailAlat" component={DetailAlatScreen} />
-            <Stack.Screen name="FormPinjam" component={FormPinjamScreen} />
-            <Stack.Screen name="SuksesPinjam" component={SuksesPinjamScreen} />
-            <Stack.Screen name="DetailPinjaman" component={DetailPinjamanScreen} />
-            <Stack.Screen name="Tentang" component={TentangScreen} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={[styles.root, Platform.OS === 'web' && styles.webRoot]}>
+      <View style={[styles.frame, Platform.OS === 'web' && styles.webFrame]}>
+        <NavigationContainer theme={navigationTheme}>
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.bg },
+              animation: 'slide_from_right',
+            }}
+          >
+            {!member ? (
+              <Stack.Screen name="Login" component={LoginScreen} options={{ animation: 'fade' }} />
+            ) : (
+              <>
+                <Stack.Screen name="Main" component={MainTabs} options={{ animation: 'fade' }} />
+                <Stack.Screen name="DetailAlat" component={DetailAlatScreen} />
+                <Stack.Screen name="FormPinjam" component={FormPinjamScreen} />
+                <Stack.Screen name="SuksesPinjam" component={SuksesPinjamScreen} />
+                <Stack.Screen name="DetailPinjaman" component={DetailPinjamanScreen} />
+                <Stack.Screen name="Tentang" component={TentangScreen} />
+              </>
+            )}
+          </Stack.Navigator>
+        </NavigationContainer>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.bg },
+  webRoot: { backgroundColor: '#E6EAF2' },
+  frame: { flex: 1 },
+  webFrame: {
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    backgroundColor: colors.bg,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: colors.border,
+  },
   boot: {
     flex: 1,
     backgroundColor: colors.primary,

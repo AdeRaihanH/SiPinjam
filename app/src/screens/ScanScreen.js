@@ -30,6 +30,11 @@ import { colors, radius, type, weight } from '../theme/tokens';
 
 const FRAME = 236;
 
+function notify(type) {
+  if (Platform.OS === 'web') return;
+  Haptics.notificationAsync(type).catch(() => {});
+}
+
 function Corner({ style }) {
   return <View style={[styles.corner, style]} />;
 }
@@ -53,8 +58,8 @@ export default function ScanScreen({ navigation }) {
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(laser, { toValue: FRAME - 28, duration: 1900, useNativeDriver: true }),
-        Animated.timing(laser, { toValue: 8, duration: 1900, useNativeDriver: true }),
+        Animated.timing(laser, { toValue: FRAME - 28, duration: 1900, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(laser, { toValue: 8, duration: 1900, useNativeDriver: Platform.OS !== 'web' }),
       ]),
     );
     loop.start();
@@ -74,11 +79,11 @@ export default function ScanScreen({ navigation }) {
       const data = parsed.type === 'tool'
         ? await toolsApi.byKode(parsed.code)
         : await loansApi.byKode(parsed.code);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      notify(Haptics.NotificationFeedbackType.Success);
       setResult({ type: parsed.type, data });
       setResultOpen(true);
     } catch (error) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+      notify(Haptics.NotificationFeedbackType.Error);
       setNotice({
         title: 'Kode tidak ditemukan',
         message: error.message,
@@ -94,7 +99,7 @@ export default function ScanScreen({ navigation }) {
     if (processing.current || Date.now() < resumeAt.current) return;
     const parsed = parseQr(raw);
     if (!parsed) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+      notify(Haptics.NotificationFeedbackType.Error);
       setNotice({
         title: 'QR tidak dikenali',
         message: 'QR ini bukan milik SiPinjam. Gunakan QR alat atau pinjaman yang tertera.',

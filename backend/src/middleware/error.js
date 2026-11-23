@@ -29,9 +29,9 @@ export function errorHandler(error, _req, res, _next) {
     });
   }
 
-  if (error.code === 'PGRST116') {
-    return res.status(404).json({
-      error: { code: 'NOT_FOUND', message: 'Data tidak ditemukan' },
+  if (error.code === '23503') {
+    return res.status(409).json({
+      error: { code: 'CONFLICT', message: 'Data masih dipakai oleh tabel lain' },
     });
   }
 

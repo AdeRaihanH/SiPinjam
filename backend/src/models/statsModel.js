@@ -1,30 +1,25 @@
 import { env } from '../config/env.js';
 import { diffDaysISO } from '../lib/dates.js';
-import { throwIfSupabaseError } from '../lib/supabaseError.js';
 
 export function createStatsModel(db) {
   return {
     async summary(memberId, today) {
-      const [toolsResult, loansResult, unreadResult] = await Promise.all([
-        db.from('tool_stok').select('stok_total,stok_tersedia'),
-        db
-          .from('loans')
-          .select('status,tanggal_kembali_rencana,denda')
-          .eq('member_id', memberId),
-        db
-          .from('notifications')
-          .select('id', { count: 'exact', head: true })
-          .eq('member_id', memberId)
-          .eq('dibaca', false)
-          .lte('show_at', new Date().toISOString()),
+      const [tools, loans, unread] = await Promise.all([
+        db.query('select stok_total, stok_tersedia from tool_stok'),
+        db.query(
+          `select status, tanggal_kembali_rencana, denda
+           from loans
+           where member_id = $1`,
+          [memberId],
+        ),
+        db.query(
+          `select count(*)::int as count
+           from notifications
+           where member_id = $1 and dibaca = false and show_at <= now()`,
+          [memberId],
+        ),
       ]);
 
-      throwIfSupabaseError(toolsResult.error);
-      throwIfSupabaseError(loansResult.error);
-      throwIfSupabaseError(unreadResult.error);
-
-      const tools = toolsResult.data || [];
-      const loans = loansResult.data || [];
       const totalUnit = tools.reduce((total, tool) => total + Number(tool.stok_total), 0);
       const tersediaUnit = tools.reduce((total, tool) => total + Number(tool.stok_tersedia), 0);
 
@@ -59,39 +54,27 @@ export function createStatsModel(db) {
         terlambat,
         denda_berjalan: dendaBerjalan,
         denda_selesai: dendaSelesai,
-        notifikasi_belum_dibaca: unreadResult.count || 0,
+        notifikasi_belum_dibaca: unread[0]?.count || 0,
         denda_per_hari: env.dendaPerHari,
       };
     },
 
     async populer(limit = 5) {
-      const { data, error } = await db
-        .from('loan_items')
-        .select(`
-          jumlah,
-          tools(
-            id,kode,nama,foto_url,kondisi,
-            categories(id,nama,slug,icon)
-          )
-        `);
-      throwIfSupabaseError(error);
-
-      const map = new Map();
-      for (const row of data || []) {
-        const tool = row.tools;
-        if (!tool) continue;
-        const current = map.get(tool.id) || { tool, total_dipinjam: 0 };
-        current.total_dipinjam += Number(row.jumlah);
-        map.set(tool.id, current);
-      }
-
-      return [...map.values()]
-        .sort((a, b) => b.total_dipinjam - a.total_dipinjam)
-        .slice(0, limit)
-        .map((item) => ({
-          ...item.tool,
-          total_dipinjam: item.total_dipinjam,
-        }));
+      return db.query(
+        `select t.id, t.kode, t.nama, t.foto_url, t.kondisi,
+                case when c.id is null then null else json_build_object(
+                  'id', c.id, 'nama', c.nama, 'slug', c.slug, 'icon', c.icon
+                ) end as categories,
+                sum(li.jumlah)::int as total_dipinjam
+         from loan_items li
+         join tools t on t.id = li.tool_id
+         left join categories c on c.id = t.category_id
+         group by t.id, t.kode, t.nama, t.foto_url, t.kondisi,
+                  c.id, c.nama, c.slug, c.icon
+         order by total_dipinjam desc, t.nama asc
+         limit $1`,
+        [limit],
+      );
     },
   };
 }

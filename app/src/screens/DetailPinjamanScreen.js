@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useState } from 'react';
 import {
   Pressable,
@@ -31,7 +32,7 @@ import {
   formatTanggalPanjang,
 } from '../lib/format';
 import { toLoanQr } from '../lib/scan';
-import { colors, layout, shadows, type, weight } from '../theme/tokens';
+import { colors, gradients, layout, radius, shadows, type, weight } from '../theme/tokens';
 
 function ItemRow({ item, onPress, last }) {
   return (
@@ -175,12 +176,17 @@ export default function DetailPinjamanScreen({ navigation, route }) {
           />
         ) : null}
 
-        <Card style={[styles.statusCard, late && styles.statusCardLate]}>
+        <LinearGradient
+          colors={returned ? ['#475569', '#1E293B'] : late ? gradients.danger : gradients.primary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.statusCard}
+        >
           <View style={styles.statusHead}>
             <Text style={styles.statusLabel}>Status pinjaman</Text>
             <StatusPill status={loan.status_efektif} />
           </View>
-          <Text style={[styles.statusTitle, late && { color: colors.danger }]}>
+          <Text style={styles.statusTitle}>
             {statusTitle}
           </Text>
           <Text style={styles.statusMessage}>
@@ -199,14 +205,14 @@ export default function DetailPinjamanScreen({ navigation, route }) {
               <Text style={styles.statusMetaLabel}>
                 {returned ? 'Dikembalikan' : 'Denda berjalan'}
               </Text>
-              <Text style={[styles.statusMetaValue, !returned && denda > 0 && { color: colors.danger }]}>
+              <Text style={[styles.statusMetaValue, !returned && denda > 0 && styles.statusMetaDanger]}>
                 {returned
                   ? formatTanggal(loan.tanggal_kembali_aktual)
                   : denda > 0 ? formatRupiah(denda) : 'Tidak ada'}
               </Text>
             </View>
           </View>
-        </Card>
+        </LinearGradient>
 
         <View style={styles.section}>
           <SectionTitle title="Alat dipinjam" subtitle={`${loan.total_unit} unit`} />
@@ -394,23 +400,23 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     gap: 16,
   },
-  statusCard: { gap: 6 },
-  statusCardLate: { borderColor: '#F3C9C9', backgroundColor: '#FFF7F7' },
+  statusCard: { gap: 6, borderRadius: radius.lg, padding: 16 },
   statusHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  statusLabel: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.muted },
-  statusTitle: { fontSize: type.lg, fontWeight: weight.bold, color: colors.text },
-  statusMessage: { fontSize: type.xs, lineHeight: 17, color: colors.muted },
+  statusLabel: { fontSize: type.xs, fontWeight: weight.semibold, color: 'rgba(255,255,255,0.66)' },
+  statusTitle: { fontSize: type.lg, fontWeight: weight.heavy, color: colors.white, letterSpacing: -0.3 },
+  statusMessage: { fontSize: type.xs, lineHeight: 17, color: 'rgba(255,255,255,0.74)' },
   statusMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    borderTopColor: 'rgba(255,255,255,0.18)',
     paddingTop: 10,
     marginTop: 4,
   },
   statusMetaRight: { alignItems: 'flex-end' },
-  statusMetaLabel: { fontSize: type.xs, color: colors.muted },
-  statusMetaValue: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.text, marginTop: 2 },
+  statusMetaLabel: { fontSize: type.xs, color: 'rgba(255,255,255,0.6)' },
+  statusMetaValue: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.white, marginTop: 2 },
+  statusMetaDanger: { color: '#FFD5D5' },
   section: { gap: 8 },
   itemRow: {
     flexDirection: 'row',

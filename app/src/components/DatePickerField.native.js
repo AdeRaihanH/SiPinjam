@@ -68,15 +68,21 @@ export default function DatePickerField({
 }
 
 const styles = StyleSheet.create({
-  root: { gap: 6 },
-  label: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.text },
+  root: { gap: 7 },
+  label: {
+    fontSize: type.xxs,
+    fontWeight: weight.bold,
+    color: colors.text,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
   field: {
-    minHeight: 56,
+    minHeight: 52,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,

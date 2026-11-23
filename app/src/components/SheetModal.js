@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import PressableScale from './PressableScale';
 import { colors, radius, shadows, type, weight } from '../theme/tokens';
 
 export default function SheetModal({
@@ -12,6 +14,24 @@ export default function SheetModal({
   style,
 }) {
   const insets = useSafeAreaInsets();
+  const [slide] = useState(() => new Animated.Value(40));
+
+  useEffect(() => {
+    if (!visible) return undefined;
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const active = document.activeElement;
+      if (active && typeof active.blur === 'function') active.blur();
+    }
+    slide.setValue(40);
+    const animation = Animated.spring(slide, {
+      toValue: 0,
+      useNativeDriver: Platform.OS !== 'web',
+      speed: 18,
+      bounciness: 4,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [visible, slide]);
 
   return (
     <Modal
@@ -23,25 +43,35 @@ export default function SheetModal({
     >
       <View style={styles.root} pointerEvents="box-none">
         <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Tutup panel" />
-        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }, style]}>
+        <Animated.View
+          style={[
+            styles.sheet,
+            { paddingBottom: Math.max(insets.bottom, 16) },
+            { transform: [{ translateY: slide }] },
+            style,
+          ]}
+        >
           <View style={styles.handle} />
           <View style={styles.header}>
             <View style={styles.titleWrap}>
               <Text style={styles.title}>{title}</Text>
               {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
             </View>
-            <Pressable
+            <PressableScale
               accessibilityRole="button"
               accessibilityLabel="Tutup"
               hitSlop={8}
               onPress={onClose}
+              scaleTo={0.9}
+              haptic={false}
+              hoverStyle={{ backgroundColor: colors.primarySoft }}
               style={styles.close}
             >
               <Ionicons name="close" size={18} color={colors.muted} />
-            </Pressable>
+            </PressableScale>
           </View>
           {children}
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -57,6 +87,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
     maxHeight: '90%',
+    ...(Platform.OS === 'web' ? { width: '100%', maxWidth: 520, alignSelf: 'center' } : {}),
     ...shadows.sheet,
   },
   handle: {

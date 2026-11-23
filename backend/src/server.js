@@ -1,9 +1,9 @@
 import { createApp } from './app.js';
 import { env } from './config/env.js';
-import { supabase } from './config/supabaseClient.js';
+import { db } from './config/db.js';
 import { createModels } from './models/index.js';
 
-const app = createApp(createModels(supabase));
+const app = createApp(createModels(db));
 
 const server = app.listen(env.port, '0.0.0.0', () => {
   console.log(`[sipinjam] API berjalan di http://localhost:${env.port}`);

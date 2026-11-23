@@ -1,71 +1,88 @@
-import { throwIfSupabaseError } from '../lib/supabaseError.js';
+const SHOW_AT_ISO = `to_char(show_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`;
 
 export function createNotificationModel(db) {
   return {
     async list(memberId, { limit, offset }) {
-      const now = new Date().toISOString();
-      const { data, count, error } = await db
-        .from('notifications')
-        .select('id,tipe,judul,pesan,ref_type,ref_id,show_at,dibaca', { count: 'exact' })
-        .eq('member_id', memberId)
-        .lte('show_at', now)
-        .order('show_at', { ascending: false })
-        .range(offset, offset + limit - 1);
-      throwIfSupabaseError(error);
-      return { rows: data || [], count: count || 0 };
+      const [rows, countRows] = await Promise.all([
+        db.query(
+          `select id, tipe, judul, pesan, ref_type, ref_id,
+                  ${SHOW_AT_ISO} as show_at, dibaca
+           from notifications
+           where member_id = $1 and show_at <= now()
+           order by show_at desc
+           limit $2 offset $3`,
+          [memberId, limit, offset],
+        ),
+        db.query(
+          `select count(*)::int as count
+           from notifications
+           where member_id = $1 and show_at <= now()`,
+          [memberId],
+        ),
+      ]);
+
+      return { rows, count: countRows[0]?.count || 0 };
     },
 
     async unreadCount(memberId) {
-      const now = new Date().toISOString();
-      const { count, error } = await db
-        .from('notifications')
-        .select('id', { count: 'exact', head: true })
-        .eq('member_id', memberId)
-        .eq('dibaca', false)
-        .lte('show_at', now);
-      throwIfSupabaseError(error);
-      return count || 0;
+      const rows = await db.query(
+        `select count(*)::int as count
+         from notifications
+         where member_id = $1 and dibaca = false and show_at <= now()`,
+        [memberId],
+      );
+      return rows[0]?.count || 0;
     },
 
     async markRead(id, memberId) {
-      const { data, error } = await db
-        .from('notifications')
-        .update({ dibaca: true })
-        .eq('id', id)
-        .eq('member_id', memberId)
-        .select('id')
-        .maybeSingle();
-      throwIfSupabaseError(error);
-      return Boolean(data);
+      const rows = await db.query(
+        `update notifications
+         set dibaca = true
+         where id = $1 and member_id = $2
+         returning id`,
+        [id, memberId],
+      );
+      return rows.length > 0;
     },
 
     async markAll(memberId) {
-      const now = new Date().toISOString();
-      const { data, error } = await db
-        .from('notifications')
-        .update({ dibaca: true })
-        .eq('member_id', memberId)
-        .eq('dibaca', false)
-        .lte('show_at', now)
-        .select('id');
-      throwIfSupabaseError(error);
-      return (data || []).length;
+      const rows = await db.query(
+        `update notifications
+         set dibaca = true
+         where member_id = $1 and dibaca = false and show_at <= now()
+         returning id`,
+        [memberId],
+      );
+      return rows.length;
     },
 
     async insertMany(rows) {
-      const { error } = await db.from('notifications').insert(rows);
-      throwIfSupabaseError(error);
+      if (!rows.length) return;
+
+      const columns = ['member_id', 'tipe', 'judul', 'pesan', 'ref_type', 'ref_id', 'show_at', 'dibaca'];
+      const values = [];
+      const tuples = rows.map((row) => {
+        const cells = columns.map((column) => {
+          values.push(row[column] ?? null);
+          return `$${values.length}`;
+        });
+        return `(${cells.join(', ')})`;
+      });
+
+      await db.query(
+        `insert into notifications (${columns.join(', ')}) values ${tuples.join(', ')}`,
+        values,
+      );
     },
 
     async markReadForLoan(memberId, loanId) {
-      const { error } = await db
-        .from('notifications')
-        .update({ dibaca: true })
-        .eq('member_id', memberId)
-        .eq('ref_type', 'loan')
-        .eq('ref_id', loanId)
-        .in('tipe', ['jatuh_tempo', 'terlambat']);
-      throwIfSupabaseError(error);
+      await db.query(
+        `update notifications
+         set dibaca = true
+         where member_id = $1 and ref_type = 'loan' and ref_id = $2
+           and tipe in ('jatuh_tempo', 'terlambat')`,
+        [memberId, loanId],
+      );
     },
   };
 }

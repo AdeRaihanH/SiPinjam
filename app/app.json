@@ -18,7 +18,7 @@
     "android": {
       "package": "com.aderaihan.sipinjam",
       "adaptiveIcon": {
-        "backgroundColor": "#1E2A5A",
+        "backgroundColor": "#1B2559",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -42,7 +42,7 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 160,
           "resizeMode": "contain",
-          "backgroundColor": "#1E2A5A"
+          "backgroundColor": "#1B2559"
         }
       ],
       "expo-status-bar",

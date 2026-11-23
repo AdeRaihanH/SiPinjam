@@ -1,14 +1,27 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import { create } from 'axios';
 import { Platform } from 'react-native';
 
 export const TOKEN_KEY = 'sipinjam.token';
 
-const fallback = Platform.OS === 'android'
-  ? 'http://10.0.2.2:5000/api/v1'
-  : 'http://localhost:5000/api/v1';
+function detectedBase() {
+  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.hostname) {
+    return `http://${window.location.hostname}:5000/api/v1`;
+  }
 
-export const API_BASE_URL = (process.env.EXPO_PUBLIC_API_URL || fallback).replace(/\/+$/, '');
+  const hostUri = Constants.expoConfig?.hostUri || Constants.expoGoConfig?.debuggerHost || '';
+  const host = hostUri.split(':')[0];
+  if (host) return `http://${host}:5000/api/v1`;
+
+  return Platform.OS === 'android'
+    ? 'http://10.0.2.2:5000/api/v1'
+    : 'http://localhost:5000/api/v1';
+}
+
+const isDev = typeof __DEV__ === 'undefined' ? false : __DEV__;
+const configured = isDev ? '' : (process.env.EXPO_PUBLIC_API_URL || '').trim();
+export const API_BASE_URL = (configured || detectedBase()).replace(/\/+$/, '');
 
 const client = create({
   baseURL: API_BASE_URL,
@@ -45,7 +58,7 @@ client.interceptors.response.use(
     const message = payload?.message
       || (error.code === 'ECONNABORTED'
         ? 'Koneksi ke server terlalu lama. Coba lagi.'
-        : 'Tidak dapat terhubung ke server. Periksa jaringan dan EXPO_PUBLIC_API_URL.');
+        : `Tidak dapat terhubung ke server (${API_BASE_URL}). Periksa jaringan dan EXPO_PUBLIC_API_URL.`);
 
     const apiError = new Error(message);
     apiError.code = payload?.code || (error.response ? 'SERVER_ERROR' : 'NETWORK_ERROR');

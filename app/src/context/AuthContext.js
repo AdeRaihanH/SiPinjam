@@ -39,32 +39,17 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let active = true;
 
+    // Sesi sengaja tidak dipulihkan saat aplikasi dibuka ulang.
+    // Pengguna wajib login lagi setiap cold start / reload halaman.
     async function boot() {
-      try {
-        const [[, token], [, cached]] = await AsyncStorage.multiGet([TOKEN_KEY, MEMBER_KEY]);
-        if (!token) return;
-
-        if (cached) {
-          try { setMember(JSON.parse(cached)); } catch { /* abaikan cache rusak */ }
-        }
-
-        try {
-          const result = await authApi.me();
-          if (!active) return;
-          setMember(result.member);
-          await AsyncStorage.setItem(MEMBER_KEY, JSON.stringify(result.member));
-        } catch (error) {
-          if (!active) return;
-          if (error.status === 401) await clearSession();
-        }
-      } finally {
-        if (active) setLoading(false);
-      }
+      if (active) setMember(null);
+      await AsyncStorage.multiRemove([TOKEN_KEY, MEMBER_KEY]).catch(() => {});
+      if (active) setLoading(false);
     }
 
     boot();
     return () => { active = false; };
-  }, [clearSession]);
+  }, []);
 
   useEffect(() => {
     setUnauthorizedHandler(() => { clearSession(); });

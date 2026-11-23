@@ -1,92 +1,82 @@
-import { throwIfSupabaseError } from '../lib/supabaseError.js';
+const CATEGORY_JSON = `case when c.id is null then null else json_build_object(
+  'id', c.id, 'nama', c.nama, 'slug', c.slug, 'icon', c.icon
+) end as categories`;
+
+const TOOL_SELECT = `
+  select t.*, ${CATEGORY_JSON}
+  from tool_stok t
+  left join categories c on c.id = t.category_id
+`;
 
 export function createToolModel(db) {
-  async function attachCategories(rows) {
-    if (!rows.length) return rows;
-    const ids = [...new Set(rows.map((row) => row.category_id).filter(Boolean))];
-    if (!ids.length) return rows;
-
-    const { data, error } = await db
-      .from('categories')
-      .select('id,nama,slug,icon')
-      .in('id', ids);
-    throwIfSupabaseError(error);
-
-    const map = new Map((data || []).map((category) => [category.id, category]));
-    return rows.map((row) => ({
-      ...row,
-      categories: map.get(row.category_id) || null,
-    }));
-  }
-
   return {
     async list({ search, categoryId, tersedia, limit, offset }) {
-      let query = db
-        .from('tool_stok')
-        .select('*', { count: 'exact' });
+      const filters = [];
+      const params = [];
 
       if (search) {
         const term = search.replace(/[,()"']/g, ' ').trim();
-        if (term) query = query.or(`nama.ilike.%${term}%,kode.ilike.%${term}%`);
+        if (term) {
+          params.push(`%${term}%`);
+          filters.push(`(t.nama ilike $${params.length} or t.kode ilike $${params.length})`);
+        }
       }
-      if (categoryId) query = query.eq('category_id', categoryId);
-      if (tersedia === '1' || tersedia === 'true') query = query.gt('stok_tersedia', 0);
+      if (categoryId) {
+        params.push(categoryId);
+        filters.push(`t.category_id = $${params.length}`);
+      }
+      if (tersedia === '1' || tersedia === 'true') {
+        filters.push('t.stok_tersedia > 0');
+      }
 
-      const { data, count, error } = await query
-        .order('nama', { ascending: true })
-        .range(offset, offset + limit - 1);
-      throwIfSupabaseError(error);
+      const where = filters.length ? `where ${filters.join(' and ')}` : '';
+      const [rows, countRows] = await Promise.all([
+        db.query(
+          `${TOOL_SELECT} ${where}
+           order by t.nama asc
+           limit $${params.length + 1} offset $${params.length + 2}`,
+          [...params, limit, offset],
+        ),
+        db.query(
+          `select count(*)::int as count from tool_stok t ${where}`,
+          params,
+        ),
+      ]);
 
-      return { rows: await attachCategories(data || []), count: count || 0 };
+      return { rows, count: countRows[0]?.count || 0 };
     },
 
     async findById(id) {
-      const { data, error } = await db
-        .from('tool_stok')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
-      throwIfSupabaseError(error);
-      if (!data) return null;
-      const [row] = await attachCategories([data]);
-      return row;
+      const rows = await db.query(`${TOOL_SELECT} where t.id = $1 limit 1`, [id]);
+      return rows[0] || null;
     },
 
     async findByKode(kode) {
-      const { data, error } = await db
-        .from('tool_stok')
-        .select('*')
-        .eq('kode', kode)
-        .maybeSingle();
-      throwIfSupabaseError(error);
-      if (!data) return null;
-      const [row] = await attachCategories([data]);
-      return row;
+      const rows = await db.query(`${TOOL_SELECT} where t.kode = $1 limit 1`, [kode]);
+      return rows[0] || null;
     },
 
     async findByIds(ids) {
       if (!ids.length) return [];
-      const { data, error } = await db
-        .from('tool_stok')
-        .select('*')
-        .in('id', ids);
-      throwIfSupabaseError(error);
-      return attachCategories(data || []);
+      const placeholders = ids.map((_, index) => `$${index + 1}`).join(', ');
+      return db.query(`${TOOL_SELECT} where t.id in (${placeholders})`, ids);
     },
 
     async recentLoans(toolId, limit = 5) {
-      const { data, error } = await db
-        .from('loans')
-        .select(`
-          id,kode,tanggal_pinjam,tanggal_kembali_rencana,tanggal_kembali_aktual,status,
-          members(nama),
-          loan_items!inner(tool_id,jumlah)
-        `)
-        .eq('loan_items.tool_id', toolId)
-        .order('tanggal_pinjam', { ascending: false })
-        .limit(limit);
-      throwIfSupabaseError(error);
-      return data || [];
+      return db.query(
+        `select l.id, l.kode, l.tanggal_pinjam, l.tanggal_kembali_rencana,
+                l.tanggal_kembali_aktual, l.status,
+                json_build_object('nama', m.nama) as members,
+                json_agg(json_build_object('tool_id', li.tool_id, 'jumlah', li.jumlah)) as loan_items
+         from loans l
+         join members m on m.id = l.member_id
+         join loan_items li on li.loan_id = l.id
+         where li.tool_id = $1
+         group by l.id, m.nama
+         order by l.tanggal_pinjam desc, l.kode desc
+         limit $2`,
+        [toolId, limit],
+      );
     },
   };
 }

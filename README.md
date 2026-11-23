@@ -1,6 +1,6 @@
 # SiPinjam
 
-Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemindaian QR Code, REST API Express, dan database Supabase/PostgreSQL.
+Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemindaian QR Code, REST API Express, dan database PostgreSQL (Neon).
 
 **Tugas Akhir Praktikum Pemrograman Perangkat Bergerak 2026**  
 Ade Raihan - NIM 2112012414011
@@ -30,10 +30,10 @@ Akun demo sengaja tidak punya pinjaman terlambat agar alur pinjam baru bisa dide
 ## Tumpukan
 
 - **App**: React Native 0.88, Expo SDK 58, React Navigation 7, `expo-camera`, `react-native-qrcode-svg`, `@react-native-community/datetimepicker`, AsyncStorage, axios, date-fns.
-- **Backend**: Express 5, `@supabase/supabase-js`, JWT, bcryptjs, zod, cors, dotenv, morgan. Deploy Vercel.
-- **Database**: Supabase/PostgreSQL, UUID, view `tool_stok`, RLS tidak diaktifkan (sesuai ketentuan tugas).
+- **Backend**: Express 5, `@neondatabase/serverless` (driver HTTP), JWT, bcryptjs, zod, cors, dotenv, morgan. Deploy Vercel.
+- **Database**: Neon PostgreSQL, UUID, view `tool_stok`.
 
-Aplikasi **hanya** memanggil Express. Tidak ada `@supabase/supabase-js` di folder `app/` dan tidak ada `service_role` key di repo.
+Aplikasi **hanya** memanggil Express; folder `app/` tidak mengakses database secara langsung.
 
 ## Struktur
 
@@ -55,16 +55,16 @@ SiPinjam/
   backend/
     api/index.js        entry point Vercel
     src/
-      config/           env + supabaseClient
+      config/           env + koneksi Neon (db.js)
       controllers/      auth, category, tool, loan, notification, stats
       lib/              tanggal, denda, serializer, error
       middleware/       JWT, error handler
-      models/           query Supabase per entitas
+      models/           query SQL per entitas
       routes/           router Express
       validators/       skema zod
     vercel.json
   database/
-    schema.sql          jalankan di SQL Editor Supabase
+    schema.sql          jalankan di SQL Editor Neon
     seed.sql
   docs/
     API.md
@@ -75,14 +75,13 @@ SiPinjam/
   README.md
 ```
 
-## Setup Supabase
+## Setup database (Neon)
 
-1. Buat proyek baru di [Supabase](https://supabase.com).
-2. Buka **SQL Editor**, jalankan isi `database/schema.sql`. **Perhatian:** file ini menghapus tabel SiPinjam yang sudah ada lalu membuatnya ulang.
+1. Buat proyek baru di [Neon](https://neon.tech), lalu salin **connection string** (pakai host `-pooler`).
+2. Buka **SQL Editor** Neon, jalankan isi `database/schema.sql`. **Perhatian:** file ini menghapus tabel SiPinjam yang sudah ada lalu membuatnya ulang.
 3. Masih di SQL Editor, jalankan `database/seed.sql` untuk mengisi data contoh.
 4. Salin `backend/.env.example` menjadi `backend/.env`, lalu isi:
-   - `SUPABASE_URL` dari Project Settings > API.
-   - `SUPABASE_KEY` dengan **anon/public key**. Jangan memakai `service_role`.
+   - `DATABASE_URL` dengan connection string Neon (`...?sslmode=require`).
    - `JWT_SECRET` dengan string acak panjang.
 5. Jalankan backend:
 
@@ -94,20 +93,27 @@ npm run dev
 
 Cek `http://localhost:5000/health` sampai muncul `{ "data": { "status": "ok", "database": "connected" } }`.
 
-Catatan: **RLS sengaja tidak diaktifkan**. Autentikasi dilakukan Express; jangan mengaktifkan RLS tanpa menulis policy karena aplikasi akan kehilangan akses.
+Catatan: database hanya diakses backend. Tidak ada PostgREST/anon key maupun RLS; otorisasi dilakukan Express lewat JWT dan pengecekan pemilik data.
+
+### Catatan database Neon
+
+Semua environment development dan QA memakai database **Neon** yang sama melalui `DATABASE_URL`. Tidak ada database lokal (PostgreSQL/SQLite) di repo ini — backend yang berjalan di laptop hanya proses Express yang terhubung ke Neon. Untuk mereset data QA, jalankan `database/seed.sql` di SQL Editor Neon.
 
 ## Menjalankan aplikasi
 
 ```bash
 cd app
 npm install
-$env:EXPO_PUBLIC_API_URL="http://<IP-komputer>:5000/api/v1"
 npx expo start -c
 ```
 
-Buka Expo Go di HP (satu Wi-Fi dengan laptop) atau emulator. Untuk Android emulator, gunakan `http://10.0.2.2:5000/api/v1`.
+Buka Expo Go di HP (satu Wi-Fi dengan laptop) atau emulator. Di development, alamat API **dideteksi otomatis** dari host Metro/browser: web memakai `localhost`, HP memakai IP laptop dari Metro. `EXPO_PUBLIC_API_URL` hanya diperlukan untuk build APK/production.
 
-`EXPO_PUBLIC_API_URL` wajib diisi saat build APK karena aplikasi tidak menebak alamat backend.
+## Label QR alat
+
+Label QR siap cetak untuk 15 alat ada di [`docs/qr-alat.html`](docs/qr-alat.html). Buka di Chrome, pilih **Print**, ukuran A4, skala 100%. Setiap label berisi `SIPINJAM:TOOL:<kode>` (mis. `SIPINJAM:TOOL:ELK-001`), dan versi PNG per alat tersedia di `docs/qr-alat/`.
+
+QR pinjaman tidak perlu dicetak: nilainya `SIPINJAM:LOAN:PJM-YYMMDD-NNN` dan dibuat otomatis saat pinjaman diajukan.
 
 ## API
 
@@ -167,8 +173,7 @@ Dokumentasi lengkap: [`docs/API.md`](docs/API.md). Koleksi Postman: [`docs/postm
 1. Import repo ke Vercel.
 2. Root directory: `backend`.
 3. Environment:
-   - `SUPABASE_URL`
-   - `SUPABASE_KEY` (anon key)
+   - `DATABASE_URL`
    - `JWT_SECRET`
    - `CORS_ORIGIN=*`
 4. Deploy. `backend/vercel.json` mengarahkan request ke `api/index.js`.
@@ -191,7 +196,7 @@ Profil `preview` memakai `android.buildType: apk`. Isi `EXPO_PUBLIC_API_URL` den
 - Notifikasi bersifat in-app, bukan push notification.
 - Denda belum terhubung ke pembayaran.
 - Foto contoh memakai URL eksternal (Unsplash/Wikimedia via proxy); kredit di [`docs/PHOTO-CREDITS.md`](docs/PHOTO-CREDITS.md).
-- APK dan deployment belum dibuat dari mesin ini; konfigurasi sudah disiapkan.
+- Database Neon sudah dibuat dan di-seed; APK dan deployment Vercel belum dibuat dari mesin ini.
 
 ## Lisensi
 

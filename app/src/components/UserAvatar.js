@@ -1,5 +1,7 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius, weight } from '../theme/tokens';
+
+import { colors, gradients, weight } from '../theme/tokens';
 import { inisial } from '../lib/format';
 
 export default function UserAvatar({ nama, size = 40, inverted = false, style }) {
@@ -10,16 +12,24 @@ export default function UserAvatar({ nama, size = 40, inverted = false, style })
         {
           width: size,
           height: size,
-          borderRadius: radius.md,
-          backgroundColor: inverted ? 'rgba(255,255,255,0.14)' : colors.primarySoft,
+          borderRadius: size / 2,
+          backgroundColor: inverted ? 'rgba(255,255,255,0.16)' : colors.primarySoft,
         },
         style,
       ]}
     >
+      {!inverted ? (
+        <LinearGradient
+          colors={gradients.hero}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[StyleSheet.absoluteFill, { borderRadius: size / 2 }]}
+        />
+      ) : null}
       <Text
         style={[
           styles.text,
-          { fontSize: size * 0.34, color: inverted ? colors.white : colors.primary },
+          { fontSize: size * 0.34, color: colors.white },
         ]}
       >
         {inisial(nama)}
@@ -29,6 +39,6 @@ export default function UserAvatar({ nama, size = 40, inverted = false, style })
 }
 
 const styles = StyleSheet.create({
-  root: { alignItems: 'center', justifyContent: 'center' },
-  text: { fontWeight: weight.bold, letterSpacing: 0.2 },
+  root: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  text: { fontWeight: weight.heavy, letterSpacing: 0.2 },
 });

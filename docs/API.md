@@ -374,10 +374,10 @@ Query `limit` 1–20 (default 5). Menghitung total unit yang pernah dipinjam per
 }
 ```
 
-## Catatan Supabase
+## Catatan database
 
 - Semua ID `uuid` (default `gen_random_uuid()`).
 - Nama tabel member adalah `members`, bukan `users`.
 - View `tool_stok` menghitung `stok_tersedia`.
-- RLS tidak diaktifkan; autentikasi ditangani Express.
-- Backend memakai `SUPABASE_KEY` anon/public. `service_role` tidak boleh ada di repo.
+- Database Neon hanya diakses backend lewat `DATABASE_URL`; tidak ada PostgREST maupun anon key.
+- Otorisasi dilakukan Express (JWT + pengecekan pemilik); RLS tidak dipakai.

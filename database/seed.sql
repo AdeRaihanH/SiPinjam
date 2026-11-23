@@ -1,4 +1,4 @@
--- SiPinjam - data contoh untuk Supabase
+-- SiPinjam - data contoh untuk PostgreSQL (Neon)
 -- Jalankan setelah schema.sql.
 -- Tanggal dibuat relatif terhadap hari ini agar status aktif/terlambat selalu relevan.
 -- Akun demo memiliki 2 pinjaman aktif tanpa keterlambatan agar alur pinjam baru bisa didemokan.

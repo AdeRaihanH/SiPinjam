@@ -1,10 +1,10 @@
--- SiPinjam - skema Supabase (PostgreSQL)
--- Jalankan seluruh file ini di SQL Editor Supabase SEBELUM seed.sql.
+-- SiPinjam - skema PostgreSQL (Neon)
+-- Jalankan seluruh file ini di database Neon SEBELUM seed.sql.
 --
 -- Catatan keamanan:
--- - RLS sengaja TIDAK diaktifkan karena autentikasi dilakukan oleh Express.
--- - Jangan mengaktifkan RLS tanpa policy; aplikasi akan kehilangan akses.
--- - Hanya anon key yang dipakai backend. service_role tidak boleh ada di repo.
+-- - Database hanya diakses backend Express lewat DATABASE_URL; tidak ada akses langsung dari app.
+-- - Tidak ada PostgREST/anon key, jadi tidak ada grant khusus yang diperlukan.
+-- - RLS tidak dipakai karena otorisasi dilakukan di Express (JWT + pengecekan pemilik).
 
 create extension if not exists pgcrypto;
 
@@ -100,11 +100,3 @@ select
     where li.tool_id = t.id and l.status = 'dipinjam'
   ), 0) as stok_tersedia
 from tools t;
-
--- Backend memakai anon key (service_role tidak boleh ada di repo).
--- RLS tetap mati sesuai ketentuan tugas; grant dibuat eksplisit agar
--- PostgREST dapat membaca view dan menulis transaksi pinjaman.
-grant usage on schema public to anon, authenticated;
-grant select on categories, members, tools to anon, authenticated;
-grant select, insert, update, delete on loans, loan_items, notifications to anon, authenticated;
-grant select on tool_stok to anon, authenticated;

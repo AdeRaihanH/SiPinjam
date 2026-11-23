@@ -1,7 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { colors, radius, type, weight } from '../theme/tokens';
+import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+
+import { colors, radius, shadows, type, weight } from '../theme/tokens';
+
+const webTransition = Platform.OS === 'web'
+  ? { transitionProperty: 'border-color, background-color', transitionDuration: '150ms' }
+  : null;
 
 export default function FormField({
   label,
@@ -31,8 +36,23 @@ export default function FormField({
           {hint ? <Text style={styles.hint}>{hint}</Text> : null}
         </View>
       ) : null}
-      <View style={[styles.field, multiline && styles.fieldMultiline, { borderColor }]}>
-        {icon ? <Ionicons name={icon} size={18} color={colors.muted} /> : null}
+      <View
+        style={[
+          styles.field,
+          multiline && styles.fieldMultiline,
+          { borderColor },
+          focused && styles.fieldFocused,
+          error && styles.fieldError,
+          webTransition,
+        ]}
+      >
+        {icon ? (
+          <Ionicons
+            name={icon}
+            size={18}
+            color={focused ? colors.accent : colors.muted}
+          />
+        ) : null}
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -59,28 +79,41 @@ export default function FormField({
 }
 
 const styles = StyleSheet.create({
-  root: { gap: 6 },
+  root: { gap: 7 },
   labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  label: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.text },
+  label: {
+    fontSize: type.xxs,
+    fontWeight: weight.bold,
+    color: colors.text,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
   hint: { fontSize: type.xs, color: colors.faint },
   field: {
-    minHeight: 48,
+    minHeight: 52,
     borderRadius: radius.md,
     borderWidth: 1,
     backgroundColor: colors.surface,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 9,
   },
+  fieldFocused: {
+    ...shadows.card,
+    shadowColor: colors.accent,
+    shadowOpacity: 0.14,
+    shadowRadius: 12,
+  },
+  fieldError: { backgroundColor: '#FFF9F9' },
   fieldMultiline: {
-    minHeight: 96,
+    minHeight: 104,
     alignItems: 'flex-start',
-    paddingTop: 12,
+    paddingTop: 13,
   },
   input: {
     flex: 1,
@@ -88,6 +121,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     paddingVertical: 0,
   },
-  inputMultiline: { minHeight: 68, paddingTop: 0 },
+  inputMultiline: { minHeight: 74, paddingTop: 0 },
   error: { fontSize: type.xs, color: colors.danger, lineHeight: 16 },
 });

@@ -1,4 +1,6 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+
+import PressableScale from './PressableScale';
 import { colors, radius, shadows } from '../theme/tokens';
 
 export default function Card({
@@ -17,17 +19,15 @@ export default function Card({
   if (!onPress) return <View style={base}>{children}</View>;
 
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       onPress={disabled ? undefined : onPress}
-      style={({ pressed }) => [
-        ...base,
-        pressed && !disabled && styles.pressed,
-        disabled && styles.disabled,
-      ]}
+      disabled={disabled}
+      scaleTo={0.985}
+      style={base}
     >
       {children}
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -40,6 +40,4 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   padded: { padding: 16 },
-  pressed: { opacity: 0.92 },
-  disabled: { opacity: 0.65 },
 });

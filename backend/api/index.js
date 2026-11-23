@@ -1,7 +1,7 @@
 import { createApp } from '../src/app.js';
 import { createModels } from '../src/models/index.js';
-import { supabase } from '../src/config/supabaseClient.js';
+import { db } from '../src/config/db.js';
 
-const app = createApp(createModels(supabase));
+const app = createApp(createModels(db));
 
 export default app;

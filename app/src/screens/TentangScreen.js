@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import BrandMark from '../components/BrandMark';
 import Button from '../components/Button';
@@ -8,6 +8,7 @@ import Screen from '../components/Screen';
 import StackHeader from '../components/StackHeader';
 import { API_BASE_URL } from '../api/client';
 import { APP_VERSION, LICENSE, REPO_URL } from '../lib/appInfo';
+import { showMessage } from '../lib/dialog';
 import { colors, layout, text, type, weight } from '../theme/tokens';
 
 function InfoRow({ label, value, last = false }) {
@@ -24,7 +25,7 @@ export default function TentangScreen() {
     try {
       await Linking.openURL(REPO_URL);
     } catch {
-      Alert.alert('Tidak dapat membuka tautan', REPO_URL);
+      showMessage('Tidak dapat membuka tautan', REPO_URL);
     }
   }
 
@@ -48,7 +49,7 @@ export default function TentangScreen() {
         <Card padded={false}>
           <InfoRow label="Base URL API" value={API_BASE_URL} />
           <InfoRow label="Platform" value="React Native · Expo" />
-          <InfoRow label="Database" value="Supabase · PostgreSQL" />
+          <InfoRow label="Database" value="Neon PostgreSQL" />
           <InfoRow label="Versi aplikasi" value={APP_VERSION} last />
         </Card>
 

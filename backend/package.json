@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "REST API SiPinjam (Express 5 + Supabase)",
+  "description": "REST API SiPinjam (Express 5 + Neon PostgreSQL)",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -13,7 +13,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.113.0",
+    "@neondatabase/serverless": "^1.2.1",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

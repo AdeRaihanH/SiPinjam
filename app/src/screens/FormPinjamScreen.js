@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { addDays, differenceInCalendarDays, format, parseISO, startOfDay } from 'date-fns';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -43,6 +43,7 @@ export default function FormPinjamScreen({ navigation, route }) {
   const [catatan, setCatatan] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const scrollRef = useRef(null);
 
   const stok = Math.max(0, Number(tool?.stok_tersedia ?? 0));
   const jumlahDipilih = Math.max(1, Math.min(jumlah, stok || 1));
@@ -69,6 +70,7 @@ export default function FormPinjamScreen({ navigation, route }) {
     } catch (err) {
       setError(err);
       if (err.code === 'STOK_TIDAK_CUKUP') toolQuery.refetch('silent');
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150);
     } finally {
       setSubmitting(false);
     }
@@ -82,6 +84,7 @@ export default function FormPinjamScreen({ navigation, route }) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}

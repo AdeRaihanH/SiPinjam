@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback } from 'react';
 import {
-  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
@@ -12,6 +11,7 @@ import Card from '../components/Card';
 import EmptyState from '../components/EmptyState';
 import ErrorState from '../components/ErrorState';
 import PageHeader from '../components/PageHeader';
+import PressableScale from '../components/PressableScale';
 import Screen from '../components/Screen';
 import { Skeleton } from '../components/Skeleton';
 import { notificationsApi } from '../api/notifications';
@@ -104,16 +104,17 @@ export default function NotifikasiScreen({ navigation }) {
         <Text style={styles.unread}>
           {query.meta.belum_dibaca || 0} belum dibaca
         </Text>
-        <Pressable
+        <PressableScale
           accessibilityRole="button"
           onPress={markAllRead}
           disabled={unread === 0}
-          style={({ pressed }) => [pressed && { opacity: 0.65 }]}
+          scaleTo={0.94}
+          style={styles.markAllButton}
         >
           <Text style={[styles.markAll, unread === 0 && { color: colors.faint }]}>
             Tandai semua
           </Text>
-        </Pressable>
+        </PressableScale>
       </View>
 
       {query.loading && !query.data.length ? (
@@ -135,15 +136,15 @@ export default function NotifikasiScreen({ navigation }) {
           {query.data.map((item, index) => {
             const meta = TIPE[item.tipe] || TIPE.sistem;
             return (
-              <Pressable
+              <PressableScale
                 key={item.id}
                 accessibilityRole="button"
                 onPress={() => openItem(item)}
-                style={({ pressed }) => [
+                scaleTo={0.99}
+                style={[
                   styles.notif,
                   !item.dibaca && styles.notifUnread,
                   index < query.data.length - 1 && styles.notifBorder,
-                  pressed && { opacity: 0.85 },
                 ]}
               >
                 <View style={[styles.icon, { backgroundColor: meta.bg }]}>
@@ -158,7 +159,7 @@ export default function NotifikasiScreen({ navigation }) {
                   <Text style={styles.notifTime}>{waktuLalu(item.show_at)}</Text>
                 </View>
                 {item.ref_id ? <Ionicons name="chevron-forward" size={15} color={colors.faint} /> : null}
-              </Pressable>
+              </PressableScale>
             );
           })}
         </Card>
@@ -185,6 +186,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   unread: { fontSize: type.xs, color: colors.muted },
+  markAllButton: { paddingVertical: 4, paddingLeft: 8 },
   markAll: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.primary },
   notif: {
     flexDirection: 'row',
