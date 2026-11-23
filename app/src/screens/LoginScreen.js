@@ -226,18 +226,18 @@ export default function LoginScreen() {
                   accessibilityRole="button"
                   accessibilityLabel="Isi akun demo admin"
                   onPress={() => fillDemo(DEMO_ADMIN_NIM, DEMO_ADMIN_PASSWORD)}
-                  style={({ pressed }) => [styles.demo, styles.demoAdmin, pressed && { opacity: 0.8 }]}
+                  style={({ pressed }) => [styles.demo, styles.demoSecond, pressed && { opacity: 0.8 }]}
                 >
-                  <View style={[styles.demoIcon, styles.demoIconAdmin]}>
-                    <Ionicons name="shield-checkmark-outline" size={17} color={colors.primary} />
+                  <View style={styles.demoIcon}>
+                    <Ionicons name="shield-checkmark-outline" size={17} color={colors.accentInk} />
                   </View>
                   <View style={styles.demoCopy}>
                     <Text style={styles.demoLabel}>Akun demo admin</Text>
                     <Text style={styles.demoText}>{DEMO_ADMIN_NIM} · {DEMO_ADMIN_PASSWORD}</Text>
                   </View>
                   <View style={styles.demoAction}>
-                    <Text style={[styles.demoActionText, styles.demoActionTextAdmin]}>Isi otomatis</Text>
-                    <Ionicons name="arrow-forward" size={13} color={colors.primary} />
+                    <Text style={styles.demoActionText}>Isi otomatis</Text>
+                    <Ionicons name="arrow-forward" size={13} color={colors.accentInk} />
                   </View>
                 </Pressable>
 
@@ -360,12 +360,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  demoAdmin: {
-    marginTop: 8,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
+  demoSecond: { marginTop: 8 },
   demoIcon: {
     width: 36,
     height: 36,
@@ -374,13 +369,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  demoIconAdmin: { backgroundColor: colors.primarySoft },
   demoCopy: { flex: 1, gap: 2 },
   demoLabel: { fontSize: type.xs, fontWeight: weight.bold, color: colors.text },
   demoText: { fontSize: type.xxs, color: colors.muted },
   demoAction: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   demoActionText: { fontSize: type.xxs, fontWeight: weight.bold, color: colors.accentInk },
-  demoActionTextAdmin: { color: colors.primary },
   footer: {
     marginTop: 'auto',
     paddingTop: 22,
