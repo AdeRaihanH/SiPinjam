@@ -125,6 +125,9 @@ Ade dipakai untuk alur peminjaman. Admin dipakai untuk mengelola alat, mencetak/
 - [ ] Repo GitHub publik dan commit terbaru di-push.
 - [ ] APK/tautan EAS siap.
 - [ ] Web/PWA dan APK bisa login ke API produksi.
+- [ ] Registrasi praktikan baru (nama lengkap + NIM + sandi) berhasil dan auto-login.
+- [ ] Praktikan tidak bisa membuka pinjaman praktikan lain (`403`).
+- [ ] Admin melihat semua pinjaman + nama/NIM peminjam.
 - [ ] Dialog Keluar/Hapus tampil sebagai modal in-app, bukan alert browser.
 - [ ] Exe Windows dijalankan minimal sekali (opsional).
 - [ ] README menjelaskan setup Neon, Vercel, dan akun demo.
