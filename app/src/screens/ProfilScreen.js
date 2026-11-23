@@ -128,7 +128,7 @@ export default function ProfilScreen({ navigation }) {
           </View>
           <View style={styles.role}>
             <Text style={styles.roleText}>
-              {member?.role === 'laboran' ? 'Laboran' : 'Praktikan'}
+              {member?.role === 'laboran' ? 'Laboran' : member?.role === 'admin' ? 'Admin' : 'Praktikan'}
             </Text>
           </View>
         </View>
@@ -169,6 +169,14 @@ export default function ProfilScreen({ navigation }) {
       ) : null}
 
       <Card padded={false} style={styles.menu}>
+        {member?.role === 'admin' ? (
+          <MenuRow
+            icon="construct-outline"
+            label="Kelola alat"
+            description="Tambah, edit, hapus alat dan QR."
+            onPress={() => navigation.navigate('AdminTools')}
+          />
+        ) : null}
         <MenuRow
           icon="document-text-outline"
           label="Kebijakan peminjaman"

@@ -3,7 +3,7 @@
 Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemindaian QR Code, REST API Express, dan database PostgreSQL (Neon).
 
 **Tugas Akhir Praktikum Pemrograman Perangkat Bergerak 2026**  
-Ade Raihan - NIM 2112012414011
+Ade Raihan - NIM 21120124140118
 
 ## Fitur
 
@@ -15,21 +15,21 @@ Ade Raihan - NIM 2112012414011
 - Detail pinjaman: status, daftar alat, linimasa, denda berjalan, QR, dan pengembalian.
 - Notifikasi pengingat H-1, hari jatuh tempo, keterlambatan, dan pengembalian.
 - Profil, kebijakan peminjaman, Tentang aplikasi, versi, base URL API, kredit, dan lisensi.
+- Admin: tambah, edit, dan hapus alat; QR alat otomatis; simpan PNG atau cetak.
 - Empat keadaan layar: loading, kosong, error dengan tombol coba lagi, dan berisi.
 
 ## Akun
 
-| Akun | NIM | Kata sandi | Isi seed |
+| Akun | NIM | Kata sandi | Peran / isi seed |
 | --- | --- | --- | --- |
-| Demo | `2112012414011` | `praktikum123` | 2 pinjaman aktif, tanpa keterlambatan |
-| Rina | `2112012414099` | `praktikum123` | 2 pinjaman terlambat, 1 selesai |
-| Bagas | `2112012414088` | `praktikum123` | 1 pinjaman selesai |
+| Ade Raihan Hanafi | `21120124140118` | `praktikum123` | Praktikan; 2 pinjaman aktif |
+| Admin Laboratorium | `2112012414000` | `admin123` | Admin; kelola alat dan QR |
 
-Akun demo sengaja tidak punya pinjaman terlambat agar alur pinjam baru bisa didemokan. Gunakan akun **Rina** untuk memperagakan status terlambat dan denda.
+Ade dipakai untuk alur peminjaman. Admin dipakai untuk menambah, mengedit, menghapus alat, dan membuat QR alat.
 
 ## Tumpukan
 
-- **App**: React Native 0.88, Expo SDK 58, React Navigation 7, `expo-camera`, `react-native-qrcode-svg`, `@react-native-community/datetimepicker`, AsyncStorage, axios, date-fns.
+- **App**: React Native 0.88, Expo SDK 58, React Navigation 7, `expo-camera`, `expo-print`, `expo-sharing`, `expo-file-system`, `react-native-qrcode-svg`, `@react-native-community/datetimepicker`, AsyncStorage, axios, date-fns.
 - **Backend**: Express 5, `@neondatabase/serverless` (driver HTTP), JWT, bcryptjs, zod, cors, dotenv, morgan. Deploy Vercel.
 - **Database**: Neon PostgreSQL, UUID, view `tool_stok`.
 
@@ -50,7 +50,7 @@ SiPinjam/
       hooks/            useAuth, useTools, useLoans, useNotifications, useStats
       lib/              format tanggal/rupiah, parser QR, info aplikasi
       navigation/       root stack, bottom tabs, tab bar
-      screens/          11 layar
+      screens/          14 layar
       theme/tokens.js   token warna, spasi, radius, tipografi
   backend/
     api/index.js        entry point Vercel
@@ -127,6 +127,10 @@ Base path `/api/v1`, autentikasi `Authorization: Bearer <token>`.
 | GET | `/tools` | Baca view `tool_stok`; `search`, `category_id`, `tersedia`, `limit`, `offset` |
 | GET | `/tools/:id` | Detail + 5 riwayat pinjam |
 | GET | `/tools/kode/:kode` | Lookup QR alat |
+| GET | `/tools/:id/qr.png` | PNG QR alat untuk simpan/cetak |
+| POST | `/tools` | **Admin**: tambah alat; kode kosong dibuat otomatis |
+| PATCH | `/tools/:id` | **Admin**: ubah alat |
+| DELETE | `/tools/:id` | **Admin**: hapus alat (409 jika sudah punya riwayat) |
 | POST | `/loans` | Body `{ tanggal_kembali_rencana, catatan, items[] }` |
 | GET | `/loans` | `status=aktif` / `selesai` / `semua` |
 | GET | `/loans/:id` | Detail + item + denda berjalan |
@@ -192,7 +196,7 @@ Profil `preview` memakai `android.buildType: apk`. Isi `EXPO_PUBLIC_API_URL` den
 
 ## Batasan
 
-- Layar admin/laboran belum dibuat; role tersedia di database.
+- Layar admin sudah tersedia untuk CRUD alat dan QR; layar khusus laboran belum dibuat.
 - Notifikasi bersifat in-app, bukan push notification.
 - Denda belum terhubung ke pembayaran.
 - Foto contoh memakai URL eksternal (Unsplash/Wikimedia via proxy); kredit di [`docs/PHOTO-CREDITS.md`](docs/PHOTO-CREDITS.md).

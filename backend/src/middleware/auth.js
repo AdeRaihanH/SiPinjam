@@ -21,3 +21,10 @@ export function requireAuth(req, _res, next) {
     return next(new ApiError(401, 'UNAUTHORIZED', 'Sesi tidak valid atau sudah kedaluwarsa'));
   }
 }
+
+export function requireAdmin(req, _res, next) {
+  if (req.auth?.role !== 'admin') {
+    return next(new ApiError(403, 'FORBIDDEN', 'Hanya admin yang dapat melakukan aksi ini'));
+  }
+  return next();
+}

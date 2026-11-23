@@ -56,6 +56,69 @@ export function createToolModel(db) {
       return rows[0] || null;
     },
 
+    async nextKode(prefix) {
+      const rows = await db.query(
+        `select kode from tools where kode like $1 order by kode desc limit 1`,
+        [`${prefix}-%`],
+      );
+      const last = rows[0]?.kode;
+      const next = last ? Number(last.split('-')[1]) + 1 : 1;
+      return `${prefix}-${String(next).padStart(3, '0')}`;
+    },
+
+    async create(payload) {
+      const rows = await db.query(
+        `insert into tools
+           (kode, nama, category_id, deskripsi, stok_total, kondisi, foto_url)
+         values ($1, $2, $3, $4, $5, $6, $7)
+         returning id`,
+        [
+          payload.kode,
+          payload.nama,
+          payload.category_id,
+          payload.deskripsi || null,
+          payload.stok_total,
+          payload.kondisi,
+          payload.foto_url || null,
+        ],
+      );
+      return rows[0]?.id || null;
+    },
+
+    async update(id, payload) {
+      const rows = await db.query(
+        `update tools
+         set kode = $2, nama = $3, category_id = $4, deskripsi = $5,
+             stok_total = $6, kondisi = $7, foto_url = $8
+         where id = $1
+         returning id`,
+        [
+          id,
+          payload.kode,
+          payload.nama,
+          payload.category_id,
+          payload.deskripsi || null,
+          payload.stok_total,
+          payload.kondisi,
+          payload.foto_url || null,
+        ],
+      );
+      return rows[0]?.id || null;
+    },
+
+    async remove(id) {
+      const rows = await db.query('delete from tools where id = $1 returning id', [id]);
+      return rows[0]?.id || null;
+    },
+
+    async countLoanItems(toolId) {
+      const rows = await db.query(
+        'select count(*)::int as count from loan_items where tool_id = $1',
+        [toolId],
+      );
+      return rows[0]?.count || 0;
+    },
+
     async findByIds(ids) {
       if (!ids.length) return [];
       const placeholders = ids.map((_, index) => `$${index + 1}`).join(', ');

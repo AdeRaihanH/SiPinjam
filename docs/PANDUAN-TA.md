@@ -10,17 +10,17 @@ Dokumen ini memetakan syarat tugas akhir ke implementasi, menyiapkan alur respon
 | Platform | React Native - Expo SDK 58 |
 | Backend | Express 5 - Neon PostgreSQL - Vercel |
 | Nama | Ade Raihan |
-| NIM | 2112012414011 |
+| NIM | 21120124140118 |
 | Repositori | https://github.com/AdeRaihanH/SiPinjam |
 
 ## Pemetaan syarat
 
 | Syarat | Implementasi | Bukti |
 | --- | --- | --- |
-| API sendiri | Express 5, 17 endpoint, JWT, Neon PostgreSQL | `backend/src`, `docs/API.md` |
+| API sendiri | Express 5, 21 endpoint, JWT, Neon PostgreSQL | `backend/src`, `docs/API.md` |
 | API berjalan publik | Konfigurasi Vercel + `api/index.js` | langkah deploy di README |
 | Bottom navigation 5 tab | Katalog, Pinjaman, Scan, Notifikasi, Profil | `TabBar.js` |
-| Minimal 5 halaman | 11 layar | daftar di bawah |
+| Minimal 5 halaman | 14 layar | daftar di bawah |
 | 2 list ke detail | Katalog ke Detail Alat; Pinjaman ke Detail Pinjaman | layar Katalog dan Pinjaman |
 | Profil + Tentang | Profil, kebijakan, Tentang | layar Profil dan Tentang |
 | QR Code | Kamera, input manual, QR alat/pinjaman | `ScanScreen.js` |
@@ -28,19 +28,18 @@ Dokumen ini memetakan syarat tugas akhir ke implementasi, menyiapkan alur respon
 | APK | Profil EAS `preview` buildType `apk` | `app/eas.json` |
 | Basis data | PostgreSQL (Neon), tabel UUID, `members`, view `tool_stok` | `database/schema.sql` |
 
-### 11 layar
+### 14 layar
 
-Login, Katalog, Detail Alat, Form Pinjam, Sukses Pinjam, Pinjaman, Detail Pinjaman, Scan, Notifikasi, Profil, Tentang.
+Login, Katalog, Detail Alat, Form Pinjam, Sukses Pinjam, Pinjaman, Detail Pinjaman, Scan, Notifikasi, Profil, Tentang, Kelola Alat, Form Alat, QR Alat.
 
 ## Akun demo
 
 | Akun | NIM | Sandi | Keperluan |
 | --- | --- | --- | --- |
-| Demo | `2112012414011` | `praktikum123` | Alur pinjam normal; 2 pinjaman aktif |
-| Rina | `2112012414099` | `praktikum123` | 2 pinjaman terlambat untuk denda |
-| Bagas | `2112012414088` | `praktikum123` | Riwayat selesai |
+| Ade Raihan Hanafi | `21120124140118` | `praktikum123` | Alur pinjam normal; 2 pinjaman aktif |
+| Admin Laboratorium | `2112012414000` | `admin123` | Kelola alat (CRUD) dan QR |
 
-Akun demo tidak punya pinjaman terlambat agar langkah "pinjam alat baru" pada skrip demo tidak terblokir. Keterlambatan diperagakan dengan akun Rina.
+Ade dipakai untuk alur peminjaman. Admin dipakai untuk mengelola alat dan mencetak/menyimpan QR.
 
 ## Persiapan responsi
 
@@ -49,13 +48,13 @@ Akun demo tidak punya pinjaman terlambat agar langkah "pinjam alat baru" pada sk
 3. Isi `backend/.env` dari `.env.example` (`DATABASE_URL`, `JWT_SECRET`).
 4. `cd backend && npm install && npm run dev`.
 5. `cd app && npm install`, lalu `npx expo start -c`. Di development, URL API dideteksi otomatis dari host Metro/browser; `EXPO_PUBLIC_API_URL` hanya wajib untuk build APK/production.
-6. Uji login demo di HP.
+6. Uji login Ade dan admin di HP.
 
 ## Alur responsi 7 menit
 
 ### Akun demo - alur utama
 
-1. **Login** dengan NIM `2112012414011` dan sandi `praktikum123`.
+1. **Login** dengan NIM `21120124140118` dan sandi `praktikum123`.
 2. **Katalog**: tunjukkan ringkasan stok, pencarian, chip kategori, filter "Tersedia", dan foto alat.
 3. Cari **"osilo"**, buka **Osiloskop Hantek DSO2D10**. Tunjukkan stok 1/2, kondisi rusak ringan, deskripsi, dan riwayat pinjam.
 4. **Pinjam alat** -> atur jumlah -> pilih tanggal (1-3 hari) -> isi catatan -> **Ajukan peminjaman**.
@@ -66,13 +65,14 @@ Akun demo tidak punya pinjaman terlambat agar langkah "pinjam alat baru" pada sk
 9. **Scan** -> izinkan kamera, pindai QR alat; jika tidak memungkinkan, ketik `ALK-002` di input manual -> hasil scan.
 10. **Profil -> Tentang aplikasi** -> tunjukkan versi, base URL API, kredit, dan lisensi.
 
-### Akun Rina - keterlambatan dan denda
+### Akun admin - kelola alat dan QR
 
-1. Keluar, login NIM `2112012414099`.
-2. **Pinjaman -> Aktif**: dua kartu berlabel **Terlambat**.
-3. Buka pinjaman **PJM-261111-001** (Tang Crimping): tunjukkan denda berjalan Rp2.000, rincian tarif, linimasa, dan QR.
-4. Tekan **Kembalikan alat** -> tunjukkan modal denda -> **Ya, kembalikan**.
-5. Tunjukkan denda final tercatat dan status berubah.
+1. Keluar, login NIM `2112012414000` dan sandi `admin123`.
+2. **Profil -> Kelola alat**.
+3. Tunjukkan daftar alat, tombol **Tambah alat**, edit, hapus, dan QR.
+4. Tambah alat baru: isi nama, kategori, stok, kondisi, lalu simpan.
+5. Tunjukkan QR otomatis, lalu **Simpan PNG** atau **Cetak**.
+6. Kembali ke daftar dan tunjukkan alat baru sudah muncul.
 
 ## Pemeriksaan build
 
@@ -88,7 +88,7 @@ Akun demo tidak punya pinjaman terlambat agar langkah "pinjam alat baru" pada sk
 2. **Vercel belum di-deploy.** Konfigurasi `backend/vercel.json` dan `api/index.js` sudah siap.
 3. **APK belum dibangun.** `eas.json` sudah siap; build memerlukan akun Expo/EAS.
 4. **Kamera hanya di perangkat.** Pemindaian kamera perlu diuji di HP.
-5. **Layar admin/laboran belum ada.** Role tersedia di database; antarmuka admin tidak termasuk cakupan.
+5. **Layar admin sudah ada.** CRUD alat dan QR tersedia untuk role admin; layar khusus laboran belum dibuat.
 6. **Notifikasi in-app**, bukan push notification.
 7. **Denda belum terhubung pembayaran.**
 8. **Foto alat memakai URL eksternal** (Unsplash/Wikimedia melalui proxy). Butuh internet; kredit ada di `docs/PHOTO-CREDITS.md`.
@@ -111,7 +111,7 @@ Akun demo tidak punya pinjaman terlambat agar langkah "pinjam alat baru" pada sk
 
 - [ ] `schema.sql` dan `seed.sql` sudah dijalankan di Neon.
 - [ ] `/health` mengembalikan `database: connected`.
-- [ ] Login demo dan Rina berhasil.
+- [ ] Login Ade dan admin berhasil.
 - [ ] Alur pinjam + kembali diuji di HP.
 - [ ] Scan kamera diuji di HP.
 - [ ] QR halaman sukses bisa dipindai.

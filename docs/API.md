@@ -72,7 +72,7 @@ Endpoint lookup menerima QR lengkap maupun kode polos. Prefix lain ditolak `404 
 ### POST `/auth/login`
 
 ```json
-{ "nim": "2112012414011", "password": "praktikum123" }
+{ "nim": "21120124140118", "password": "praktikum123" }
 ```
 
 `200`:
@@ -83,8 +83,8 @@ Endpoint lookup menerima QR lengkap maupun kode polos. Prefix lain ditolak `404 
     "token": "eyJhbGciOiJIUzI1NiIs...",
     "member": {
       "id": "a0000001-0000-4000-8000-000000000001",
-      "nama": "Ade Raihan",
-      "nim": "2112012414011",
+      "nama": "Ade Raihan Hanafi",
+      "nim": "21120124140118",
       "email": "demo@sipinjam.id",
       "role": "praktikan",
       "avatar_url": null
@@ -96,6 +96,42 @@ Endpoint lookup menerima QR lengkap maupun kode polos. Prefix lain ditolak `404 
 ### GET `/auth/me`
 
 Header Bearer. Respons `{ "data": { "member": { ... } } }`.
+
+Akun admin memakai NIM `2112012414000` dan kata sandi `admin123`; token-nya membawa `role: "admin"`. Endpoint tulis alat wajib memakai token admin.
+
+## Alat (admin)
+
+Endpoint berikut memerlukan Bearer token dengan role `admin`; selain admin mendapat `403 FORBIDDEN`.
+
+### POST `/tools`
+
+Body:
+
+```json
+{
+  "nama": "Osiloskop Digital",
+  "category_id": "22222222-2222-4222-8222-222222222222",
+  "kode": "ELK-005",
+  "stok_total": 2,
+  "kondisi": "baik",
+  "deskripsi": "Opsional",
+  "foto_url": "https://..."
+}
+```
+
+`kode` opsional — jika kosong, server membuat kode berikutnya sesuai kategori (`ELK-`, `JAR-`, `ALK-`, `KOM-`). Respons `201` berisi alat yang dibuat.
+
+### PATCH `/tools/:id`
+
+Body sama dengan create; semua field opsional. Jika kategori diubah dan kode tidak diberikan, kode lama dipertahankan (pastikan tetap sesuai prefix kategori).
+
+### DELETE `/tools/:id`
+
+`200` jika berhasil. `409 CONFLICT` jika alat sudah memiliki riwayat `loan_items` — alat tidak dihapus agar riwayat tetap utuh.
+
+### GET `/tools/:id/qr.png`
+
+Mengembalikan PNG QR `SIPINJAM:TOOL:<kode>` (640px). Dipakai tombol **Simpan PNG** dan **Cetak QR** di aplikasi.
 
 ---
 
@@ -168,7 +204,7 @@ Sama seperti item di atas, ditambah:
       "status": "dipinjam",
       "status_efektif": "terlambat",
       "jumlah": 1,
-      "member_nama": "Rina Pratama"
+      "member_nama": "Ade Raihan Hanafi"
     }
   ]
 }
@@ -259,7 +295,7 @@ Detail milik sendiri. `403` jika bukan pemilik.
         }
       }
     ],
-    "member": { "id": "...", "nama": "Rina Pratama", "nim": "2112012414099" }
+    "member": { "id": "...", "nama": "Ade Raihan Hanafi", "nim": "21120124140118" }
   }
 }
 ```

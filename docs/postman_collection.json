@@ -62,7 +62,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nim\": \"2112012414011\",\n  \"password\": \"praktikum123\"\n}"
+              "raw": "{\n  \"nim\": \"21120124140118\",\n  \"password\": \"praktikum123\"\n}"
             },
             "url": "{{baseUrl}}/auth/login"
           }

@@ -1,8 +1,8 @@
 -- SiPinjam - data contoh untuk PostgreSQL (Neon)
 -- Jalankan setelah schema.sql.
 -- Tanggal dibuat relatif terhadap hari ini agar status aktif/terlambat selalu relevan.
--- Akun demo memiliki 2 pinjaman aktif tanpa keterlambatan agar alur pinjam baru bisa didemokan.
--- Akun Rina memiliki 2 pinjaman terlambat untuk mendemokan denda.
+-- Akun Ade memiliki 2 pinjaman aktif tanpa keterlambatan agar alur pinjam baru bisa didemokan.
+-- Akun admin dipakai untuk mengelola alat dan QR.
 
 set time zone 'Asia/Jakarta';
 
@@ -17,12 +17,11 @@ insert into categories (id, nama, slug, icon) values
   ('44444444-4444-4444-8444-444444444444', 'Komponen', 'komponen', 'construct-outline');
 
 insert into members (id, nama, nim, email, password_hash, role) values
-  ('a0000001-0000-4000-8000-000000000001', 'Ade Raihan', '2112012414011', 'demo@sipinjam.id',
+  ('a0000001-0000-4000-8000-000000000001', 'Ade Raihan Hanafi', '21120124140118', 'demo@sipinjam.id',
    '$2b$10$wxhtvUvn78p.7jjQr4MpaeUZvKzZVKVlw7MVKEQTb2g0QYm32tade', 'praktikan'),
-  ('a0000002-0000-4000-8000-000000000002', 'Rina Pratama', '2112012414099', 'rina@sipinjam.id',
-   '$2b$10$wxhtvUvn78p.7jjQr4MpaeUZvKzZVKVlw7MVKEQTb2g0QYm32tade', 'praktikan'),
-  ('a0000003-0000-4000-8000-000000000003', 'Bagas Nugraha', '2112012414088', 'bagas@sipinjam.id',
-   '$2b$10$wxhtvUvn78p.7jjQr4MpaeUZvKzZVKVlw7MVKEQTb2g0QYm32tade', 'praktikan');
+  ('a0000004-0000-4000-8000-000000000004', 'Admin Laboratorium', '2112012414000', 'admin@sipinjam.id',
+   '$2b$10$rbcWrFfH8/RHCre1mhusFeJbfumcOjxtpdba/Jj8B7OqV1i/Qqlba', 'admin');
+
 
 insert into tools (id, kode, nama, category_id, deskripsi, stok_total, kondisi, foto_url) values
   ('b0000001-0000-4000-8000-000000000001', 'ELK-001', 'Laptop Lenovo ThinkPad T14',
@@ -138,31 +137,8 @@ values
    concat('PJM-', to_char(current_date, 'YYMMDD'), '-001'),
    'a0000001-0000-4000-8000-000000000001',
    current_date, current_date + 2, null, 'dipinjam', 0,
-   'Eksperimen sensor suhu ruang server.', now()),
+   'Eksperimen sensor suhu ruang server.', now());
 
-  ('d0000007-0000-4000-8000-000000000007',
-   concat('PJM-', to_char(current_date - 6, 'YYMMDD'), '-001'),
-   'a0000002-0000-4000-8000-000000000002',
-   current_date - 6, current_date - 2, null, 'dipinjam', 0,
-   'Praktikum sinyal analog.', now() - interval '6 days'),
-
-  ('d0000008-0000-4000-8000-000000000008',
-   concat('PJM-', to_char(current_date - 4, 'YYMMDD'), '-001'),
-   'a0000002-0000-4000-8000-000000000002',
-   current_date - 4, current_date - 1, null, 'dipinjam', 0,
-   'Instalasi jaringan laboratorium.', now() - interval '4 days'),
-
-  ('d0000009-0000-4000-8000-000000000009',
-   concat('PJM-', to_char(current_date - 10, 'YYMMDD'), '-001'),
-   'a0000002-0000-4000-8000-000000000002',
-   current_date - 10, current_date - 7, current_date - 7, 'dikembalikan', 0,
-   'Presentasi proposal.', now() - interval '10 days'),
-
-  ('d0000010-0000-4000-8000-000000000010',
-   concat('PJM-', to_char(current_date - 9, 'YYMMDD'), '-001'),
-   'a0000003-0000-4000-8000-000000000003',
-   current_date - 9, current_date - 6, current_date - 6, 'dikembalikan', 0,
-   'Praktikum catu daya.', now() - interval '9 days');
 
 insert into loan_items (id, loan_id, tool_id, jumlah) values
   ('e0000001-0000-4000-8000-000000000001', 'd0000001-0000-4000-8000-000000000001', 'b0000001-0000-4000-8000-000000000001', 1),
@@ -170,11 +146,8 @@ insert into loan_items (id, loan_id, tool_id, jumlah) values
   ('e0000003-0000-4000-8000-000000000003', 'd0000003-0000-4000-8000-000000000003', 'b0000005-0000-4000-8000-000000000005', 1),
   ('e0000004-0000-4000-8000-000000000004', 'd0000004-0000-4000-8000-000000000004', 'b0000013-0000-4000-8000-000000000013', 2),
   ('e0000005-0000-4000-8000-000000000005', 'd0000005-0000-4000-8000-000000000005', 'b0000001-0000-4000-8000-000000000001', 1),
-  ('e0000006-0000-4000-8000-000000000006', 'd0000006-0000-4000-8000-000000000006', 'b0000012-0000-4000-8000-000000000012', 1),
-  ('e0000007-0000-4000-8000-000000000007', 'd0000007-0000-4000-8000-000000000007', 'b0000010-0000-4000-8000-000000000010', 1),
-  ('e0000008-0000-4000-8000-000000000008', 'd0000008-0000-4000-8000-000000000008', 'b0000007-0000-4000-8000-000000000007', 3),
-  ('e0000009-0000-4000-8000-000000000009', 'd0000009-0000-4000-8000-000000000009', 'b0000002-0000-4000-8000-000000000002', 1),
-  ('e0000010-0000-4000-8000-000000000010', 'd0000010-0000-4000-8000-000000000010', 'b0000011-0000-4000-8000-000000000011', 1);
+  ('e0000006-0000-4000-8000-000000000006', 'd0000006-0000-4000-8000-000000000006', 'b0000012-0000-4000-8000-000000000012', 1);
+
 
 insert into notifications
   (id, member_id, tipe, judul, pesan, ref_type, ref_id, show_at, dibaca)
@@ -199,29 +172,7 @@ values
   ('f0000004-0000-4000-8000-000000000004',
    'a0000001-0000-4000-8000-000000000001', 'sistem', 'Selamat datang di SiPinjam',
    'Pinjam alat laboratorium cukup dari ponsel. Pindai QR alat untuk melihat detail dan mengajukan peminjaman.',
-   null, null, now() - interval '20 days', true),
+   null, null, now() - interval '20 days', true);
 
-  ('f0000005-0000-4000-8000-000000000005',
-   'a0000002-0000-4000-8000-000000000002', 'terlambat', 'Pinjaman terlambat',
-   concat('Pinjaman ', (select kode from loans where id = 'd0000007-0000-4000-8000-000000000007'),
-     ' terlambat 2 hari. Denda berjalan Rp4.000. Segera kembalikan alat.'),
-   'loan', 'd0000007-0000-4000-8000-000000000007', now() - interval '2 days', false),
-
-  ('f0000006-0000-4000-8000-000000000006',
-   'a0000002-0000-4000-8000-000000000002', 'terlambat', 'Pinjaman terlambat',
-   concat('Pinjaman ', (select kode from loans where id = 'd0000008-0000-4000-8000-000000000008'),
-     ' terlambat 1 hari. Denda berjalan Rp2.000. Segera kembalikan alat.'),
-   'loan', 'd0000008-0000-4000-8000-000000000008', now() - interval '1 day', false),
-
-  ('f0000007-0000-4000-8000-000000000007',
-   'a0000002-0000-4000-8000-000000000002', 'jatuh_tempo', 'Jatuh tempo terlewat',
-   concat('Pinjaman ', (select kode from loans where id = 'd0000007-0000-4000-8000-000000000007'),
-     ' sudah melewati jatuh tempo.'),
-   'loan', 'd0000007-0000-4000-8000-000000000007', now() - interval '3 days', true),
-
-  ('f0000008-0000-4000-8000-000000000008',
-   'a0000003-0000-4000-8000-000000000003', 'pengembalian', 'Pengembalian diterima',
-   'Power Supply Variable 30V 5A dikembalikan tepat waktu.',
-   'loan', 'd0000010-0000-4000-8000-000000000010', now() - interval '6 days', true);
 
 commit;

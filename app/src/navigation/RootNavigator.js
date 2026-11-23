@@ -22,6 +22,9 @@ import FormPinjamScreen from '../screens/FormPinjamScreen';
 import SuksesPinjamScreen from '../screens/SuksesPinjamScreen';
 import DetailPinjamanScreen from '../screens/DetailPinjamanScreen';
 import TentangScreen from '../screens/TentangScreen';
+import AdminToolsScreen from '../screens/AdminToolsScreen';
+import AdminToolFormScreen from '../screens/AdminToolFormScreen';
+import AdminToolQrScreen from '../screens/AdminToolQrScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -101,6 +104,9 @@ export default function RootNavigator() {
                 <Stack.Screen name="SuksesPinjam" component={SuksesPinjamScreen} />
                 <Stack.Screen name="DetailPinjaman" component={DetailPinjamanScreen} />
                 <Stack.Screen name="Tentang" component={TentangScreen} />
+                <Stack.Screen name="AdminTools" component={AdminToolsScreen} />
+                <Stack.Screen name="AdminToolForm" component={AdminToolFormScreen} />
+                <Stack.Screen name="AdminToolQr" component={AdminToolQrScreen} />
               </>
             )}
           </Stack.Navigator>

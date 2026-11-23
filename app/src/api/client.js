@@ -91,4 +91,9 @@ export async function patchData(url, body = {}, config) {
   return response.data?.data;
 }
 
+export async function deleteData(url, config) {
+  const response = await client.delete(url, config);
+  return response.data?.data;
+}
+
 export default client;

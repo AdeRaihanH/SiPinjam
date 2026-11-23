@@ -32,7 +32,7 @@ create table members (
   email         text,
   password_hash text not null,
   role          text not null default 'praktikan'
-                check (role in ('praktikan', 'laboran')),
+                check (role in ('praktikan', 'laboran', 'admin')),
   avatar_url    text,
   created_at    timestamptz not null default now()
 );

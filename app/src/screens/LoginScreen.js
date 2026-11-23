@@ -23,7 +23,7 @@ import Reveal from '../components/Reveal';
 import { useAuth } from '../hooks/useAuth';
 import { colors, gradients, radius, type, weight } from '../theme/tokens';
 
-const DEMO_NIM = '2112012414011';
+const DEMO_NIM = '21120124140118';
 const DEMO_PASSWORD = 'praktikum123';
 
 export default function LoginScreen() {
@@ -135,7 +135,7 @@ export default function LoginScreen() {
                     icon="person-outline"
                     value={nim}
                     onChangeText={setNim}
-                    placeholder="2112012414011"
+                    placeholder="21120124140118"
                     keyboardType="number-pad"
                     autoCapitalize="none"
                     maxLength={20}
