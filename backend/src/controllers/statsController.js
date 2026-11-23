@@ -12,7 +12,8 @@ const populerSchema = z.object({
 export function createStatsController({ stats }) {
   return {
     summary: asyncHandler(async (req, res) => {
-      return sendData(res, await stats.summary(req.auth.id, todayISO()));
+      const semua = req.auth.role === 'admin';
+      return sendData(res, await stats.summary(req.auth.id, todayISO(), semua));
     }),
 
     populer: asyncHandler(async (req, res) => {

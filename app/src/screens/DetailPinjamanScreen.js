@@ -27,6 +27,7 @@ import StatusPill from '../components/StatusPill';
 import ToolPhoto from '../components/ToolPhoto';
 import { loansApi } from '../api/loans';
 import { useNotificationBadge } from '../context/NotificationContext';
+import { useAuth } from '../hooks/useAuth';
 import { useLoanDetail } from '../hooks/useLoanDetail';
 import {
   formatRupiah,
@@ -84,6 +85,8 @@ function TimelineRow({ title, value, active, last, danger = false }) {
 export default function DetailPinjamanScreen({ navigation, route }) {
   const { loanId } = route.params || {};
   const insets = useSafeAreaInsets();
+  const { member: authMember } = useAuth();
+  const isAdmin = authMember?.role === 'admin';
   const { refresh: refreshBadge } = useNotificationBadge();
   const query = useLoanDetail(loanId);
   const { refetch } = query;
@@ -177,6 +180,20 @@ export default function DetailPinjamanScreen({ navigation, route }) {
               ? `Denda ${formatRupiah(denda)} tercatat pada pinjaman ini.`
               : 'Alat dikembalikan tepat waktu tanpa denda.'}
           />
+        ) : null}
+
+        {isAdmin && loan.member ? (
+          <View style={styles.borrowerCard}>
+            <View style={styles.borrowerIcon}>
+              <Ionicons name="person-outline" size={16} color={colors.primary} />
+            </View>
+            <View style={styles.borrowerCopy}>
+              <Text style={styles.borrowerLabel}>Peminjam</Text>
+              <Text style={styles.borrowerName} numberOfLines={1}>
+                {loan.member.nama} · {loan.member.nim}
+              </Text>
+            </View>
+          </View>
         ) : null}
 
         <LinearGradient
@@ -399,6 +416,33 @@ export default function DetailPinjamanScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   loading: { paddingHorizontal: layout.screenPadding, gap: 12 },
+  borrowerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 12,
+  },
+  borrowerIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 11,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  borrowerCopy: { flex: 1, gap: 1 },
+  borrowerLabel: {
+    fontSize: 9,
+    fontWeight: weight.bold,
+    color: colors.muted,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  borrowerName: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.text },
   content: {
     paddingHorizontal: layout.screenPadding,
     paddingBottom: 16,

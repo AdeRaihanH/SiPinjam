@@ -52,6 +52,30 @@ export function createLoanModel(db) {
       return { rows, count: countRows[0]?.count || 0 };
     },
 
+    async listAll({ status, limit, offset }) {
+      const filters = [];
+      const params = [];
+
+      if (status === 'aktif') filters.push("l.status = 'dipinjam'");
+      if (status === 'selesai') filters.push("l.status = 'dikembalikan'");
+
+      const where = filters.length ? `where ${filters.join(' and ')}` : '';
+      const [rows, countRows] = await Promise.all([
+        db.query(
+          `${LOAN_SELECT} ${where}
+           order by l.created_at desc
+           limit $${params.length + 1} offset $${params.length + 2}`,
+          [...params, limit, offset],
+        ),
+        db.query(
+          `select count(*)::int as count from loans l ${where}`,
+          params,
+        ),
+      ]);
+
+      return { rows, count: countRows[0]?.count || 0 };
+    },
+
     async findById(id) {
       const rows = await db.query(`${LOAN_SELECT} where l.id = $1 limit 1`, [id]);
       return rows[0] || null;

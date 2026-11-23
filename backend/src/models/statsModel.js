@@ -3,15 +3,22 @@ import { diffDaysISO } from '../lib/dates.js';
 
 export function createStatsModel(db) {
   return {
-    async summary(memberId, today) {
-      const [tools, loans, unread] = await Promise.all([
-        db.query('select stok_total, stok_tersedia from tool_stok'),
-        db.query(
+    async summary(memberId, today, semua = false) {
+      const loansQuery = semua
+        ? db.query(
+          `select status, tanggal_kembali_rencana, denda
+           from loans`,
+        )
+        : db.query(
           `select status, tanggal_kembali_rencana, denda
            from loans
            where member_id = $1`,
           [memberId],
-        ),
+        );
+
+      const [tools, loans, unread] = await Promise.all([
+        db.query('select stok_total, stok_tersedia from tool_stok'),
+        loansQuery,
         db.query(
           `select count(*)::int as count
            from notifications

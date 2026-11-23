@@ -25,6 +25,7 @@ Ade Raihan Hanafi - NIM 21120124140118
 - Notifikasi pengingat H-1, hari jatuh tempo, keterlambatan, dan pengembalian.
 - Profil, kebijakan peminjaman, Tentang aplikasi, versi, base URL API, kredit, dan lisensi.
 - Admin: tambah, edit, dan hapus alat; QR alat otomatis; simpan PNG atau cetak.
+- Admin melihat seluruh pinjaman praktikan (nama/NIM peminjam tampil di daftar dan detail) serta bisa memproses pengembalian.
 - Empat keadaan layar: loading, kosong, error dengan tombol coba lagi, dan berisi.
 - Dialog konfirmasi dan pesan memakai modal in-app yang konsisten di web, Android, dan Windows (bukan alert browser).
 
@@ -45,7 +46,7 @@ Redesign 2026 memakai arah **“Forest & Sage”**: hijau pinus dalam sebagai wa
 | Akun | NIM | Kata sandi | Peran / isi seed |
 | --- | --- | --- | --- |
 | Ade Raihan Hanafi | `21120124140118` | `praktikum123` | Praktikan; 2 pinjaman aktif |
-| Admin Laboratorium | `2112012414000` | `admin123` | Admin; kelola alat dan QR |
+| Admin Laboratorium | `2112012414000` | `admin123` | Admin; kelola alat/QR dan melihat semua pinjaman praktikan |
 
 Ade dipakai untuk alur peminjaman. Admin dipakai untuk menambah, mengedit, menghapus alat, dan membuat QR alat.
 
@@ -181,7 +182,7 @@ Base path `/api/v1`, autentikasi `Authorization: Bearer <token>`.
 | PATCH | `/tools/:id` | **Admin**: ubah alat |
 | DELETE | `/tools/:id` | **Admin**: hapus alat (409 jika sudah punya riwayat) |
 | POST | `/loans` | Body `{ tanggal_kembali_rencana, catatan, items[] }` |
-| GET | `/loans` | `status=aktif` / `selesai` / `semua` |
+| GET | `/loans` | `status=aktif` / `selesai` / `semua`; admin melihat semua praktikan, praktikan hanya miliknya |
 | GET | `/loans/:id` | Detail + item + denda berjalan |
 | GET | `/loans/kode/:kode` | Lookup QR pinjaman |
 | POST | `/loans/:id/return` | Kembalikan + hitung denda |

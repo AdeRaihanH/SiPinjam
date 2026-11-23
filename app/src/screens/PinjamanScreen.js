@@ -14,6 +14,7 @@ import Reveal from '../components/Reveal';
 import Screen from '../components/Screen';
 import SegmentedControl from '../components/SegmentedControl';
 import { ListSkeleton } from '../components/Skeleton';
+import { useAuth } from '../hooks/useAuth';
 import { useFocusRefetch } from '../hooks/useQuery';
 import { useLoans } from '../hooks/useLoans';
 import { useStats } from '../hooks/useStats';
@@ -56,6 +57,8 @@ function SummaryStat({ value, label, alert = false }) {
 
 export default function PinjamanScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const { member } = useAuth();
+  const isAdmin = member?.role === 'admin';
   const [status, setStatus] = useState('aktif');
   const loansQuery = useLoans(status);
   const statsQuery = useStats();
@@ -93,9 +96,11 @@ export default function PinjamanScreen({ navigation }) {
 
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <PageHeader
-          eyebrow="Aktivitas"
+          eyebrow={isAdmin ? 'Aktivitas · semua praktikan' : 'Aktivitas'}
           title="Pinjaman"
-          subtitle="Pantau jadwal pengembalian dan denda."
+          subtitle={isAdmin
+            ? 'Pantau seluruh pinjaman praktikan di laboratorium.'
+            : 'Pantau jadwal pengembalian dan denda.'}
         />
       </View>
 
@@ -109,8 +114,14 @@ export default function PinjamanScreen({ navigation }) {
         <View style={styles.summaryHead}>
           <Text style={styles.summaryEyebrow}>Ringkasan pinjaman</Text>
           <View style={styles.summaryPill}>
-            <Ionicons name="shield-checkmark-outline" size={12} color={colors.accent} />
-            <Text style={styles.summaryPillText}>Tercatat</Text>
+            <Ionicons
+              name={isAdmin ? 'people-outline' : 'shield-checkmark-outline'}
+              size={12}
+              color={colors.accent}
+            />
+            <Text style={styles.summaryPillText}>
+              {isAdmin ? 'Semua praktikan' : 'Tercatat'}
+            </Text>
           </View>
         </View>
         <View style={styles.summaryRow}>
@@ -159,6 +170,7 @@ export default function PinjamanScreen({ navigation }) {
               <Reveal key={loan.id} delay={Math.min(index, 6) * 30}>
                 <LoanRow
                   loan={loan}
+                  showMember={isAdmin}
                   onPress={() => navigation.navigate('DetailPinjaman', { loanId: loan.id })}
                 />
               </Reveal>

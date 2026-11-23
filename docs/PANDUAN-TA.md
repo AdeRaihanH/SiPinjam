@@ -43,7 +43,7 @@ Redesign 2026 memakai **Forest & Sage**: forest `#0E2A20`, sage `#B9CD9A`, kanva
 | Ade Raihan Hanafi | `21120124140118` | `praktikum123` | Alur pinjam normal; 2 pinjaman aktif |
 | Admin Laboratorium | `2112012414000` | `admin123` | Kelola alat (CRUD) dan QR |
 
-Ade dipakai untuk alur peminjaman. Admin dipakai untuk mengelola alat dan mencetak/menyimpan QR.
+Ade dipakai untuk alur peminjaman. Admin dipakai untuk mengelola alat, mencetak/menyimpan QR, dan memantau seluruh pinjaman praktikan beserta nama/NIM peminjam.
 
 ## Persiapan responsi
 

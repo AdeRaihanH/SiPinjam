@@ -254,11 +254,11 @@ Aturan:
 | `limit` | 1–50 | Default 20 |
 | `offset` | ≥0 | Default 0 |
 
-Item ringkas berisi `tool_id`, `jumlah`, dan objek `tool`.
+Praktikan hanya menerima pinjaman miliknya. Admin menerima **semua pinjaman** dari seluruh praktikan, dan setiap item menyertakan objek `member` berisi nama/NIM peminjam. Item ringkas berisi `tool_id`, `jumlah`, dan objek `tool`.
 
 ### GET `/loans/:id`
 
-Detail milik sendiri. `403` jika bukan pemilik.
+Praktikan hanya boleh membuka pinjaman miliknya; admin boleh membuka semua. `403` jika praktikan bukan pemilik.
 
 ```json
 {
@@ -301,7 +301,7 @@ Detail milik sendiri. `403` jika bukan pemilik.
 
 ### GET `/loans/kode/:kode`
 
-Menerima kode polos atau QR lengkap. Hanya milik sendiri.
+Menerima kode polos atau QR lengkap. Praktikan hanya milik sendiri; admin boleh memindai QR pinjaman praktikan mana pun.
 
 ### POST `/loans/:id/return`
 
@@ -310,7 +310,8 @@ Tanpa body. Efek:
 - `status = dikembalikan`
 - `tanggal_kembali_aktual = hari ini`
 - `denda = jumlah hari terlambat × Rp2.000`
-- Notifikasi pengembalian dibuat; pengingat lama ditandai dibaca.
+- Notifikasi pengembalian dibuat untuk **peminjam**; pengingat lama ditandai dibaca.
+- Praktikan hanya bisa mengembalikan pinjaman sendiri; admin/laboran boleh memproses pinjaman praktikan mana pun.
 
 Pengembalian kedua:
 

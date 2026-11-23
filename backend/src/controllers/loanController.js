@@ -18,7 +18,7 @@ import { kodeParamSchema, uuidParamSchema } from '../validators/toolValidator.js
 import { validate } from '../validators/validate.js';
 
 function pastikanPemilik(loan, member) {
-  if (loan.member_id !== member.id) {
+  if (loan.member_id !== member.id && member.role !== 'admin') {
     throw new ApiError(403, 'FORBIDDEN', 'Anda tidak berhak mengakses pinjaman ini');
   }
 }
@@ -54,8 +54,12 @@ export function createLoanController({ loans, tools, notifications }) {
     list: asyncHandler(async (req, res) => {
       const query = validate(loanListSchema, req.query);
       const today = todayISO();
-      const { rows, count } = await loans.listByMember(req.auth.id, query);
-      return sendList(res, rows.map((row) => serializeLoan(row, today)), {
+      const isAdmin = req.auth.role === 'admin';
+      const { rows, count } = isAdmin
+        ? await loans.listAll(query)
+        : await loans.listByMember(req.auth.id, query);
+
+      return sendList(res, rows.map((row) => serializeLoan(row, today, { member: true })), {
         total: count,
         limit: query.limit,
         offset: query.offset,
@@ -182,9 +186,11 @@ export function createLoanController({ loans, tools, notifications }) {
         throw new ApiError(409, 'CONFLICT', 'Pinjaman sudah dikembalikan');
       }
 
-      await notifications.markReadForLoan(req.auth.id, id).catch(() => {});
+      // Admin/laboran boleh memproses pengembalian; notifikasi tetap untuk peminjam.
+      const ownerId = loan.member_id;
+      await notifications.markReadForLoan(ownerId, id).catch(() => {});
       await notifications.insertMany([{
-        member_id: req.auth.id,
+        member_id: ownerId,
         tipe: 'pengembalian',
         judul: 'Pengembalian diterima',
         pesan: denda > 0
@@ -197,7 +203,7 @@ export function createLoanController({ loans, tools, notifications }) {
       }]).catch(() => {});
 
       const detail = await loans.findById(id);
-      return sendData(res, serializeLoan(detail, today));
+      return sendData(res, serializeLoan(detail, today, { member: true }));
     }),
   };
 }

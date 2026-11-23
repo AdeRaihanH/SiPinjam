@@ -105,6 +105,7 @@ export default function KatalogScreen({ navigation }) {
   const tools = toolsQuery.data;
   const stats = statsQuery.data;
   const activeLoan = activeLoansQuery.data[0];
+  const isAdmin = member?.role === 'admin';
   const hasFilter = Boolean(search || categoryId || onlyAvailable);
 
   const onRefresh = useCallback(() => {
@@ -269,6 +270,11 @@ export default function KatalogScreen({ navigation }) {
               <Text style={[styles.activeMeta, lateLoan && styles.activeMetaLate]}>
                 Jatuh tempo {formatTanggal(activeLoan.tanggal_kembali_rencana)}
               </Text>
+              {isAdmin && activeLoan.member ? (
+                <Text style={styles.activeBorrower} numberOfLines={1}>
+                  Peminjam: {activeLoan.member.nama} · {activeLoan.member.nim}
+                </Text>
+              ) : null}
             </View>
             <View style={[styles.activeArrow, lateLoan && styles.activeArrowLate]}>
               <Ionicons name="arrow-forward" size={15} color={lateLoan ? colors.danger : colors.primary} />
@@ -518,6 +524,7 @@ const styles = StyleSheet.create({
   activeTitle: { fontSize: type.sm, fontWeight: weight.bold, color: colors.text },
   activeMeta: { fontSize: type.xxs, color: colors.muted },
   activeMetaLate: { color: colors.danger, fontWeight: weight.semibold },
+  activeBorrower: { fontSize: 9.5, color: colors.faint, marginTop: 1 },
   activeArrow: {
     width: 30,
     height: 30,

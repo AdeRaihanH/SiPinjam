@@ -37,7 +37,7 @@ function dueMeta(loan) {
   };
 }
 
-export default function LoanRow({ loan, onPress, style }) {
+export default function LoanRow({ loan, onPress, style, showMember = false }) {
   const late = loan.status_efektif === 'terlambat';
   const returned = loan.status === 'dikembalikan';
   const meta = dueMeta(loan);
@@ -60,6 +60,16 @@ export default function LoanRow({ loan, onPress, style }) {
       </View>
 
       <Text style={styles.title} numberOfLines={2}>{loan.ringkasan_alat}</Text>
+
+      {showMember && loan.member ? (
+        <View style={styles.memberRow}>
+          <Ionicons name="person-outline" size={13} color={colors.muted} />
+          <Text style={styles.memberText} numberOfLines={1}>
+            Peminjam · {loan.member.nama}
+          </Text>
+          <Text style={styles.memberNim}>{loan.member.nim}</Text>
+        </View>
+      ) : null}
 
       <View style={styles.bottom}>
         <View style={styles.due}>
@@ -128,6 +138,19 @@ const styles = StyleSheet.create({
     color: colors.text,
     letterSpacing: -0.2,
   },
+  memberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingTop: 1,
+  },
+  memberText: {
+    flexShrink: 1,
+    fontSize: 11.5,
+    fontWeight: weight.semibold,
+    color: colors.muted,
+  },
+  memberNim: { fontSize: 10.5, color: colors.faint },
   bottom: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   due: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 },
   dueCopy: { flex: 1, gap: 1 },
