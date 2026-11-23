@@ -33,7 +33,11 @@ const FRAME = 236;
 
 function notify(type) {
   if (Platform.OS === 'web') return;
-  Haptics.notificationAsync(type).catch(() => {});
+  try {
+    Haptics.notificationAsync(type)?.catch(() => {});
+  } catch {
+    // Haptics tidak tersedia di Expo Go/perangkat tertentu; pemindaian tetap jalan.
+  }
 }
 
 function Corner({ style }) {
@@ -47,6 +51,7 @@ export default function ScanScreen({ navigation }) {
 
   const [torch, setTorch] = useState(false);
   const [looking, setLooking] = useState(false);
+  const [cameraError, setCameraError] = useState(false);
   const [manual, setManual] = useState('');
   const [result, setResult] = useState(null);
   const [resultOpen, setResultOpen] = useState(false);
@@ -69,8 +74,8 @@ export default function ScanScreen({ navigation }) {
 
   const isWeb = Platform.OS === 'web';
   const denied = permission && !permission.granted;
-  const cameraReady = !isWeb && permission?.granted && isFocused && !resultOpen && !notice;
-  const showPermission = isWeb || denied;
+  const cameraReady = !isWeb && !cameraError && permission?.granted && isFocused && !resultOpen && !notice;
+  const showPermission = isWeb || denied || cameraError;
 
   async function lookup(parsed) {
     if (processing.current) return;
@@ -85,9 +90,12 @@ export default function ScanScreen({ navigation }) {
       setResultOpen(true);
     } catch (error) {
       notify(Haptics.NotificationFeedbackType.Error);
+      const network = error.code === 'NETWORK_ERROR';
       setNotice({
-        title: 'Kode tidak ditemukan',
-        message: error.message,
+        title: network ? 'Server tidak terjangkau' : 'Kode tidak ditemukan',
+        message: network
+          ? `${error.message}\n\nJika memakai Expo Go, pastikan backend berjalan di laptop dan HP berada di Wi-Fi yang sama. Build APK memakai API produksi.`
+          : error.message,
       });
       resumeAt.current = Date.now() + 1500;
     } finally {
@@ -98,17 +106,25 @@ export default function ScanScreen({ navigation }) {
 
   function processRaw(raw) {
     if (processing.current || Date.now() < resumeAt.current) return;
-    const parsed = parseQr(raw);
-    if (!parsed) {
-      notify(Haptics.NotificationFeedbackType.Error);
+    try {
+      const parsed = parseQr(raw);
+      if (!parsed) {
+        notify(Haptics.NotificationFeedbackType.Error);
+        setNotice({
+          title: 'QR tidak dikenali',
+          message: 'QR ini bukan milik SiPinjam. Gunakan QR alat atau pinjaman yang tertera, bukan QR proyek Expo.',
+        });
+        resumeAt.current = Date.now() + 1800;
+        return;
+      }
+      lookup(parsed);
+    } catch {
       setNotice({
-        title: 'QR tidak dikenali',
-        message: 'QR ini bukan milik SiPinjam. Gunakan QR alat atau pinjaman yang tertera.',
+        title: 'Gagal membaca QR',
+        message: 'Coba pindai ulang dengan pencahayaan yang cukup, atau ketik kode alat secara manual.',
       });
-      resumeAt.current = Date.now() + 1800;
-      return;
+      resumeAt.current = Date.now() + 1500;
     }
-    lookup(parsed);
   }
 
   function submitManual() {
@@ -152,6 +168,15 @@ export default function ScanScreen({ navigation }) {
             facing="back"
             enableTorch={torch}
             barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+            onMountError={(event) => {
+              setCameraError(true);
+              setNotice({
+                title: 'Kamera tidak dapat dibuka',
+                message: event?.message
+                  || event?.nativeEvent?.message
+                  || 'Tutup aplikasi lain yang sedang memakai kamera, lalu coba lagi. Input kode manual tetap bisa dipakai.',
+              });
+            }}
             onBarcodeScanned={({ data }) => processRaw(data)}
           />
         ) : (
@@ -196,14 +221,30 @@ export default function ScanScreen({ navigation }) {
                 <Ionicons name="camera-outline" size={26} color={colors.primary} />
               </View>
               <Text style={styles.permissionTitle}>
-                {isWeb ? 'Kamera tersedia di aplikasi' : 'Izin kamera diperlukan'}
+                {isWeb
+                  ? 'Kamera tersedia di aplikasi'
+                  : cameraError
+                    ? 'Kamera tidak dapat dibuka'
+                    : 'Izin kamera diperlukan'}
               </Text>
               <Text style={styles.permissionText}>
                 {isWeb
                   ? 'Gunakan input kode manual di bawah untuk mencoba alur pemindaian di browser.'
-                  : 'SiPinjam memakai kamera hanya untuk membaca QR alat dan pinjaman.'}
+                  : cameraError
+                    ? 'Tutup aplikasi lain yang memakai kamera, lalu coba lagi. Input kode manual tetap bisa dipakai.'
+                    : 'SiPinjam memakai kamera hanya untuk membaca QR alat dan pinjaman.'}
               </Text>
-              {!isWeb && permission?.canAskAgain !== false ? (
+              {!isWeb && cameraError ? (
+                <Button
+                  title="Coba kamera lagi"
+                  icon="refresh"
+                  size="sm"
+                  fullWidth={false}
+                  onPress={() => setCameraError(false)}
+                  style={styles.permissionButton}
+                />
+              ) : null}
+              {!isWeb && !cameraError && permission?.canAskAgain !== false ? (
                 <Button
                   title="Izinkan kamera"
                   size="sm"
@@ -212,7 +253,7 @@ export default function ScanScreen({ navigation }) {
                   style={styles.permissionButton}
                 />
               ) : null}
-              {!isWeb && permission?.canAskAgain === false ? (
+              {!isWeb && !cameraError && permission?.canAskAgain === false ? (
                 <Button
                   title="Buka pengaturan"
                   icon="settings-outline"
@@ -289,6 +330,7 @@ export default function ScanScreen({ navigation }) {
           title="Coba lagi"
           onPress={() => {
             setNotice(null);
+            if (cameraError) setCameraError(false);
             resumeAt.current = Date.now() + 1200;
           }}
           style={styles.noticeButton}
