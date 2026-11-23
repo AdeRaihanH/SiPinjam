@@ -54,7 +54,7 @@ export default function TentangScreen() {
         </Card>
 
         <Card padded={false}>
-          <InfoRow label="Pengembang" value="Ade Raihan" />
+          <InfoRow label="Pengembang" value="Ade Raihan Hanafi" />
           <InfoRow label="NIM" value="21120124140118" />
           <InfoRow label="Mata kuliah" value="Praktikum Pemrograman Perangkat Bergerak" last />
         </Card>

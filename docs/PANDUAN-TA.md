@@ -9,7 +9,7 @@ Dokumen ini memetakan syarat tugas akhir ke implementasi, menyiapkan alur respon
 | Judul | SiPinjam: Aplikasi Peminjaman Alat Laboratorium Berbasis React Native dengan Pemindaian QR Code |
 | Platform | React Native - Expo SDK 58 |
 | Backend | Express 5 - Neon PostgreSQL - Vercel |
-| Nama | Ade Raihan |
+| Nama | Ade Raihan Hanafi |
 | NIM | 21120124140118 |
 | Repositori | https://github.com/AdeRaihanH/SiPinjam |
 

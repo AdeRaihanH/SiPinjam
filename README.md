@@ -3,7 +3,7 @@
 Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemindaian QR Code, REST API Express, dan database PostgreSQL (Neon).
 
 **Tugas Akhir Praktikum Pemrograman Perangkat Bergerak 2026**  
-Ade Raihan - NIM 21120124140118
+Ade Raihan Hanafi - NIM 21120124140118
 
 ## Fitur
 
