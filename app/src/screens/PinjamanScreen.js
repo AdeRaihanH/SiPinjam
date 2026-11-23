@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useIsFocused } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
 import { RefreshControl, StyleSheet, Text, View } from 'react-native';
@@ -46,21 +45,17 @@ const EMPTY = {
   },
 };
 
-function Stat({ value, label, icon, gold = false }) {
+function SummaryStat({ value, label, alert = false }) {
   return (
-    <View style={styles.stat}>
-      <View style={styles.statIcon}>
-        <Ionicons name={icon} size={13} color={gold ? colors.gold : colors.accent} />
-      </View>
-      <Text style={[styles.statValue, gold && styles.statValueGold]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={styles.summaryStat}>
+      <Text style={[styles.summaryValue, alert && styles.summaryAlert]}>{value}</Text>
+      <Text style={styles.summaryLabel}>{label}</Text>
     </View>
   );
 }
 
 export default function PinjamanScreen({ navigation }) {
   const insets = useSafeAreaInsets();
-  const isFocused = useIsFocused();
   const [status, setStatus] = useState('aktif');
   const loansQuery = useLoans(status);
   const statsQuery = useStats();
@@ -88,37 +83,51 @@ export default function PinjamanScreen({ navigation }) {
         <RefreshControl
           refreshing={loansQuery.refreshing}
           onRefresh={onRefresh}
-          tintColor={colors.white}
+          tintColor={colors.primary}
           colors={[colors.primary]}
           progressBackgroundColor={colors.surface}
         />
       )}
     >
-      {isFocused ? <StatusBar style="light" /> : null}
-      <LinearGradient
-        colors={gradients.hero}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[styles.hero, { paddingTop: insets.top + 4 }]}
-      >
-        <HeroGlow />
+      <StatusBar style="dark" />
+
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <PageHeader
-          tone="light"
           eyebrow="Aktivitas"
           title="Pinjaman"
           subtitle="Pantau jadwal pengembalian dan denda."
         />
-        <View style={styles.statsRow}>
-          <Stat value={stats?.total_pinjaman ?? '—'} label="Total" icon="layers-outline" />
-          <Stat value={stats?.aktif ?? '—'} label="Aktif" icon="swap-horizontal-outline" />
-          <Stat value={stats?.terlambat ?? '—'} label="Terlambat" icon="alarm-outline" gold />
+      </View>
+
+      <LinearGradient
+        colors={gradients.hero}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.summaryCard}
+      >
+        <HeroGlow />
+        <View style={styles.summaryHead}>
+          <Text style={styles.summaryEyebrow}>Ringkasan pinjaman</Text>
+          <View style={styles.summaryPill}>
+            <Ionicons name="shield-checkmark-outline" size={12} color={colors.accent} />
+            <Text style={styles.summaryPillText}>Tercatat</Text>
+          </View>
+        </View>
+        <View style={styles.summaryRow}>
+          <SummaryStat value={stats?.total_pinjaman ?? '—'} label="Total" />
+          <View style={styles.summaryDivider} />
+          <SummaryStat value={stats?.aktif ?? '—'} label="Aktif" />
+          <View style={styles.summaryDivider} />
+          <SummaryStat
+            value={stats?.terlambat ?? '—'}
+            label="Terlambat"
+            alert={Number(stats?.terlambat) > 0}
+          />
         </View>
       </LinearGradient>
 
       <View style={styles.body}>
-        <View style={styles.toolbar}>
-          <SegmentedControl options={OPTIONS} value={status} onChange={setStatus} />
-        </View>
+        <SegmentedControl options={OPTIONS} value={status} onChange={setStatus} />
 
         <View style={styles.summaryLine}>
           <Text style={styles.summaryText}>
@@ -147,7 +156,7 @@ export default function PinjamanScreen({ navigation }) {
         ) : (
           <View style={styles.list}>
             {loansQuery.data.map((loan, index) => (
-              <Reveal key={loan.id} delay={Math.min(index, 6) * 35}>
+              <Reveal key={loan.id} delay={Math.min(index, 6) * 30}>
                 <LoanRow
                   loan={loan}
                   onPress={() => navigation.navigate('DetailPinjaman', { loanId: loan.id })}
@@ -158,7 +167,9 @@ export default function PinjamanScreen({ navigation }) {
         )}
 
         <View style={styles.footerCard}>
-          <Ionicons name="information-circle-outline" size={15} color={colors.muted} />
+          <View style={styles.footerIcon}>
+            <Ionicons name="information-circle-outline" size={16} color={colors.accentInk} />
+          </View>
           <Text style={styles.footer}>
             Denda Rp2.000 per hari dihitung saat alat dikembalikan.
           </Text>
@@ -169,58 +180,44 @@ export default function PinjamanScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  content: { paddingBottom: 28 },
-  hero: {
-    paddingHorizontal: layout.screenPadding,
-    paddingBottom: 40,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+  content: { paddingBottom: 120 },
+  header: { paddingHorizontal: layout.screenPadding, paddingBottom: 16 },
+  summaryCard: {
+    marginHorizontal: layout.screenPadding,
+    borderRadius: radius.xl,
+    padding: 20,
+    gap: 18,
     overflow: 'hidden',
-    gap: 22,
+    ...shadows.lift,
   },
-  statsRow: { flexDirection: 'row', gap: 8 },
-  stat: {
-    flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.09)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    borderRadius: radius.md,
-    paddingHorizontal: 11,
-    paddingVertical: 10,
-    gap: 2,
-  },
-  statIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 2,
-  },
-  statValue: {
-    fontSize: type.lg,
-    lineHeight: 27,
-    fontWeight: weight.heavy,
-    color: colors.white,
-    letterSpacing: -0.5,
-  },
-  statValueGold: { color: colors.gold },
-  statLabel: {
+  summaryHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  summaryEyebrow: {
     fontSize: type.xxs,
-    fontWeight: weight.semibold,
-    color: 'rgba(255,255,255,0.62)',
+    fontWeight: weight.bold,
+    color: 'rgba(255,255,255,0.56)',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
+  summaryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 9,
+    height: 25,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(200,241,105,0.1)',
+  },
+  summaryPillText: { fontSize: 9.5, fontWeight: weight.bold, color: colors.accent },
+  summaryRow: { flexDirection: 'row', alignItems: 'center' },
+  summaryStat: { flex: 1, gap: 1 },
+  summaryDivider: { width: 1, height: 34, backgroundColor: 'rgba(255,255,255,0.1)' },
+  summaryValue: { fontSize: 28, fontWeight: weight.heavy, color: colors.white, letterSpacing: -1 },
+  summaryAlert: { color: '#E3A79E' },
+  summaryLabel: { fontSize: 10, fontWeight: weight.semibold, color: 'rgba(255,255,255,0.6)' },
   body: {
     paddingHorizontal: layout.screenPadding,
-    marginTop: -26,
+    paddingTop: 16,
     gap: 14,
-  },
-  toolbar: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: 5,
-    ...shadows.lift,
   },
   summaryLine: {
     flexDirection: 'row',
@@ -233,19 +230,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 8,
-    height: 24,
+    paddingHorizontal: 9,
+    height: 25,
     borderRadius: radius.pill,
     backgroundColor: colors.dangerSoft,
   },
   lateText: { fontSize: type.xxs, fontWeight: weight.bold, color: colors.danger },
-  list: { gap: 10 },
+  list: { gap: 12 },
   footerCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    marginTop: 4,
+    gap: 9,
+    backgroundColor: colors.accentSoft,
+    borderRadius: radius.md,
+    padding: 12,
+    marginTop: 2,
   },
-  footer: { fontSize: type.xxs, color: colors.faint },
+  footerIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 9,
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footer: { flex: 1, fontSize: type.xxs, lineHeight: 16, color: colors.accentInk },
 });

@@ -1,48 +1,60 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import PressableScale from './PressableScale';
-import { colors, gradients, radius, shadows, type, weight } from '../theme/tokens';
+import { colors, radius, shadows, type, weight } from '../theme/tokens';
 
 const VARIANTS = {
   primary: {
-    gradient: gradients.primary,
+    bg: colors.primary,
     fg: colors.white,
     border: 'transparent',
-    shadow: shadows.floating,
+    shadow: shadows.card,
+    iconBg: 'rgba(255,255,255,0.14)',
+    iconFg: colors.white,
   },
   secondary: {
     bg: colors.surface,
     border: colors.borderStrong,
     fg: colors.text,
+    iconBg: colors.surfaceMuted,
+    iconFg: colors.primary,
   },
   soft: {
-    bg: colors.primarySoft,
+    bg: colors.accentSoft,
     border: 'transparent',
-    fg: colors.primary,
+    fg: colors.accentInk,
+    iconBg: 'rgba(76,107,50,0.09)',
+    iconFg: colors.accentInk,
   },
   accent: {
-    gradient: gradients.accent,
-    fg: colors.white,
+    bg: colors.accentSoft,
+    fg: colors.primary,
     border: 'transparent',
-    shadow: shadows.glowAccent,
+    iconBg: 'rgba(14,42,32,0.08)',
+    iconFg: colors.primary,
   },
   ghost: {
     bg: 'transparent',
     border: 'transparent',
     fg: colors.primary,
+    iconBg: colors.primarySoft,
+    iconFg: colors.primary,
   },
   danger: {
-    gradient: gradients.danger,
+    bg: colors.danger,
     fg: colors.white,
     border: 'transparent',
-    shadow: shadows.floating,
+    shadow: shadows.card,
+    iconBg: 'rgba(255,255,255,0.14)',
+    iconFg: colors.white,
   },
   dangerSoft: {
     bg: colors.dangerSoft,
     border: 'transparent',
     fg: colors.danger,
+    iconBg: 'rgba(181,74,67,0.09)',
+    iconFg: colors.danger,
   },
 };
 
@@ -62,7 +74,7 @@ export default function Button({
 }) {
   const tone = VARIANTS[variant] || VARIANTS.primary;
   const blocked = disabled || loading;
-  const height = size === 'sm' ? 42 : size === 'lg' ? 56 : 50;
+  const height = size === 'sm' ? 44 : size === 'lg' ? 58 : 52;
 
   return (
     <PressableScale
@@ -71,12 +83,12 @@ export default function Button({
       onPress={blocked ? undefined : onPress}
       disabled={blocked}
       scaleTo={0.975}
-      hoverStyle={{ opacity: 0.9 }}
+      hoverStyle={{ opacity: 0.92 }}
       style={[
         styles.base,
         {
           height,
-          backgroundColor: tone.gradient ? 'transparent' : tone.bg,
+          backgroundColor: tone.bg,
           borderColor: tone.border,
           width: fullWidth ? '100%' : undefined,
         },
@@ -85,14 +97,6 @@ export default function Button({
         style,
       ]}
     >
-      {tone.gradient ? (
-        <LinearGradient
-          colors={tone.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[StyleSheet.absoluteFill, styles.fill]}
-        />
-      ) : null}
       {loading ? (
         <ActivityIndicator size="small" color={tone.fg} />
       ) : icon ? (
@@ -109,8 +113,8 @@ export default function Button({
         {title || children}
       </Text>
       {iconRight && !loading ? (
-        <View style={styles.iconRight}>
-          <Ionicons name={iconRight} size={size === 'sm' ? 15 : 17} color={tone.fg} />
+        <View style={[styles.iconRight, { backgroundColor: tone.iconBg }]}>
+          <Ionicons name={iconRight} size={size === 'sm' ? 13 : 15} color={tone.iconFg} />
         </View>
       ) : null}
     </PressableScale>
@@ -124,20 +128,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 18,
+    gap: 9,
+    paddingHorizontal: 20,
   },
-  fill: { borderRadius: radius.md },
-  blocked: { opacity: 0.55 },
+  blocked: { opacity: 0.5 },
   label: {
     fontWeight: weight.bold,
     letterSpacing: 0.1,
   },
   iconRight: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: 'rgba(255,255,255,0.16)',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },

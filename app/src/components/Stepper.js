@@ -18,7 +18,7 @@ export default function Stepper({ value, onChange, min = 1, max = 99, suffix = '
         scaleTo={0.9}
         style={[styles.control, decDisabled && styles.controlDisabled]}
       >
-        <Ionicons name="remove" size={20} color={decDisabled ? colors.muted : colors.primary} />
+        <Ionicons name="remove" size={20} color={decDisabled ? colors.faint : colors.text} />
       </PressableScale>
       <View style={styles.valueWrap}>
         <Text style={styles.value}>{value}</Text>
@@ -41,8 +41,8 @@ export default function Stepper({ value, onChange, min = 1, max = 99, suffix = '
 const styles = StyleSheet.create({
   root: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   control: {
-    width: 44,
-    height: 44,
+    width: 46,
+    height: 46,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
@@ -57,14 +57,15 @@ const styles = StyleSheet.create({
   controlDisabled: {
     backgroundColor: colors.surfaceMuted,
     borderColor: colors.border,
+    opacity: 0.6,
   },
   valueWrap: {
-    minWidth: 72,
+    minWidth: 78,
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'center',
     gap: 4,
   },
-  value: { fontSize: type.lg, fontWeight: weight.heavy, color: colors.text, letterSpacing: -0.5 },
+  value: { fontSize: 26, fontWeight: weight.heavy, color: colors.text, letterSpacing: -0.8 },
   suffix: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.muted },
 });

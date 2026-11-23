@@ -1,40 +1,53 @@
 export const colors = {
-  primary: '#1B2559',
-  primaryPressed: '#141C45',
-  primaryDeep: '#0E1736',
-  primarySoft: '#EEF1FA',
-  accent: '#14B8A6',
-  accentPressed: '#0E9384',
-  accentSoft: '#E6F8F5',
-  gold: '#E9A32B',
-  goldSoft: '#FEF5E3',
-  bg: '#F5F7FC',
+  // Brand — deep forest, quiet and grounded
+  primary: '#0E2A20',
+  primaryPressed: '#0A1F18',
+  primaryDeep: '#071710',
+  primarySoft: '#E8EEE7',
+  accent: '#B9CD9A',
+  accentPressed: '#A6BC84',
+  accentSoft: '#F0F4E9',
+  accentInk: '#4C6B32',
+  gold: '#B98A3E',
+  goldSoft: '#F6EFE2',
+
+  // Canvas & surfaces
+  bg: '#F4F5F2',
   surface: '#FFFFFF',
-  surfaceMuted: '#F0F3F9',
-  text: '#0F172A',
-  muted: '#64748B',
-  faint: '#94A3B8',
-  border: '#E6EAF3',
-  borderStrong: '#CBD5E1',
-  success: '#0F9D6E',
-  successSoft: '#E7F7F0',
-  warning: '#B7791F',
-  warningSoft: '#FDF3E1',
-  danger: '#D64545',
-  dangerSoft: '#FDECEC',
+  surfaceMuted: '#ECEFEA',
+  surfaceStrong: '#DEE4DC',
+
+  // Text
+  text: '#141C17',
+  muted: '#5C6961',
+  faint: '#6F7C73',
+
+  // Lines
+  border: '#E2E7E1',
+  borderStrong: '#CBD4CB',
+
+  // Status — muted, readable
+  success: '#2F7D5B',
+  successSoft: '#E9F2EC',
+  warning: '#94631A',
+  warningSoft: '#F7EFDF',
+  danger: '#B54A43',
+  dangerSoft: '#F8E9E7',
+
   white: '#FFFFFF',
-  overlay: 'rgba(10, 17, 40, 0.56)',
-  shadow: '#0B1224',
+  overlay: 'rgba(7, 23, 16, 0.6)',
+  shadow: '#07130E',
 };
 
 export const gradients = {
-  hero: ['#0E1736', '#1B2559', '#2C3C7C'],
-  primary: ['#26336F', '#1B2559'],
-  accent: ['#22C9B4', '#0E9384'],
-  success: ['#24C78E', '#0F9D6E'],
-  danger: ['#EF5B5B', '#C53030'],
-  gold: ['#F8C65A', '#E9A32B'],
-  surface: ['#FFFFFF', '#F5F7FC'],
+  hero: ['#081C15', '#0D2A20', '#16382A'],
+  primary: ['#12352A', '#0A1F18'],
+  accent: ['#D2E0BC', '#B4C993'],
+  success: ['#3E9370', '#2F7D5B'],
+  danger: ['#C96A62', '#A9433C'],
+  gold: ['#D0A865', '#B98A3E'],
+  surface: ['#FFFFFF', '#F4F5F2'],
+  limeSoft: ['#F5F8EF', '#EDF2E3'],
 };
 
 export const spacing = {
@@ -51,8 +64,8 @@ export const radius = {
   sm: 10,
   md: 14,
   lg: 20,
-  xl: 26,
-  xxl: 32,
+  xl: 24,
+  xxl: 30,
   pill: 999,
 };
 
@@ -63,7 +76,7 @@ export const type = {
   md: 16,
   lg: 22,
   xl: 30,
-  display: 34,
+  display: 36,
 };
 
 export const weight = {
@@ -77,40 +90,41 @@ export const weight = {
 export const text = {
   display: {
     fontSize: type.display,
-    lineHeight: 40,
+    lineHeight: 42,
+    fontWeight: weight.heavy,
+    color: colors.text,
+    letterSpacing: -1,
+  },
+  h1: {
+    fontSize: 28,
+    lineHeight: 35,
     fontWeight: weight.heavy,
     color: colors.text,
     letterSpacing: -0.8,
-  },
-  h1: {
-    fontSize: type.xl,
-    lineHeight: 37,
-    fontWeight: weight.heavy,
-    color: colors.text,
-    letterSpacing: -0.6,
   },
   h2: {
     fontSize: type.lg,
     lineHeight: 29,
     fontWeight: weight.bold,
     color: colors.text,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   h3: {
     fontSize: type.md,
-    lineHeight: 22,
+    lineHeight: 23,
     fontWeight: weight.semibold,
     color: colors.text,
+    letterSpacing: -0.2,
   },
   body: {
     fontSize: type.sm,
-    lineHeight: 21,
+    lineHeight: 22,
     fontWeight: weight.regular,
     color: colors.text,
   },
   small: {
     fontSize: type.xs,
-    lineHeight: 17,
+    lineHeight: 18,
     fontWeight: weight.regular,
     color: colors.muted,
   },
@@ -119,7 +133,7 @@ export const text = {
     lineHeight: 14,
     fontWeight: weight.bold,
     color: colors.muted,
-    letterSpacing: 0.7,
+    letterSpacing: 1,
     textTransform: 'uppercase',
   },
 };
@@ -127,46 +141,46 @@ export const text = {
 export const shadows = {
   card: {
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 12,
+    elevation: 1,
   },
   lift: {
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.07,
+    shadowRadius: 22,
+    elevation: 5,
   },
   sheet: {
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: -6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
+    shadowOffset: { width: 0, height: -8 },
+    shadowOpacity: 0.07,
+    shadowRadius: 24,
     elevation: 14,
   },
   floating: {
-    shadowColor: colors.primary,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.22,
-    shadowRadius: 20,
+    shadowOpacity: 0.16,
+    shadowRadius: 22,
     elevation: 10,
   },
   glowAccent: {
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 18,
-    elevation: 8,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
   },
 };
 
 export const categoryTones = {
-  elektronika: { bg: '#E9EDFA', fg: '#27357A' },
-  jaringan: { bg: colors.accentSoft, fg: '#087A6B' },
-  'alat-ukur': { bg: colors.warningSoft, fg: colors.warning },
-  komponen: { bg: '#F0EDFB', fg: '#5B4B9E' },
+  elektronika: { bg: '#E9EEF5', fg: '#3D5A78' },
+  jaringan: { bg: '#E8F0E9', fg: '#3F6B4D' },
+  'alat-ukur': { bg: '#F6EFE1', fg: '#8A6224' },
+  komponen: { bg: '#EFEBF4', fg: '#63507B' },
   lainnya: { bg: colors.surfaceMuted, fg: colors.muted },
 };
 
@@ -177,9 +191,9 @@ export function toneForCategory(slug) {
 export const statusTone = {
   dipinjam: {
     label: 'Dipinjam',
-    bg: colors.primarySoft,
-    fg: colors.primary,
-    dot: colors.primary,
+    bg: '#E9EEF5',
+    fg: '#3D5A78',
+    dot: '#3D5A78',
   },
   terlambat: {
     label: 'Terlambat',
@@ -189,14 +203,14 @@ export const statusTone = {
   },
   dikembalikan: {
     label: 'Dikembalikan',
-    bg: colors.surfaceMuted,
+    bg: '#EDF0EC',
     fg: colors.muted,
     dot: colors.muted,
   },
 };
 
 export const layout = {
-  screenPadding: 18,
+  screenPadding: 20,
   gap: 16,
   tabBarHeight: 64,
 };

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
 import {
   Pressable,
@@ -14,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import ErrorState from '../components/ErrorState';
+import HeroGlow from '../components/HeroGlow';
 import InlineNotice from '../components/InlineNotice';
 import QRCodeCard from '../components/QRCodeCard';
 import Screen from '../components/Screen';
@@ -147,6 +149,7 @@ export default function DetailPinjamanScreen({ navigation, route }) {
 
   return (
     <Screen padded={false}>
+      <StatusBar style="dark" />
       <StackHeader
         title="Detail pinjaman"
         subtitle={loan.kode}
@@ -177,11 +180,12 @@ export default function DetailPinjamanScreen({ navigation, route }) {
         ) : null}
 
         <LinearGradient
-          colors={returned ? ['#475569', '#1E293B'] : late ? gradients.danger : gradients.primary}
+          colors={returned ? ['#3C4B43', '#202D27'] : late ? gradients.danger : gradients.hero}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.statusCard}
         >
+          <HeroGlow />
           <View style={styles.statusHead}>
             <Text style={styles.statusLabel}>Status pinjaman</Text>
             <StatusPill status={loan.status_efektif} />
@@ -400,24 +404,30 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     gap: 16,
   },
-  statusCard: { gap: 6, borderRadius: radius.lg, padding: 16 },
+  statusCard: { gap: 7, borderRadius: radius.lg, padding: 18, overflow: 'hidden' },
   statusHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  statusLabel: { fontSize: type.xs, fontWeight: weight.semibold, color: 'rgba(255,255,255,0.66)' },
-  statusTitle: { fontSize: type.lg, fontWeight: weight.heavy, color: colors.white, letterSpacing: -0.3 },
-  statusMessage: { fontSize: type.xs, lineHeight: 17, color: 'rgba(255,255,255,0.74)' },
+  statusLabel: {
+    fontSize: type.xxs,
+    fontWeight: weight.bold,
+    color: 'rgba(255,255,255,0.52)',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  statusTitle: { fontSize: 24, fontWeight: weight.heavy, color: colors.white, letterSpacing: -0.6 },
+  statusMessage: { fontSize: type.xs, lineHeight: 18, color: 'rgba(255,255,255,0.66)' },
   statusMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.18)',
-    paddingTop: 10,
-    marginTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+    paddingTop: 12,
+    marginTop: 6,
   },
   statusMetaRight: { alignItems: 'flex-end' },
   statusMetaLabel: { fontSize: type.xs, color: 'rgba(255,255,255,0.6)' },
   statusMetaValue: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.white, marginTop: 2 },
-  statusMetaDanger: { color: '#FFD5D5' },
-  section: { gap: 8 },
+  statusMetaDanger: { color: '#F2C9C4' },
+  section: { gap: 10 },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -443,7 +453,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.borderStrong,
     marginTop: 3,
   },
-  timelineDotActive: { backgroundColor: colors.accent },
+  timelineDotActive: { backgroundColor: colors.accentInk },
   timelineDotDanger: { backgroundColor: colors.danger },
   timelineLine: {
     width: 1,
@@ -454,7 +464,7 @@ const styles = StyleSheet.create({
   timelineCopy: { flex: 1, paddingBottom: 14, gap: 1 },
   timelineTitle: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.text },
   timelineValue: { fontSize: type.xs, color: colors.muted },
-  fineCard: { borderColor: '#F3C9C9', gap: 7 },
+  fineCard: { borderColor: '#EFCFCB', gap: 8 },
   fineHead: { flexDirection: 'row', alignItems: 'center', gap: 7 },
   fineTitle: { flex: 1, fontSize: type.xs, fontWeight: weight.semibold, color: colors.text },
   fineTotal: { fontSize: type.sm, fontWeight: weight.bold, color: colors.danger },

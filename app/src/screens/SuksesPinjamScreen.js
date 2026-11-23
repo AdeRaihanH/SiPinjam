@@ -66,14 +66,10 @@ export default function SuksesPinjamScreen({ navigation, route }) {
           </SafeAreaView>
 
           <View style={styles.heroBody}>
-            <View style={styles.checkRingOuter}>
-              <View style={styles.checkRing}>
-                <View style={styles.check}>
-                  <Ionicons name="checkmark" size={30} color={colors.primary} />
-                </View>
-              </View>
+            <View style={styles.check}>
+              <Ionicons name="checkmark" size={30} color={colors.primary} />
             </View>
-            <Text style={styles.title}>Berhasil diajukan</Text>
+            <Text style={styles.title}>Pinjaman berhasil diajukan</Text>
             <Text style={styles.subtitle}>
               Tunjukkan QR di bawah ke laboran saat mengambil alat.
             </Text>
@@ -128,9 +124,7 @@ export default function SuksesPinjamScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   hero: {
-    paddingBottom: 58,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    paddingBottom: 66,
     overflow: 'hidden',
   },
   topBar: {
@@ -142,60 +136,45 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   close: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.16)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.22)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  closeSpacer: { width: 40 },
-  topTitle: { fontSize: type.sm, fontWeight: weight.semibold, color: 'rgba(255,255,255,0.8)' },
-  heroBody: { alignItems: 'center', gap: 7, paddingTop: 18, paddingHorizontal: 24 },
-  checkRingOuter: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.16)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
   },
-  checkRing: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  closeSpacer: { width: 42 },
+  topTitle: { fontSize: type.xs, fontWeight: weight.semibold, color: 'rgba(255,255,255,0.7)' },
+  heroBody: { alignItems: 'center', gap: 8, paddingTop: 16, paddingHorizontal: 24 },
   check: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.white,
+    width: 76,
+    height: 76,
+    borderRadius: 26,
+    backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 10,
+    transform: [{ rotate: '-4deg' }],
   },
   title: {
-    fontSize: type.lg,
+    fontSize: 26,
+    lineHeight: 33,
     fontWeight: weight.heavy,
     color: colors.white,
-    letterSpacing: -0.4,
+    letterSpacing: -0.6,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: type.xs,
-    lineHeight: 18,
-    color: 'rgba(255,255,255,0.7)',
+    lineHeight: 19,
+    color: 'rgba(255,255,255,0.62)',
     textAlign: 'center',
-    maxWidth: 290,
+    maxWidth: 300,
   },
   sheet: {
-    marginTop: -38,
+    marginTop: -44,
     marginHorizontal: layout.screenPadding,
     gap: 16,
   },
@@ -205,7 +184,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: 16,
-    paddingVertical: 11,
+    paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
   },

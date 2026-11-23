@@ -18,14 +18,12 @@ export default function UserAvatar({ nama, size = 40, inverted = false, style })
         style,
       ]}
     >
-      {!inverted ? (
-        <LinearGradient
-          colors={gradients.hero}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[StyleSheet.absoluteFill, { borderRadius: size / 2 }]}
-        />
-      ) : null}
+      <LinearGradient
+        colors={inverted ? ['#3B6A4F', '#1C4A36'] : gradients.hero}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[StyleSheet.absoluteFill, { borderRadius: size / 2 }]}
+      />
       <Text
         style={[
           styles.text,

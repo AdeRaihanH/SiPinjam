@@ -5,17 +5,31 @@ export default function HeroGlow({ tone = 'light' }) {
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <View style={[styles.blob, styles.blobTop, {
-        backgroundColor: light ? 'rgba(20,184,166,0.22)' : 'rgba(20,184,166,0.12)',
-      }]}
+      <View
+        style={[
+          styles.blob,
+          styles.blobTop,
+          { backgroundColor: light ? 'rgba(185,205,154,0.1)' : 'rgba(185,205,154,0.07)' },
+        ]}
       />
-      <View style={[styles.blob, styles.blobBottom, {
-        backgroundColor: light ? 'rgba(255,255,255,0.06)' : 'rgba(27,37,89,0.06)',
-      }]}
+      <View
+        style={[
+          styles.blob,
+          styles.blobBottom,
+          { backgroundColor: light ? 'rgba(255,255,255,0.05)' : 'rgba(12,43,33,0.05)' },
+        ]}
       />
-      <View style={[styles.ring, {
-        borderColor: light ? 'rgba(255,255,255,0.12)' : 'rgba(27,37,89,0.08)',
-      }]}
+      <View
+        style={[
+          styles.ring,
+          { borderColor: light ? 'rgba(255,255,255,0.07)' : 'rgba(12,43,33,0.05)' },
+        ]}
+      />
+      <View
+        style={[
+          styles.ringSmall,
+          { borderColor: light ? 'rgba(185,205,154,0.12)' : 'rgba(185,205,154,0.1)' },
+        ]}
       />
     </View>
   );
@@ -23,15 +37,24 @@ export default function HeroGlow({ tone = 'light' }) {
 
 const styles = StyleSheet.create({
   blob: { position: 'absolute', borderRadius: 999 },
-  blobTop: { width: 220, height: 220, top: -90, right: -70 },
-  blobBottom: { width: 260, height: 260, bottom: -130, left: -90 },
+  blobTop: { width: 240, height: 240, top: -108, right: -64 },
+  blobBottom: { width: 280, height: 280, bottom: -160, left: -100 },
   ring: {
     position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 132,
+    height: 132,
+    borderRadius: 66,
     borderWidth: 1,
-    top: 78,
-    right: 28,
+    top: 62,
+    right: 24,
+  },
+  ringSmall: {
+    position: 'absolute',
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    borderWidth: 1,
+    top: 92,
+    right: 63,
   },
 });

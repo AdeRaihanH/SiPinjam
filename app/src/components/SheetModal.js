@@ -14,7 +14,7 @@ export default function SheetModal({
   style,
 }) {
   const insets = useSafeAreaInsets();
-  const [slide] = useState(() => new Animated.Value(40));
+  const [slide] = useState(() => new Animated.Value(48));
 
   useEffect(() => {
     if (!visible) return undefined;
@@ -22,7 +22,7 @@ export default function SheetModal({
       const active = document.activeElement;
       if (active && typeof active.blur === 'function') active.blur();
     }
-    slide.setValue(40);
+    slide.setValue(48);
     const animation = Animated.spring(slide, {
       toValue: 0,
       useNativeDriver: Platform.OS !== 'web',
@@ -46,7 +46,7 @@ export default function SheetModal({
         <Animated.View
           style={[
             styles.sheet,
-            { paddingBottom: Math.max(insets.bottom, 16) },
+            { paddingBottom: Math.max(insets.bottom, 18) },
             { transform: [{ translateY: slide }] },
             style,
           ]}
@@ -64,10 +64,10 @@ export default function SheetModal({
               onPress={onClose}
               scaleTo={0.9}
               haptic={false}
-              hoverStyle={{ backgroundColor: colors.primarySoft }}
+              hoverStyle={{ backgroundColor: colors.surfaceMuted }}
               style={styles.close}
             >
-              <Ionicons name="close" size={18} color={colors.muted} />
+              <Ionicons name="close" size={18} color={colors.text} />
             </PressableScale>
           </View>
           {children}
@@ -82,35 +82,35 @@ const styles = StyleSheet.create({
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: colors.overlay },
   sheet: {
     backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    paddingHorizontal: 20,
-    paddingTop: 8,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
+    paddingHorizontal: 22,
+    paddingTop: 10,
     maxHeight: '90%',
     ...(Platform.OS === 'web' ? { width: '100%', maxWidth: 520, alignSelf: 'center' } : {}),
     ...shadows.sheet,
   },
   handle: {
     alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.borderStrong,
-    marginBottom: 14,
+    width: 42,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: colors.accent,
+    marginBottom: 16,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 18,
   },
   titleWrap: { flex: 1, gap: 2 },
-  title: { fontSize: type.md, fontWeight: weight.bold, color: colors.text },
-  subtitle: { fontSize: type.xs, lineHeight: 17, color: colors.muted },
+  title: { fontSize: 19, fontWeight: weight.heavy, color: colors.text, letterSpacing: -0.3 },
+  subtitle: { fontSize: type.xs, lineHeight: 18, color: colors.muted },
   close: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: radius.pill,
     backgroundColor: colors.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',

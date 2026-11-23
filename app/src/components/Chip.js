@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text } from 'react-native';
 
 import PressableScale from './PressableScale';
-import { colors, gradients, radius, shadows, type, weight } from '../theme/tokens';
+import { colors, radius, shadows, type, weight } from '../theme/tokens';
 
 export default function Chip({ label, icon, selected = false, onPress, style }) {
   return (
@@ -12,19 +11,11 @@ export default function Chip({ label, icon, selected = false, onPress, style }) 
       accessibilityState={{ selected }}
       onPress={onPress}
       scaleTo={0.95}
-      hoverStyle={selected ? { opacity: 0.9 } : { borderColor: colors.primary }}
+      hoverStyle={selected ? { opacity: 0.92 } : { borderColor: colors.primary, backgroundColor: colors.surfaceMuted }}
       style={[styles.chip, selected ? styles.selected : styles.idle, style]}
     >
-      {selected ? (
-        <LinearGradient
-          colors={gradients.primary}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[StyleSheet.absoluteFill, styles.fill]}
-        />
-      ) : null}
       {icon ? (
-        <Ionicons name={icon} size={14} color={selected ? colors.white : colors.muted} />
+        <Ionicons name={icon} size={14} color={selected ? colors.accent : colors.muted} />
       ) : null}
       <Text style={[styles.label, selected && styles.labelSelected]} numberOfLines={1}>
         {label}
@@ -35,25 +26,25 @@ export default function Chip({ label, icon, selected = false, onPress, style }) 
 
 const styles = StyleSheet.create({
   chip: {
-    height: 38,
+    height: 40,
     borderRadius: radius.pill,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 7,
     overflow: 'hidden',
   },
-  fill: { borderRadius: radius.pill },
   idle: {
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
   },
   selected: {
+    backgroundColor: colors.primary,
     borderWidth: 1,
-    borderColor: 'transparent',
-    ...shadows.floating,
-    shadowOpacity: 0.16,
+    borderColor: colors.primary,
+    ...shadows.card,
+    shadowOpacity: 0.12,
   },
   label: {
     fontSize: type.xs,

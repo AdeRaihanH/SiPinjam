@@ -1,8 +1,7 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
-import { colors, gradients, radius, shadows, type, weight } from '../theme/tokens';
+import { colors, radius, shadows, type, weight } from '../theme/tokens';
 
 export default function QRCodeCard({
   value,
@@ -13,22 +12,21 @@ export default function QRCodeCard({
 }) {
   return (
     <View style={[styles.card, style]}>
-      <LinearGradient
-        colors={gradients.hero}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.borderRing}
-      >
+      <View style={styles.eyebrowRow}>
+        <View style={styles.eyebrowDot} />
+        <Text style={styles.eyebrow}>QR siap dipindai</Text>
+      </View>
+      <View style={styles.qrFrame}>
         <View style={styles.qrBox}>
           <QRCode
             value={value}
             size={size}
-            color={colors.text}
+            color={colors.primaryDeep}
             backgroundColor={colors.white}
             quietZone={6}
           />
         </View>
-      </LinearGradient>
+      </View>
       {code ? <Text style={styles.code}>{code}</Text> : null}
       <Text style={styles.label}>{label}</Text>
     </View>
@@ -41,27 +39,42 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
     borderWidth: 1,
     borderColor: colors.border,
-    paddingVertical: 22,
+    paddingVertical: 24,
     paddingHorizontal: 18,
     alignItems: 'center',
-    gap: 9,
+    gap: 10,
     ...shadows.lift,
   },
-  borderRing: {
-    padding: 2,
-    borderRadius: radius.lg,
+  eyebrowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     marginBottom: 2,
+  },
+  eyebrowDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent },
+  eyebrow: {
+    fontSize: type.xxs,
+    fontWeight: weight.bold,
+    color: colors.muted,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  qrFrame: {
+    padding: 10,
+    borderRadius: radius.lg,
+    backgroundColor: colors.accentSoft,
   },
   qrBox: {
     backgroundColor: colors.white,
     padding: 8,
-    borderRadius: radius.lg - 2,
+    borderRadius: radius.md,
   },
   code: {
-    fontSize: type.md,
+    fontSize: 19,
     fontWeight: weight.heavy,
     color: colors.text,
-    letterSpacing: 1,
+    letterSpacing: 2,
+    marginTop: 2,
   },
   label: {
     fontSize: type.xs,

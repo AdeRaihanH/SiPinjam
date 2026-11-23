@@ -6,7 +6,7 @@ import PressableScale from './PressableScale';
 import { colors, radius, shadows, type } from '../theme/tokens';
 
 const webTransition = Platform.OS === 'web'
-  ? { transitionProperty: 'border-color, background-color', transitionDuration: '150ms' }
+  ? { transitionProperty: 'border-color, background-color, box-shadow', transitionDuration: '160ms' }
   : null;
 
 export default function SearchBar({ value, onChangeText, placeholder = 'Cari alat atau kode', style }) {
@@ -14,18 +14,20 @@ export default function SearchBar({ value, onChangeText, placeholder = 'Cari ala
 
   return (
     <View style={[styles.root, focused && styles.rootFocused, webTransition, style]}>
-      <Ionicons
-        name="search-outline"
-        size={19}
-        color={focused ? colors.accent : colors.muted}
-      />
+      <View style={[styles.iconWrap, focused && styles.iconWrapFocused]}>
+        <Ionicons
+          name="search-outline"
+          size={17}
+          color={focused ? colors.primary : colors.muted}
+        />
+      </View>
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.faint}
         style={styles.input}
-        selectionColor={colors.accent}
+        selectionColor={colors.primary}
         returnKeyType="search"
         autoCorrect={false}
         onFocus={() => setFocused(true)}
@@ -40,7 +42,7 @@ export default function SearchBar({ value, onChangeText, placeholder = 'Cari ala
           onPress={() => onChangeText('')}
           style={styles.clear}
         >
-          <Ionicons name="close" size={13} color={colors.muted} />
+          <Ionicons name="close" size={13} color={colors.white} />
         </PressableScale>
       ) : null}
     </View>
@@ -49,24 +51,32 @@ export default function SearchBar({ value, onChangeText, placeholder = 'Cari ala
 
 const styles = StyleSheet.create({
   root: {
-    height: 52,
+    height: 56,
     borderRadius: radius.lg,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    paddingHorizontal: 14,
+    paddingHorizontal: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    ...shadows.card,
+    gap: 9,
+    ...shadows.lift,
+    shadowOpacity: 0.06,
   },
   rootFocused: {
-    borderColor: colors.accent,
-    shadowColor: colors.accent,
-    shadowOpacity: 0.16,
-    shadowRadius: 14,
-    elevation: 3,
+    borderColor: colors.primary,
+    shadowColor: colors.primary,
+    shadowOpacity: 0.14,
   },
+  iconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 13,
+    backgroundColor: colors.surfaceMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconWrapFocused: { backgroundColor: colors.accentSoft },
   input: {
     flex: 1,
     fontSize: type.sm,
@@ -74,10 +84,10 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   clear: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: colors.surfaceMuted,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },

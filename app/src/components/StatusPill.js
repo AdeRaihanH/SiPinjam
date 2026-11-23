@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { radius, statusTone, type, weight } from '../theme/tokens';
+import { radius, statusTone, weight } from '../theme/tokens';
 
 export default function StatusPill({ status, style }) {
   const tone = statusTone[status] || statusTone.dikembalikan;
@@ -13,8 +13,8 @@ export default function StatusPill({ status, style }) {
 
 const styles = StyleSheet.create({
   pill: {
-    height: 24,
-    paddingHorizontal: 8,
+    height: 26,
+    paddingHorizontal: 10,
     borderRadius: radius.pill,
     flexDirection: 'row',
     alignItems: 'center',
@@ -22,5 +22,5 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   dot: { width: 6, height: 6, borderRadius: 3 },
-  text: { fontSize: type.xs, fontWeight: weight.semibold },
+  text: { fontSize: 11, fontWeight: weight.bold },
 });

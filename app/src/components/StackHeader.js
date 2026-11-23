@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, Text, View } from 'react-native';
 
 import PressableScale from './PressableScale';
-import { colors, type, weight } from '../theme/tokens';
+import { colors, radius, type, weight } from '../theme/tokens';
 
 export default function StackHeader({
   title,
@@ -25,7 +25,7 @@ export default function StackHeader({
         hitSlop={8}
         onPress={onBack || (() => navigation.goBack())}
         scaleTo={0.9}
-        hoverStyle={{ backgroundColor: colors.primarySoft }}
+        hoverStyle={{ backgroundColor: colors.surfaceMuted }}
         style={[styles.back, light && styles.backLight]}
       >
         <Ionicons
@@ -51,15 +51,15 @@ const styles = StyleSheet.create({
   root: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     paddingTop: 2,
-    paddingBottom: 12,
-    gap: 11,
+    paddingBottom: 14,
+    gap: 12,
   },
   back: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: radius.pill,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
@@ -67,13 +67,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   backLight: {
-    backgroundColor: 'rgba(255,255,255,0.16)',
-    borderColor: 'rgba(255,255,255,0.22)',
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   copy: { flex: 1, gap: 1 },
-  title: { fontSize: type.md, fontWeight: weight.bold, color: colors.text, letterSpacing: -0.2 },
+  title: { fontSize: 17, fontWeight: weight.bold, color: colors.text, letterSpacing: -0.3 },
   titleLight: { color: colors.white },
   subtitle: { fontSize: type.xs, color: colors.muted },
-  subtitleLight: { color: 'rgba(255,255,255,0.68)' },
-  spacer: { width: 40, height: 40 },
+  subtitleLight: { color: 'rgba(255,255,255,0.62)' },
+  spacer: { width: 42, height: 42 },
 });

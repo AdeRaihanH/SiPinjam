@@ -63,7 +63,7 @@ function BootScreen() {
   return (
     <SafeAreaView style={styles.boot} edges={['top', 'bottom']}>
       <View style={styles.bootInner}>
-        <BrandMark size={68} tone="light" />
+        <BrandMark size={72} tone="light" />
         <View style={styles.bootText}>
           <Text style={styles.bootTitle}>SiPinjam</Text>
           <Text style={styles.bootSubtitle}>Menyiapkan laboratorium...</Text>
@@ -118,7 +118,7 @@ export default function RootNavigator() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
-  webRoot: { backgroundColor: '#E6EAF2' },
+  webRoot: { backgroundColor: '#E4EBE2' },
   frame: { flex: 1 },
   webFrame: {
     width: '100%',
@@ -127,17 +127,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
     borderLeftWidth: 1,
     borderRightWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#D7E1D7',
   },
   boot: {
     flex: 1,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDeep,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 28,
+    gap: 30,
   },
-  bootInner: { alignItems: 'center', gap: 16 },
+  bootInner: { alignItems: 'center', gap: 18 },
   bootText: { alignItems: 'center', gap: 4 },
   bootTitle: { ...text.h1, color: colors.white },
-  bootSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.66)' },
+  bootSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.56)' },
 });

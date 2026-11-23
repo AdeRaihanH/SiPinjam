@@ -1,4 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { addDays, differenceInCalendarDays, format, parseISO, startOfDay } from 'date-fns';
 import { useRef, useState } from 'react';
 import {
@@ -20,15 +22,26 @@ import Screen from '../components/Screen';
 import SectionTitle from '../components/SectionTitle';
 import StackHeader from '../components/StackHeader';
 import Stepper from '../components/Stepper';
+import StockBadge from '../components/StockBadge';
 import ToolPhoto from '../components/ToolPhoto';
 import { loansApi } from '../api/loans';
 import { useNotificationBadge } from '../context/NotificationContext';
 import { useToolDetail } from '../hooks/useToolDetail';
 import { formatRupiah, formatTanggal } from '../lib/format';
-import { colors, layout, shadows, type, weight } from '../theme/tokens';
+import { colors, gradients, layout, radius, shadows, type, weight } from '../theme/tokens';
 
 function tomorrowISO() {
   return format(addDays(new Date(), 1), 'yyyy-MM-dd');
+}
+
+function SummaryItem({ icon, label, value }) {
+  return (
+    <View style={styles.summaryItem}>
+      <Ionicons name={icon} size={16} color={colors.accent} />
+      <Text style={styles.summaryLabel}>{label}</Text>
+      <Text style={styles.summaryValue}>{value}</Text>
+    </View>
+  );
 }
 
 export default function FormPinjamScreen({ navigation, route }) {
@@ -78,6 +91,7 @@ export default function FormPinjamScreen({ navigation, route }) {
 
   return (
     <Screen padded={false}>
+      <StatusBar style="dark" />
       <StackHeader title="Ajukan pinjaman" subtitle={tool?.kode} />
       <KeyboardAvoidingView
         style={styles.flex}
@@ -90,13 +104,11 @@ export default function FormPinjamScreen({ navigation, route }) {
           showsVerticalScrollIndicator={false}
         >
           <Card style={styles.toolCard}>
-            <ToolPhoto tool={tool} width={56} height={56} />
+            <ToolPhoto tool={tool} width={62} height={62} />
             <View style={styles.toolCopy}>
               <Text style={styles.toolName} numberOfLines={2}>{tool?.nama}</Text>
               <Text style={styles.toolMeta}>{tool?.kode} · {tool?.kategori?.nama}</Text>
-              <Text style={[styles.toolStock, habis && { color: colors.danger }]}>
-                {habis ? 'Stok habis' : `${stok} unit tersedia`}
-              </Text>
+              <StockBadge stok={stok} compact />
             </View>
           </Card>
 
@@ -109,7 +121,7 @@ export default function FormPinjamScreen({ navigation, route }) {
           ) : null}
 
           <View style={styles.section}>
-            <SectionTitle title="Jumlah unit" subtitle={`Maksimal ${stok} unit`} />
+            <SectionTitle title="Jumlah unit" subtitle={`Maksimal ${stok} unit tersedia`} />
             <Card style={styles.stepperCard}>
               <Stepper
                 value={jumlahDipilih}
@@ -140,29 +152,29 @@ export default function FormPinjamScreen({ navigation, route }) {
             maxLength={500}
           />
 
-          <Card style={styles.summary}>
+          <LinearGradient
+            colors={gradients.hero}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.summary}
+          >
+            <Text style={styles.summaryEyebrow}>Ringkasan pinjaman</Text>
             <View style={styles.summaryRow}>
-              <View style={styles.summaryItem}>
-                <Ionicons name="cube-outline" size={17} color={colors.muted} />
-                <Text style={styles.summaryLabel}>Jumlah</Text>
-                <Text style={styles.summaryValue}>{jumlahDipilih} unit</Text>
-              </View>
+              <SummaryItem icon="cube-outline" label="Jumlah" value={`${jumlahDipilih} unit`} />
               <View style={styles.summaryDivider} />
-              <View style={styles.summaryItem}>
-                <Ionicons name="time-outline" size={17} color={colors.muted} />
-                <Text style={styles.summaryLabel}>Durasi</Text>
-                <Text style={styles.summaryValue}>
-                  {durasi === 0 ? 'Hari ini' : `${durasi} hari`}
-                </Text>
-              </View>
+              <SummaryItem
+                icon="time-outline"
+                label="Durasi"
+                value={durasi === 0 ? 'Hari ini' : `${durasi} hari`}
+              />
               <View style={styles.summaryDivider} />
-              <View style={styles.summaryItem}>
-                <Ionicons name="calendar-outline" size={17} color={colors.muted} />
-                <Text style={styles.summaryLabel}>Kembali</Text>
-                <Text style={styles.summaryValue}>{formatTanggal(tanggal, 'd MMM')}</Text>
-              </View>
+              <SummaryItem
+                icon="calendar-outline"
+                label="Kembali"
+                value={formatTanggal(tanggal, 'd MMM')}
+              />
             </View>
-          </Card>
+          </LinearGradient>
 
           <InlineNotice
             tone="info"
@@ -189,7 +201,7 @@ export default function FormPinjamScreen({ navigation, route }) {
           </View>
           <Button
             title={habis ? 'Stok habis' : 'Ajukan peminjaman'}
-            icon={habis ? undefined : 'arrow-forward'}
+            iconRight={habis ? undefined : 'arrow-forward'}
             loading={submitting}
             disabled={habis}
             onPress={submit}
@@ -208,20 +220,32 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     gap: 16,
   },
-  toolCard: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  toolCopy: { flex: 1, gap: 2 },
-  toolName: { fontSize: type.sm, fontWeight: weight.semibold, color: colors.text },
+  toolCard: { flexDirection: 'row', alignItems: 'center', gap: 13 },
+  toolCopy: { flex: 1, gap: 3 },
+  toolName: { fontSize: type.sm, fontWeight: weight.bold, color: colors.text },
   toolMeta: { fontSize: type.xs, color: colors.muted },
-  toolStock: { fontSize: type.xs, color: colors.success, fontWeight: weight.semibold },
-  section: { gap: 8 },
-  stepperCard: { gap: 8 },
+  section: { gap: 10 },
+  stepperCard: { gap: 10 },
   helper: { fontSize: type.xs, color: colors.muted },
-  summary: { paddingVertical: 14 },
+  summary: {
+    borderRadius: radius.lg,
+    padding: 18,
+    gap: 14,
+    overflow: 'hidden',
+    ...shadows.lift,
+  },
+  summaryEyebrow: {
+    fontSize: type.xxs,
+    fontWeight: weight.bold,
+    color: 'rgba(255,255,255,0.5)',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
   summaryRow: { flexDirection: 'row', alignItems: 'center' },
-  summaryItem: { flex: 1, alignItems: 'center', gap: 3 },
-  summaryDivider: { width: 1, height: 32, backgroundColor: colors.border },
-  summaryLabel: { fontSize: type.xs, color: colors.muted },
-  summaryValue: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.text },
+  summaryItem: { flex: 1, gap: 3 },
+  summaryDivider: { width: 1, height: 36, backgroundColor: 'rgba(255,255,255,0.1)' },
+  summaryLabel: { fontSize: 9.5, color: 'rgba(255,255,255,0.5)' },
+  summaryValue: { fontSize: type.xs, fontWeight: weight.bold, color: colors.white },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -234,8 +258,8 @@ const styles = StyleSheet.create({
     ...shadows.sheet,
     shadowOpacity: 0.04,
   },
-  footerCopy: { width: 96, gap: 1 },
-  footerLabel: { fontSize: type.xs, color: colors.muted },
+  footerCopy: { width: 102, gap: 1 },
+  footerLabel: { fontSize: type.xxs, color: colors.muted },
   footerValue: { fontSize: type.sm, fontWeight: weight.bold, color: colors.text },
   footerButton: { flex: 1 },
 });

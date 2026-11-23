@@ -3,13 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useIsFocused } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback } from 'react';
-import {
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Button from '../components/Button';
@@ -36,7 +30,7 @@ function HistoryRow({ item, last }) {
       <View style={styles.historyCopy}>
         <Text style={styles.historyCode}>{item.kode}</Text>
         <Text style={styles.historyMeta} numberOfLines={1}>
-          {item.member_nama || 'Praktikan'} • {formatTanggal(item.tanggal_pinjam)}
+          {item.member_nama || 'Praktikan'} · {formatTanggal(item.tanggal_pinjam)}
         </Text>
       </View>
       <View style={styles.historyRight}>
@@ -49,10 +43,12 @@ function HistoryRow({ item, last }) {
   );
 }
 
-function InfoTile({ icon, label, value }) {
+function InfoTile({ icon, label, value, last = false }) {
   return (
-    <View style={styles.infoTile}>
-      <Ionicons name={icon} size={16} color={colors.accent} />
+    <View style={[styles.infoTile, !last && styles.infoDivider]}>
+      <View style={styles.infoIcon}>
+        <Ionicons name={icon} size={15} color={colors.primary} />
+      </View>
       <Text style={styles.infoLabel}>{label}</Text>
       <Text style={styles.infoValue} numberOfLines={1}>{value}</Text>
     </View>
@@ -76,10 +72,10 @@ export default function DetailAlatScreen({ navigation, route }) {
       <Screen padded={false}>
         <StackHeader title="Detail alat" subtitle="Memuat..." />
         <View style={styles.loading}>
-          <Skeleton height={240} radius={20} />
+          <Skeleton height={260} radius={20} />
           <Skeleton height={26} width="72%" />
           <Skeleton height={16} width="48%" />
-          <Skeleton height={100} radius={20} />
+          <Skeleton height={104} radius={20} />
         </View>
       </Screen>
     );
@@ -113,15 +109,10 @@ export default function DetailAlatScreen({ navigation, route }) {
         )}
       >
         <View style={styles.hero}>
-          <ToolPhoto
-            tool={tool}
-            width="100%"
-            height={300}
-            rounded={0}
-          />
+          <ToolPhoto tool={tool} width="100%" height={320} rounded={0} />
           <LinearGradient
-            colors={['rgba(10,17,40,0.68)', 'rgba(10,17,40,0.04)', 'rgba(10,17,40,0.78)']}
-            locations={[0, 0.42, 1]}
+            colors={['rgba(7,23,16,0.7)', 'rgba(7,23,16,0.02)', 'rgba(7,23,16,0.82)']}
+            locations={[0, 0.4, 1]}
             style={StyleSheet.absoluteFill}
           />
           <SafeAreaView edges={['top']} style={styles.heroHeader}>
@@ -145,11 +136,11 @@ export default function DetailAlatScreen({ navigation, route }) {
           <View style={styles.heading}>
             <Text style={styles.title}>{tool.nama}</Text>
             <Text style={styles.meta}>
-              {tool.kode} • {tool.kategori?.nama || 'Alat laboratorium'}
+              {tool.kode} · {tool.kategori?.nama || 'Alat laboratorium'}
             </Text>
           </View>
 
-          <View style={styles.infoGrid}>
+          <View style={styles.infoCard}>
             <InfoTile
               icon="cube-outline"
               label="Tersedia"
@@ -164,6 +155,7 @@ export default function DetailAlatScreen({ navigation, route }) {
               icon="pricetag-outline"
               label="Kategori"
               value={tool.kategori?.nama || '-'}
+              last
             />
           </View>
 
@@ -228,13 +220,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   content: { paddingBottom: 24 },
-  hero: { height: 300, backgroundColor: colors.primaryDeep },
+  hero: { height: 320, backgroundColor: colors.primaryDeep },
   heroHeader: { position: 'absolute', top: 0, left: 0, right: 0 },
   heroBadges: {
     position: 'absolute',
     left: layout.screenPadding,
     right: layout.screenPadding,
-    bottom: 42,
+    bottom: 46,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -243,64 +235,79 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    height: 24,
+    height: 25,
     paddingHorizontal: 9,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.16)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.22)',
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   conditionText: { fontSize: type.xxs, fontWeight: weight.semibold, color: colors.white },
   sheet: {
-    marginTop: -26,
+    marginTop: -28,
     backgroundColor: colors.bg,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
     paddingHorizontal: layout.screenPadding,
-    paddingTop: 22,
+    paddingTop: 24,
     paddingBottom: 26,
-    gap: 18,
+    gap: 20,
   },
   heading: { gap: 4 },
-  title: { ...text.h2 },
+  title: { ...text.h2, fontSize: 24, lineHeight: 31, letterSpacing: -0.6 },
   meta: { fontSize: type.xs, color: colors.muted },
-  infoGrid: { flexDirection: 'row', gap: 8 },
-  infoTile: {
-    flex: 1,
+  infoCard: {
+    flexDirection: 'row',
     backgroundColor: colors.surface,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: 10,
-    paddingVertical: 11,
-    gap: 3,
+    paddingVertical: 14,
+    ...shadows.card,
+  },
+  infoTile: { flex: 1, alignItems: 'center', gap: 3, paddingHorizontal: 6 },
+  infoDivider: { borderRightWidth: 1, borderRightColor: colors.border },
+  infoIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
   },
   infoLabel: {
-    fontSize: type.xxs,
-    fontWeight: weight.semibold,
+    fontSize: 9,
+    fontWeight: weight.bold,
     color: colors.muted,
     textTransform: 'uppercase',
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
+    textAlign: 'center',
   },
-  infoValue: { fontSize: type.xs, fontWeight: weight.bold, color: colors.text },
-  section: { gap: 9 },
-  description: { fontSize: type.sm, lineHeight: 21, color: colors.text },
+  infoValue: {
+    fontSize: type.xs,
+    fontWeight: weight.bold,
+    color: colors.text,
+    textAlign: 'center',
+  },
+  section: { gap: 10 },
+  description: { fontSize: type.sm, lineHeight: 22, color: colors.muted },
   historyRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 13,
   },
   rowBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
   },
   historyIcon: {
-    width: 30,
-    height: 30,
+    width: 32,
+    height: 32,
     borderRadius: 10,
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.accentSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -324,7 +331,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     backgroundColor: colors.surface,
     ...shadows.sheet,
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.04,
   },
   footerCopy: { width: 92, gap: 1 },
   footerLabel: { fontSize: type.xxs, color: colors.muted },

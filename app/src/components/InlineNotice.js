@@ -5,10 +5,10 @@ import PressableScale from './PressableScale';
 import { colors, radius, type, weight } from '../theme/tokens';
 
 const TONES = {
-  info: { bg: colors.primarySoft, border: '#DDE3F5', fg: colors.primary },
-  success: { bg: colors.successSoft, border: '#CFEFE2', fg: colors.success },
-  warning: { bg: colors.warningSoft, border: '#F6E3C2', fg: colors.warning },
-  danger: { bg: colors.dangerSoft, border: '#F7D6D6', fg: colors.danger },
+  info: { bg: colors.primarySoft, fg: colors.primary },
+  success: { bg: colors.successSoft, fg: colors.success },
+  warning: { bg: colors.warningSoft, fg: colors.warning },
+  danger: { bg: colors.dangerSoft, fg: colors.danger },
 };
 
 export default function InlineNotice({
@@ -24,8 +24,8 @@ export default function InlineNotice({
   const iconName = icon || (tone === 'danger' ? 'alert-circle' : tone === 'warning' ? 'warning' : 'information-circle');
 
   return (
-    <View style={[styles.root, { backgroundColor: palette.bg, borderColor: palette.border }, style]}>
-      <View style={[styles.iconWrap, { backgroundColor: 'rgba(255,255,255,0.62)' }]}>
+    <View style={[styles.root, { backgroundColor: palette.bg }, style]}>
+      <View style={styles.iconWrap}>
         <Ionicons name={iconName} size={17} color={palette.fg} />
       </View>
       <View style={styles.copy}>
@@ -50,21 +50,21 @@ export default function InlineNotice({
 const styles = StyleSheet.create({
   root: {
     borderRadius: radius.md,
-    borderWidth: 1,
-    padding: 12,
+    padding: 14,
     flexDirection: 'row',
-    gap: 10,
+    gap: 11,
   },
   iconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 11,
+    backgroundColor: 'rgba(255,255,255,0.66)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   copy: { flex: 1, gap: 2, paddingTop: 1 },
-  title: { fontSize: type.xs, fontWeight: weight.bold },
-  message: { fontSize: type.xs, lineHeight: 17, color: colors.text },
-  action: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4, alignSelf: 'flex-start' },
+  title: { fontSize: type.xs, fontWeight: weight.bold, lineHeight: 17 },
+  message: { fontSize: type.xs, lineHeight: 18, color: colors.text },
+  action: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 5, alignSelf: 'flex-start' },
   actionText: { fontSize: type.xs, fontWeight: weight.bold },
 });

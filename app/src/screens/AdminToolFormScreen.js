@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -80,6 +81,7 @@ export default function AdminToolFormScreen({ navigation, route }) {
 
   return (
     <Screen padded={false}>
+      <StatusBar style="dark" />
       <StackHeader
         title={tool ? 'Edit alat' : 'Tambah alat'}
         subtitle={tool ? tool.kode : 'Admin / inventaris'}
@@ -226,21 +228,28 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     gap: 15,
   },
-  intro: { gap: 3, paddingVertical: 6 },
+  intro: { gap: 4, paddingVertical: 8 },
   kicker: {
     fontSize: type.xxs,
     fontWeight: weight.bold,
-    color: colors.primary,
+    color: colors.muted,
     letterSpacing: 1,
+    textTransform: 'uppercase',
   },
-  title: { fontSize: 28, lineHeight: 34, fontWeight: weight.heavy, color: colors.text, letterSpacing: -0.8 },
-  subtitle: { fontSize: type.xs, lineHeight: 18, color: colors.muted },
-  section: { gap: 8 },
-  label: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.text },
-  helper: { fontSize: type.xs, lineHeight: 17, color: colors.muted },
+  title: { fontSize: 28, lineHeight: 35, fontWeight: weight.heavy, color: colors.text, letterSpacing: -0.8 },
+  subtitle: { fontSize: type.xs, lineHeight: 19, color: colors.muted },
+  section: { gap: 9 },
+  label: {
+    fontSize: type.xxs,
+    fontWeight: weight.bold,
+    color: colors.muted,
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
+  },
+  helper: { fontSize: type.xs, lineHeight: 18, color: colors.muted },
   helperDanger: { fontSize: type.xs, color: colors.danger },
   chips: { gap: 8 },
-  stockCard: { paddingVertical: 13 },
+  stockCard: { paddingVertical: 15 },
   stockHead: { gap: 12 },
   stockCopy: { gap: 2 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

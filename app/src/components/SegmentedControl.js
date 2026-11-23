@@ -15,8 +15,8 @@ export default function SegmentedControl({ options, value, onChange, style }) {
     Animated.spring(slide, {
       toValue: index,
       useNativeDriver: Platform.OS !== 'web',
-      speed: 30,
-      bounciness: 7,
+      speed: 32,
+      bounciness: 5,
     }).start();
   }, [index, slide]);
 
@@ -74,14 +74,14 @@ const styles = StyleSheet.create({
     top: 4,
     left: 4,
     bottom: 4,
-    borderRadius: radius.sm,
+    borderRadius: radius.sm + 2,
     backgroundColor: colors.surface,
     ...shadows.card,
     shadowOpacity: 0.1,
   },
   item: {
     flex: 1,
-    height: 36,
+    height: 38,
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',

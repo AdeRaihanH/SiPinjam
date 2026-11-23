@@ -1,12 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
-import {
-  RefreshControl,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import Card from '../components/Card';
 import HeroGlow from '../components/HeroGlow';
@@ -21,11 +17,15 @@ import { useStats } from '../hooks/useStats';
 import { APP_VERSION } from '../lib/appInfo';
 import { confirmAction, showMessage } from '../lib/dialog';
 import { formatRupiah } from '../lib/format';
-import { colors, gradients, layout, radius, type, weight } from '../theme/tokens';
+import { colors, gradients, layout, radius, shadows, type, weight } from '../theme/tokens';
 
-function Metric({ label, value, tone = colors.text, small = false }) {
+function Metric({ label, value, icon, tone = colors.text, small = false }) {
   return (
     <View style={styles.metric}>
+      <View style={styles.metricHead}>
+        <Text style={styles.metricLabel}>{label}</Text>
+        <Ionicons name={icon} size={14} color={colors.faint} />
+      </View>
       <Text
         style={[styles.metricValue, small && styles.metricValueSmall, { color: tone }]}
         numberOfLines={1}
@@ -33,7 +33,6 @@ function Metric({ label, value, tone = colors.text, small = false }) {
       >
         {value}
       </Text>
-      <Text style={styles.metricLabel}>{label}</Text>
     </View>
   );
 }
@@ -46,7 +45,7 @@ function MenuRow({ icon, label, description, onPress, danger = false, last = fal
       scaleTo={0.99}
       style={[styles.menuRow, !last && styles.menuBorder]}
     >
-      <View style={[styles.menuIcon, danger && { backgroundColor: colors.dangerSoft }]}>
+      <View style={[styles.menuIcon, danger && styles.menuIconDanger]}>
         <Ionicons name={icon} size={18} color={danger ? colors.danger : colors.primary} />
       </View>
       <View style={styles.menuCopy}>
@@ -104,12 +103,15 @@ export default function ProfilScreen({ navigation }) {
         />
       )}
     >
-      <PageHeader
-        eyebrow="Akun laboratorium"
-        title="Profil"
-        subtitle="Kelola akun dan lihat ringkasan aktivitas."
-        style={styles.header}
-      />
+      <StatusBar style="dark" />
+
+      <View style={styles.header}>
+        <PageHeader
+          eyebrow="Akun laboratorium"
+          title="Profil"
+          subtitle="Kelola akun dan lihat ringkasan aktivitas."
+        />
+      </View>
 
       <LinearGradient
         colors={gradients.hero}
@@ -120,20 +122,18 @@ export default function ProfilScreen({ navigation }) {
         <HeroGlow />
         <View style={styles.identityTop}>
           <View style={styles.avatarRing}>
-            <UserAvatar nama={member?.nama} size={58} inverted />
+            <UserAvatar nama={member?.nama} size={60} inverted />
           </View>
           <View style={styles.identityCopy}>
+            <Text style={styles.identityRole}>
+              {member?.role === 'laboran' ? 'Laboran' : member?.role === 'admin' ? 'Admin' : 'Praktikan'}
+            </Text>
             <Text style={styles.name} numberOfLines={1}>{member?.nama}</Text>
             <Text style={styles.nim}>{member?.nim}</Text>
           </View>
-          <View style={styles.role}>
-            <Text style={styles.roleText}>
-              {member?.role === 'laboran' ? 'Laboran' : member?.role === 'admin' ? 'Admin' : 'Praktikan'}
-            </Text>
-          </View>
         </View>
         <View style={styles.identityFooter}>
-          <Ionicons name="mail-outline" size={14} color="rgba(255,255,255,0.7)" />
+          <Ionicons name="mail-outline" size={14} color="rgba(255,255,255,0.6)" />
           <Text style={styles.email}>{member?.email || '-'}</Text>
           <View style={styles.activePill}>
             <View style={styles.activeDot} />
@@ -143,14 +143,16 @@ export default function ProfilScreen({ navigation }) {
       </LinearGradient>
 
       <View style={styles.statsGrid}>
-        <Metric label="Total pinjaman" value={stats?.total_pinjaman ?? '—'} />
-        <Metric label="Sedang aktif" value={stats?.aktif ?? '—'} />
+        <Metric icon="layers-outline" label="Total pinjaman" value={stats?.total_pinjaman ?? '—'} />
+        <Metric icon="swap-horizontal-outline" label="Sedang aktif" value={stats?.aktif ?? '—'} />
         <Metric
+          icon="alarm-outline"
           label="Terlambat"
           value={stats?.terlambat ?? '—'}
           tone={stats?.terlambat > 0 ? colors.danger : colors.text}
         />
         <Metric
+          icon="wallet-outline"
           label="Denda berjalan"
           value={stats ? formatRupiah(stats.denda_berjalan) : '—'}
           tone={stats?.denda_berjalan > 0 ? colors.danger : colors.text}
@@ -168,6 +170,7 @@ export default function ProfilScreen({ navigation }) {
         />
       ) : null}
 
+      <Text style={styles.sectionLabel}>Pengaturan</Text>
       <Card padded={false} style={styles.menu}>
         {member?.role === 'admin' ? (
           <MenuRow
@@ -208,15 +211,14 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: layout.screenPadding,
     paddingTop: 4,
-    paddingBottom: 28,
+    paddingBottom: 120,
     gap: 14,
   },
   header: { marginBottom: 2 },
   identity: {
     borderRadius: radius.xl,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    ...shadows.lift,
   },
   identityTop: {
     flexDirection: 'row',
@@ -226,43 +228,42 @@ const styles = StyleSheet.create({
   },
   avatarRing: {
     padding: 2,
-    borderRadius: 32,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.34)',
+    borderRadius: 34,
+    borderWidth: 1,
+    borderColor: 'rgba(200,221,178,0.4)',
   },
-  identityCopy: { flex: 1, gap: 2 },
-  name: { fontSize: type.lg - 2, fontWeight: weight.heavy, color: colors.white, letterSpacing: -0.4 },
-  nim: { fontSize: type.xs, color: 'rgba(255,255,255,0.66)' },
-  role: {
-    height: 26,
-    paddingHorizontal: 10,
-    borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.16)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  identityCopy: { flex: 1, gap: 1 },
+  identityRole: {
+    fontSize: 9,
+    fontWeight: weight.bold,
+    color: colors.accent,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 2,
   },
-  roleText: { fontSize: type.xxs, fontWeight: weight.bold, color: colors.white, letterSpacing: 0.4 },
+  name: { fontSize: 20, fontWeight: weight.heavy, color: colors.white, letterSpacing: -0.4 },
+  nim: { fontSize: type.xs, color: 'rgba(255,255,255,0.56)' },
   identityFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.16)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
     paddingHorizontal: 18,
     paddingVertical: 12,
   },
-  email: { flex: 1, fontSize: type.xs, color: 'rgba(255,255,255,0.72)' },
+  email: { flex: 1, fontSize: type.xs, color: 'rgba(255,255,255,0.62)' },
   activePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 7,
-    height: 20,
+    gap: 5,
+    paddingHorizontal: 8,
+    height: 21,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(20,184,166,0.2)',
+    backgroundColor: 'rgba(185,205,154,0.12)',
   },
   activeDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.accent },
-  activeText: { fontSize: 9, fontWeight: weight.bold, color: '#8FF0E3', letterSpacing: 0.4 },
+  activeText: { fontSize: 9, fontWeight: weight.bold, color: colors.accent, letterSpacing: 0.3 },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -275,51 +276,62 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
-    paddingHorizontal: 13,
-    paddingVertical: 12,
-    gap: 3,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    gap: 6,
   },
-  metricValue: {
-    fontSize: type.lg - 2,
-    fontWeight: weight.heavy,
-    color: colors.text,
-    letterSpacing: -0.4,
-  },
-  metricValueSmall: { fontSize: type.md },
+  metricHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6 },
   metricLabel: {
-    fontSize: type.xxs,
-    fontWeight: weight.semibold,
+    fontSize: 9,
+    fontWeight: weight.bold,
     color: colors.muted,
     textTransform: 'uppercase',
-    letterSpacing: 0.3,
+    letterSpacing: 0.6,
+  },
+  metricValue: {
+    fontSize: 23,
+    fontWeight: weight.heavy,
+    color: colors.text,
+    letterSpacing: -0.6,
+  },
+  metricValueSmall: { fontSize: type.md },
+  sectionLabel: {
+    fontSize: type.xxs,
+    fontWeight: weight.bold,
+    color: colors.muted,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginTop: 4,
+    marginLeft: 2,
   },
   menu: { overflow: 'hidden' },
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 11,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
+    gap: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 14,
   },
   menuBorder: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
   },
   menuIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: radius.md,
+    width: 40,
+    height: 40,
+    borderRadius: 13,
     backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  menuIconDanger: { backgroundColor: colors.dangerSoft },
   menuCopy: { flex: 1, gap: 2 },
   menuLabel: { fontSize: type.sm, fontWeight: weight.semibold, color: colors.text },
   menuDescription: { fontSize: type.xs, color: colors.muted },
   menuChevron: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 26,
+    height: 26,
+    borderRadius: radius.pill,
     backgroundColor: colors.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',

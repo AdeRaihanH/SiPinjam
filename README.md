@@ -26,6 +26,19 @@ Ade Raihan Hanafi - NIM 21120124140118
 - Profil, kebijakan peminjaman, Tentang aplikasi, versi, base URL API, kredit, dan lisensi.
 - Admin: tambah, edit, dan hapus alat; QR alat otomatis; simpan PNG atau cetak.
 - Empat keadaan layar: loading, kosong, error dengan tombol coba lagi, dan berisi.
+- Dialog konfirmasi dan pesan memakai modal in-app yang konsisten di web, Android, dan Windows (bukan alert browser).
+
+## Arah desain
+
+Redesign 2026 memakai arah **“Forest & Sage”**: hijau pinus dalam sebagai warna utama, sage muted sebagai aksen kecil, dan kanvas cool-mist. Tidak ada gradient neon atau glow berlebihan; CTA utama memakai forest, sedangkan sage hanya muncul pada status, ikon, dan detail kecil.
+
+- Token warna, tipografi, spacing, radius, shadow, dan status ada di `app/src/theme/tokens.js`.
+- Navigasi bawah berbentuk dock gelap dengan tombol Scan di tengah; tab aktif ditandai pill terang, bukan warna menyala.
+- Home memprioritaskan status laboratorium, pencarian, kategori, pinjaman aktif, alat populer, lalu katalog grid dua kolom.
+- Komponen baru: `ToolCard`, `PopularCard`, `LoanRow` (kartu jatuh tempo), `QRCodeCard`, `SheetModal`, `SegmentedControl`, `PressableScale`, dan `Reveal`.
+- Interaksi: press scale, fade/slide antar layar, segmented control animasi, skeleton, pull-to-refresh, haptics, dan sheet modal.
+- Ikon aplikasi, adaptive icon Android, splash, favicon, dan ikon PWA ikut diperbarui ke palet baru.
+- Layout responsif: padding 20, grid 48% + gap 12, dan frame web maksimal 520 px.
 
 ## Akun
 

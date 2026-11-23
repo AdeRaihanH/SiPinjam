@@ -39,5 +39,5 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     ...shadows.card,
   },
-  padded: { padding: 16 },
+  padded: { padding: 18 },
 });

@@ -2,14 +2,14 @@ import { useEffect, useMemo } from 'react';
 import { Animated, Platform, StyleSheet, View } from 'react-native';
 import { colors, radius } from '../theme/tokens';
 
-export function Skeleton({ width = '100%', height = 12, style, radius: r = 6 }) {
+export function Skeleton({ width = '100%', height = 12, style, radius: r = 8 }) {
   const opacity = useMemo(() => new Animated.Value(0.45), []);
 
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(opacity, { toValue: 1, duration: 650, useNativeDriver: Platform.OS !== 'web' }),
-        Animated.timing(opacity, { toValue: 0.45, duration: 650, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(opacity, { toValue: 1, duration: 700, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(opacity, { toValue: 0.45, duration: 700, useNativeDriver: Platform.OS !== 'web' }),
       ]),
     );
     loop.start();
@@ -19,7 +19,7 @@ export function Skeleton({ width = '100%', height = 12, style, radius: r = 6 }) 
   return (
     <Animated.View
       style={[
-        { width, height, borderRadius: r, backgroundColor: colors.surfaceMuted, opacity },
+        { width, height, borderRadius: r, backgroundColor: colors.surfaceStrong, opacity },
         style,
       ]}
     />
@@ -31,11 +31,11 @@ export function ListSkeleton({ count = 4 }) {
     <View style={styles.list}>
       {Array.from({ length: count }).map((_, index) => (
         <View key={index} style={styles.row}>
-          <Skeleton width={56} height={56} radius={12} />
+          <Skeleton width={60} height={60} radius={18} />
           <View style={styles.lines}>
-            <Skeleton width="42%" height={10} />
-            <Skeleton width="80%" height={13} />
-            <Skeleton width="28%" height={10} />
+            <Skeleton width="38%" height={9} />
+            <Skeleton width="82%" height={14} />
+            <Skeleton width="32%" height={9} />
           </View>
         </View>
       ))}
@@ -44,20 +44,16 @@ export function ListSkeleton({ count = 4 }) {
 }
 
 const styles = StyleSheet.create({
-  list: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-  },
+  list: { gap: 10 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 13,
     padding: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  lines: { flex: 1, gap: 7 },
+  lines: { flex: 1, gap: 8 },
 });

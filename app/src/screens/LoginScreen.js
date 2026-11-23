@@ -21,10 +21,16 @@ import HeroGlow from '../components/HeroGlow';
 import InlineNotice from '../components/InlineNotice';
 import Reveal from '../components/Reveal';
 import { useAuth } from '../hooks/useAuth';
-import { colors, gradients, radius, type, weight } from '../theme/tokens';
+import { colors, gradients, radius, shadows, type, weight } from '../theme/tokens';
 
 const DEMO_NIM = '21120124140118';
 const DEMO_PASSWORD = 'praktikum123';
+
+const FEATURES = [
+  { icon: 'scan-outline', label: 'QR Code' },
+  { icon: 'cube-outline', label: 'Stok live' },
+  { icon: 'wallet-outline', label: 'Denda jelas' },
+];
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -79,46 +85,58 @@ export default function LoginScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <ScrollView
-            contentContainerStyle={[styles.scroll, { paddingBottom: Math.max(insets.bottom, 20) }]}
+            contentContainerStyle={[styles.scroll, { paddingBottom: Math.max(insets.bottom, 18) }]}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
             bounces={false}
           >
             <Reveal distance={10} style={styles.hero}>
               <View style={styles.brandRow}>
-                <BrandMark size={44} tone="light" />
+                <BrandMark size={42} tone="light" />
                 <View style={styles.brandCopy}>
                   <Text style={styles.brandName}>SiPinjam</Text>
                   <Text style={styles.brandSub}>Laboratorium Komputer</Text>
                 </View>
                 <View style={styles.livePill}>
                   <View style={styles.liveDot} />
-                  <Text style={styles.liveText}>QR Aktif</Text>
+                  <Text style={styles.liveText}>QR aktif</Text>
                 </View>
               </View>
 
               <View style={styles.heroCopy}>
-                <Text style={styles.heroTitle}>Pinjam alat,{'\n'}tanpa antre.</Text>
+                <Text style={styles.heroTitle}>
+                  Pinjam alat,{'\n'}
+                  <Text style={styles.heroTitleAccent}>kembali tepat.</Text>
+                </Text>
                 <Text style={styles.heroSubtitle}>
-                  Katalog stok real-time, QR peminjaman, pengingat jatuh tempo, dan denda
-                  yang transparan dalam satu aplikasi.
+                  Katalog real-time, QR peminjaman, pengingat jatuh tempo, dan denda
+                  transparan dalam satu aplikasi laboratorium.
                 </Text>
               </View>
 
               <View style={styles.featureRow}>
-                <Ionicons name="sparkles-outline" size={14} color={colors.gold} />
-                <Text style={styles.featureText}>
-                  QR Code • Stok real-time • Denda otomatis
-                </Text>
+                {FEATURES.map((feature) => (
+                  <View key={feature.label} style={styles.feature}>
+                    <Ionicons name={feature.icon} size={15} color={colors.accent} />
+                    <Text style={styles.featureText}>{feature.label}</Text>
+                  </View>
+                ))}
               </View>
             </Reveal>
 
-            <Reveal delay={120} distance={24} style={styles.sheetWrap}>
+            <Reveal delay={110} distance={26} style={styles.sheetWrap}>
               <View style={styles.sheet}>
-                <Text style={styles.formTitle}>Selamat datang kembali</Text>
-                <Text style={styles.formSubtitle}>
-                  Masuk dengan NIM dan kata sandi laboratorium.
-                </Text>
+                <View style={styles.sheetHead}>
+                  <View style={styles.sheetMark}>
+                    <Ionicons name="finger-print-outline" size={18} color={colors.primary} />
+                  </View>
+                  <View style={styles.sheetCopy}>
+                    <Text style={styles.formTitle}>Masuk ke akun</Text>
+                    <Text style={styles.formSubtitle}>
+                      Gunakan NIM dan kata sandi laboratorium.
+                    </Text>
+                  </View>
+                </View>
 
                 {error ? (
                   <InlineNotice
@@ -177,26 +195,32 @@ export default function LoginScreen() {
                   Akun dikelola laboran. Hubungi laboran jika kata sandi bermasalah.
                 </Text>
 
+                <View style={styles.divider}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>atau coba dulu</Text>
+                  <View style={styles.dividerLine} />
+                </View>
+
                 <Pressable
                   accessibilityRole="button"
                   onPress={fillDemo}
-                  style={({ pressed }) => [styles.demo, pressed && { opacity: 0.75 }]}
+                  style={({ pressed }) => [styles.demo, pressed && { opacity: 0.8 }]}
                 >
                   <View style={styles.demoIcon}>
-                    <Ionicons name="flash" size={16} color={colors.gold} />
+                    <Ionicons name="flash" size={17} color={colors.accentInk} />
                   </View>
                   <View style={styles.demoCopy}>
-                    <Text style={styles.demoLabel}>Coba akun demo</Text>
-                    <Text style={styles.demoText}>{DEMO_NIM} • {DEMO_PASSWORD}</Text>
+                    <Text style={styles.demoLabel}>Akun demo praktikan</Text>
+                    <Text style={styles.demoText}>{DEMO_NIM} · {DEMO_PASSWORD}</Text>
                   </View>
                   <View style={styles.demoAction}>
                     <Text style={styles.demoActionText}>Isi otomatis</Text>
-                    <Ionicons name="arrow-forward" size={13} color={colors.primary} />
+                    <Ionicons name="arrow-forward" size={13} color={colors.accentInk} />
                   </View>
                 </Pressable>
 
                 <Text style={styles.footer}>
-                  SiPinjam • Tugas Akhir Praktikum PPB 2026
+                  SiPinjam · Tugas Akhir Praktikum PPB 2026
                 </Text>
               </View>
             </Reveal>
@@ -213,67 +237,80 @@ const styles = StyleSheet.create({
   scroll: { flexGrow: 1 },
   hero: {
     paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 34,
-    gap: 30,
+    paddingTop: 14,
+    paddingBottom: 32,
+    gap: 28,
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 11 },
   brandCopy: { flex: 1, gap: 1 },
-  brandName: { fontSize: type.md, fontWeight: weight.heavy, color: colors.white, letterSpacing: -0.3 },
-  brandSub: { fontSize: type.xs, color: 'rgba(255,255,255,0.62)' },
+  brandName: { fontSize: 16, fontWeight: weight.heavy, color: colors.white, letterSpacing: -0.3 },
+  brandSub: { fontSize: type.xs, color: 'rgba(255,255,255,0.56)' },
   livePill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 9,
-    height: 24,
+    paddingHorizontal: 10,
+    height: 26,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(200,241,105,0.1)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.14)',
+    borderColor: 'rgba(200,241,105,0.2)',
   },
   liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent },
-  liveText: { fontSize: type.xxs, fontWeight: weight.bold, color: colors.white, letterSpacing: 0.4 },
-  heroCopy: { gap: 10 },
+  liveText: { fontSize: type.xxs, fontWeight: weight.bold, color: colors.accent, letterSpacing: 0.3 },
+  heroCopy: { gap: 11 },
   heroTitle: {
-    fontSize: type.display,
-    lineHeight: 41,
+    fontSize: 38,
+    lineHeight: 44,
     fontWeight: weight.heavy,
     color: colors.white,
-    letterSpacing: -1,
-    maxWidth: 300,
+    letterSpacing: -1.4,
+    maxWidth: 320,
   },
+  heroTitleAccent: { color: colors.accent },
   heroSubtitle: {
     fontSize: type.sm,
     lineHeight: 21,
-    color: 'rgba(255,255,255,0.72)',
-    maxWidth: 320,
+    color: 'rgba(255,255,255,0.62)',
+    maxWidth: 330,
   },
-  featureRow: {
+  featureRow: { flexDirection: 'row', gap: 8 },
+  feature: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 11,
-    height: 30,
-    borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    gap: 6,
+    height: 42,
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.09)',
   },
-  featureText: { fontSize: type.xxs, fontWeight: weight.semibold, color: 'rgba(255,255,255,0.82)' },
+  featureText: { fontSize: 10.5, fontWeight: weight.semibold, color: 'rgba(255,255,255,0.8)' },
   sheetWrap: { flexGrow: 1 },
   sheet: {
     flexGrow: 1,
     backgroundColor: colors.bg,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
     paddingHorizontal: 24,
-    paddingTop: 26,
-    paddingBottom: 22,
+    paddingTop: 24,
+    paddingBottom: 20,
+    ...shadows.sheet,
   },
-  formTitle: { fontSize: type.lg, fontWeight: weight.heavy, color: colors.text, letterSpacing: -0.4 },
-  formSubtitle: { fontSize: type.xs, color: colors.muted, marginTop: 4, marginBottom: 20 },
+  sheetHead: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
+  sheetMark: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    backgroundColor: colors.accentSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sheetCopy: { flex: 1, gap: 2 },
+  formTitle: { fontSize: 22, fontWeight: weight.heavy, color: colors.text, letterSpacing: -0.5 },
+  formSubtitle: { fontSize: type.xs, lineHeight: 17, color: colors.muted },
   notice: { marginBottom: 16 },
   form: { gap: 15 },
   button: { marginTop: 20 },
@@ -284,22 +321,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
   },
-  demo: {
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     marginTop: 18,
-    padding: 12,
+    marginBottom: 12,
+  },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  dividerText: { fontSize: type.xxs, color: colors.faint },
+  demo: {
+    padding: 13,
     borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.accentSoft,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
   demoIcon: {
-    width: 34,
-    height: 34,
+    width: 36,
+    height: 36,
     borderRadius: 12,
-    backgroundColor: colors.goldSoft,
+    backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -307,7 +350,7 @@ const styles = StyleSheet.create({
   demoLabel: { fontSize: type.xs, fontWeight: weight.bold, color: colors.text },
   demoText: { fontSize: type.xxs, color: colors.muted },
   demoAction: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  demoActionText: { fontSize: type.xxs, fontWeight: weight.bold, color: colors.primary },
+  demoActionText: { fontSize: type.xxs, fontWeight: weight.bold, color: colors.accentInk },
   footer: {
     marginTop: 'auto',
     paddingTop: 22,

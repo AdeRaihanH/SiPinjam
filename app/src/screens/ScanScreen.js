@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useIsFocused } from '@react-navigation/native';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -159,6 +160,12 @@ export default function ScanScreen({ navigation }) {
           </View>
         )}
 
+        <LinearGradient
+          colors={['rgba(7,23,16,0.78)', 'rgba(7,23,16,0.3)', 'transparent']}
+          style={styles.topShade}
+          pointerEvents="none"
+        />
+
         <SafeAreaView edges={['top']} style={styles.top}>
           <View style={styles.topBar}>
             <View style={styles.topCopy}>
@@ -239,7 +246,7 @@ export default function ScanScreen({ navigation }) {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={[styles.panel, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+        <View style={[styles.panel, { paddingBottom: Math.max(insets.bottom, 12) + 84 }]}>
           <Text style={styles.panelTitle}>Input kode manual</Text>
           <View style={styles.manualRow}>
             <TextInput
@@ -263,7 +270,7 @@ export default function ScanScreen({ navigation }) {
             </Pressable>
           </View>
           <Text style={styles.hint}>
-            QR format: SIPINJAM:TOOL:ELK-001 · SIPINJAM:LOAN:PJM-...
+            QR format: SIPINJAM:TOOL:ELK-001 Â· SIPINJAM:LOAN:PJM-...
           </Text>
         </View>
       </KeyboardAvoidingView>
@@ -354,29 +361,36 @@ export default function ScanScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.primary },
-  cameraArea: { flex: 1, backgroundColor: colors.primary },
+  root: { flex: 1, backgroundColor: colors.primaryDeep },
+  cameraArea: { flex: 1, backgroundColor: colors.primaryDeep },
   fallback: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  topShade: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 130,
   },
   top: { position: 'absolute', top: 0, left: 0, right: 0 },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingHorizontal: 16,
-    paddingTop: 6,
+    paddingHorizontal: 20,
+    paddingTop: 12,
   },
   topCopy: { flex: 1, gap: 1 },
-  topTitle: { fontSize: type.md, fontWeight: weight.bold, color: colors.white },
-  topSubtitle: { fontSize: type.xs, color: 'rgba(255,255,255,0.64)' },
+  topTitle: { fontSize: 19, fontWeight: weight.heavy, color: colors.white, letterSpacing: -0.3 },
+  topSubtitle: { fontSize: type.xs, color: 'rgba(255,255,255,0.56)' },
   iconButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -387,12 +401,12 @@ const styles = StyleSheet.create({
     height: FRAME,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.25)',
+    borderColor: 'rgba(255,255,255,0.16)',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  corner: { position: 'absolute', width: 28, height: 28, borderColor: colors.white },
+  corner: { position: 'absolute', width: 30, height: 30, borderColor: colors.accent },
   tl: { top: 0, left: 0, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 12 },
   tr: { top: 0, right: 0, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 12 },
   bl: { bottom: 0, left: 0, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 12 },
@@ -405,20 +419,20 @@ const styles = StyleSheet.create({
     borderRadius: 1,
     backgroundColor: colors.accent,
   },
-  frameHint: { fontSize: type.xs, color: 'rgba(255,255,255,0.72)' },
+  frameHint: { fontSize: type.xs, color: 'rgba(255,255,255,0.62)' },
   permission: {
     width: 300,
-    borderRadius: radius.lg,
+    borderRadius: radius.xl,
     backgroundColor: colors.surface,
-    padding: 20,
+    padding: 22,
     alignItems: 'center',
-    gap: 7,
+    gap: 8,
   },
   permissionIcon: {
-    width: 52,
-    height: 52,
+    width: 54,
+    height: 54,
     borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.accentSoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 2,
@@ -428,33 +442,40 @@ const styles = StyleSheet.create({
   permissionButton: { marginTop: 6 },
   panel: {
     backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    gap: 9,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    gap: 10,
   },
-  panelTitle: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.muted },
+  panelTitle: {
+    fontSize: type.xxs,
+    fontWeight: weight.bold,
+    color: colors.muted,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
   manualRow: { flexDirection: 'row', gap: 8 },
   input: {
     flex: 1,
-    height: 44,
-    borderWidth: 1,
-    borderColor: colors.border,
+    height: 50,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    backgroundColor: colors.surfaceMuted,
     borderRadius: radius.md,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     fontSize: type.sm,
     color: colors.text,
   },
   openButton: {
-    width: 64,
-    height: 44,
+    width: 70,
+    height: 50,
     borderRadius: radius.md,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  openText: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.white },
+  openText: { fontSize: type.xs, fontWeight: weight.bold, color: colors.white },
   hint: { fontSize: type.xs, color: colors.faint },
   noticeText: { fontSize: type.sm, lineHeight: 20, color: colors.text },
   noticeButton: { marginTop: 16 },
@@ -478,3 +499,4 @@ const styles = StyleSheet.create({
   resultFine: { fontSize: type.xs, fontWeight: weight.semibold, color: colors.danger, marginTop: 4 },
   resultButton: { marginTop: 16 },
 });
+

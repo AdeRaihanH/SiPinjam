@@ -34,25 +34,25 @@ export default function PageHeader({
 
 const styles = StyleSheet.create({
   root: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  copy: { flex: 1, gap: 3 },
-  eyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  copy: { flex: 1, gap: 2 },
+  eyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
   eyebrowDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
     backgroundColor: colors.accent,
   },
-  eyebrowDotLight: { backgroundColor: colors.gold },
+  eyebrowDotLight: { backgroundColor: colors.accent },
   eyebrow: {
     fontSize: type.xxs,
     fontWeight: weight.bold,
-    color: colors.primary,
-    letterSpacing: 0.8,
+    color: colors.muted,
+    letterSpacing: 1.1,
     textTransform: 'uppercase',
   },
-  eyebrowLight: { color: 'rgba(255,255,255,0.72)' },
+  eyebrowLight: { color: 'rgba(255,255,255,0.62)' },
   title: text.h1,
   titleLight: { color: colors.white },
-  subtitle: { fontSize: type.xs, lineHeight: 17, color: colors.muted },
-  subtitleLight: { color: 'rgba(255,255,255,0.66)' },
+  subtitle: { fontSize: type.xs, lineHeight: 18, color: colors.muted },
+  subtitleLight: { color: 'rgba(255,255,255,0.62)' },
 });

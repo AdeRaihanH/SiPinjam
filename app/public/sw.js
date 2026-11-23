@@ -1,5 +1,5 @@
 /* Service worker SiPinjam: app shell tahan offline, data tetap dari API. */
-const VERSION = 'sipinjam-v1';
+const VERSION = 'sipinjam-v2';
 const APP_SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {

@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -54,6 +55,7 @@ export default function AdminToolQrScreen({ navigation, route }) {
 
   return (
     <Screen padded={false}>
+      <StatusBar style="dark" />
       <StackHeader title="QR alat" subtitle={tool.kode} />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -61,7 +63,7 @@ export default function AdminToolQrScreen({ navigation, route }) {
       >
         <View style={styles.intro}>
           <Text style={styles.kicker}>{created ? 'ALAT BERHASIL DIBUAT' : 'QR ALAT'}</Text>
-          <Text style={styles.title}>{created ? 'QR otomatis siap' : 'QR alat'}</Text>
+          {created ? <Text style={styles.title}>QR otomatis siap</Text> : null}
           <Text style={styles.subtitle}>
             QR ini sudah terhubung dengan kode alat dan bisa langsung disimpan atau dicetak.
           </Text>
@@ -138,14 +140,15 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     gap: 14,
   },
-  intro: { gap: 3, paddingVertical: 6 },
+  intro: { gap: 4, paddingVertical: 8 },
   kicker: {
     fontSize: type.xxs,
     fontWeight: weight.bold,
-    color: colors.primary,
+    color: colors.muted,
     letterSpacing: 1,
+    textTransform: 'uppercase',
   },
-  title: { fontSize: 28, lineHeight: 34, fontWeight: weight.heavy, color: colors.text, letterSpacing: -0.8 },
+  title: { fontSize: 28, lineHeight: 35, fontWeight: weight.heavy, color: colors.text, letterSpacing: -0.8 },
   subtitle: { fontSize: type.sm, lineHeight: 21, color: colors.muted },
   info: { paddingVertical: 6 },
   infoRow: {

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
 import {
   RefreshControl,
@@ -42,6 +43,7 @@ function ToolAdminRow({ tool, onEdit, onQr, onDelete, last }) {
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel={`QR ${tool.kode}`}
+          hitSlop={6}
           onPress={() => onQr(tool)}
           scaleTo={0.9}
           style={styles.action}
@@ -51,6 +53,7 @@ function ToolAdminRow({ tool, onEdit, onQr, onDelete, last }) {
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel={`Edit ${tool.kode}`}
+          hitSlop={6}
           onPress={() => onEdit(tool)}
           scaleTo={0.9}
           style={styles.action}
@@ -60,6 +63,7 @@ function ToolAdminRow({ tool, onEdit, onQr, onDelete, last }) {
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel={`Hapus ${tool.kode}`}
+          hitSlop={6}
           onPress={() => onDelete(tool)}
           scaleTo={0.9}
           style={[styles.action, styles.actionDanger]}
@@ -106,6 +110,7 @@ export default function AdminToolsScreen({ navigation }) {
 
   return (
     <Screen padded={false}>
+      <StatusBar style="dark" />
       <StackHeader title="Kelola alat" subtitle="Admin / inventaris" />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -120,8 +125,16 @@ export default function AdminToolsScreen({ navigation }) {
         )}
       >
         <View style={styles.intro}>
-          <Text style={styles.kicker}>ADMIN / INVENTARIS</Text>
-          <Text style={styles.title}>Kelola alat</Text>
+          <View style={styles.introTop}>
+            <View style={styles.kickerRow}>
+              <View style={styles.kickerDot} />
+              <Text style={styles.kicker}>Admin · Inventaris</Text>
+            </View>
+            <View style={styles.countPill}>
+              <Text style={styles.countPillValue}>{query.meta.total}</Text>
+              <Text style={styles.countPillLabel}>alat</Text>
+            </View>
+          </View>
           <Text style={styles.subtitle}>
             Tambah alat baru, ubah data, atau hapus alat yang belum pernah dipinjam.
           </Text>
@@ -148,7 +161,6 @@ export default function AdminToolsScreen({ navigation }) {
 
         <View style={styles.listHead}>
           <Text style={styles.listTitle}>Daftar alat</Text>
-          <Text style={styles.listCount}>{query.meta.total} alat</Text>
         </View>
 
         {query.loading && !query.data.length ? (
@@ -196,15 +208,29 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     gap: 14,
   },
-  intro: { gap: 3, paddingVertical: 6 },
+  intro: { gap: 6, paddingVertical: 8 },
+  introTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  kickerRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  kickerDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent },
   kicker: {
     fontSize: type.xxs,
     fontWeight: weight.bold,
-    color: colors.primary,
+    color: colors.muted,
     letterSpacing: 1,
+    textTransform: 'uppercase',
   },
-  title: { fontSize: 30, lineHeight: 36, fontWeight: weight.heavy, color: colors.text, letterSpacing: -0.8 },
-  subtitle: { fontSize: type.sm, lineHeight: 21, color: colors.muted },
+  countPill: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 4,
+    paddingHorizontal: 10,
+    height: 26,
+    borderRadius: radius.pill,
+    backgroundColor: colors.accentSoft,
+  },
+  countPillValue: { fontSize: type.xs, fontWeight: weight.bold, color: colors.accentInk },
+  countPillLabel: { fontSize: 9, color: colors.accentInk },
+  subtitle: { fontSize: type.xs, lineHeight: 19, color: colors.muted },
   listHead: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -212,7 +238,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   listTitle: { fontSize: type.md, fontWeight: weight.bold, color: colors.text },
-  listCount: { fontSize: type.xs, color: colors.muted },
   list: { overflow: 'hidden' },
   row: {
     flexDirection: 'row',
@@ -233,10 +258,10 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   action: {
-    width: 30,
-    height: 30,
+    width: 31,
+    height: 31,
     borderRadius: radius.sm,
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.accentSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },

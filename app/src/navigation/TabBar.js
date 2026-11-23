@@ -1,12 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PressableScale from '../components/PressableScale';
 import { useNotificationBadge } from '../context/NotificationContext';
 import { select } from '../lib/haptics';
-import { colors, gradients, radius, shadows, type, weight } from '../theme/tokens';
+import { colors, radius, shadows, weight } from '../theme/tokens';
 
 const ICONS = {
   Katalog: ['grid-outline', 'grid'],
@@ -60,14 +59,9 @@ export default function TabBar({ state, navigation }) {
                 style={styles.item}
               >
                 <View style={[styles.scanRing, focused && styles.scanRingActive]}>
-                  <LinearGradient
-                    colors={focused ? gradients.accent : gradients.primary}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.scanButton}
-                  >
-                    <Ionicons name="scan" size={24} color={colors.white} />
-                  </LinearGradient>
+                  <View style={styles.scanButton}>
+                    <Ionicons name="scan" size={22} color={colors.primary} />
+                  </View>
                 </View>
                 <Text style={[styles.label, focused && styles.labelActive]}>{label}</Text>
               </PressableScale>
@@ -88,8 +82,8 @@ export default function TabBar({ state, navigation }) {
               <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
                 <Ionicons
                   name={focused ? active : idle}
-                  size={20}
-                  color={focused ? colors.primary : colors.muted}
+                  size={19}
+                  color={focused ? colors.white : 'rgba(255,255,255,0.58)'}
                 />
                 {route.name === 'Notifikasi' && unread > 0 ? (
                   <View style={styles.badge}>
@@ -108,74 +102,68 @@ export default function TabBar({ state, navigation }) {
 
 const styles = StyleSheet.create({
   wrap: {
-    paddingHorizontal: 12,
-    paddingTop: 6,
+    paddingHorizontal: 14,
+    paddingTop: 8,
     backgroundColor: colors.bg,
   },
   bar: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    height: 62,
-    backgroundColor: colors.surface,
+    alignItems: 'center',
+    height: 68,
+    backgroundColor: colors.primaryDeep,
     borderRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 6,
-    paddingBottom: 6,
-    ...shadows.sheet,
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 12,
+    paddingHorizontal: 7,
+    ...shadows.floating,
   },
   item: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     gap: 3,
-    minHeight: 52,
+    minHeight: 54,
   },
   iconWrap: {
     width: 38,
-    height: 28,
-    borderRadius: 10,
+    height: 30,
+    borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconWrapActive: { backgroundColor: colors.primarySoft },
-  label: { fontSize: type.xxs, fontWeight: weight.semibold, color: colors.muted },
-  labelActive: { color: colors.primary, fontWeight: weight.bold },
+  iconWrapActive: { backgroundColor: 'rgba(255,255,255,0.11)' },
+  label: { fontSize: 9.5, fontWeight: weight.semibold, color: 'rgba(255,255,255,0.58)' },
+  labelActive: { color: colors.white, fontWeight: weight.bold },
   scanRing: {
     width: 58,
     height: 58,
     borderRadius: 20,
-    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -26,
-    ...shadows.floating,
+    marginTop: -24,
+    borderWidth: 2,
+    borderColor: colors.primaryDeep,
+    backgroundColor: colors.surface,
+    ...shadows.lift,
   },
-  scanRingActive: {
-    shadowColor: colors.accent,
-    shadowOpacity: 0.35,
-  },
+  scanRingActive: { borderColor: colors.accent },
   scanButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 17,
+    width: 54,
+    height: 54,
+    borderRadius: 18,
+    backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
   badge: {
     position: 'absolute',
     top: -3,
-    right: 2,
+    right: 1,
     minWidth: 16,
     height: 16,
     borderRadius: 8,
     paddingHorizontal: 4,
     backgroundColor: colors.danger,
     borderWidth: 1.5,
-    borderColor: colors.surface,
+    borderColor: colors.primaryDeep,
     alignItems: 'center',
     justifyContent: 'center',
   },

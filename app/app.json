@@ -18,7 +18,7 @@
     "android": {
       "package": "com.aderaihan.sipinjam",
       "adaptiveIcon": {
-        "backgroundColor": "#1B2559",
+        "backgroundColor": "#0E2A20",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -33,8 +33,8 @@
       "name": "SiPinjam",
       "shortName": "SiPinjam",
       "lang": "id",
-      "themeColor": "#1B2559",
-      "backgroundColor": "#F5F7FB",
+      "themeColor": "#0E2A20",
+      "backgroundColor": "#F4F5F2",
       "description": "Katalog alat laboratorium, peminjaman, pemindaian QR, pengingat jatuh tempo, dan pencatatan denda.",
       "display": "standalone",
       "startUrl": "/"
@@ -53,7 +53,7 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 160,
           "resizeMode": "contain",
-          "backgroundColor": "#1B2559"
+          "backgroundColor": "#0E2A20"
         }
       ],
       "expo-status-bar",
