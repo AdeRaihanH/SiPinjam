@@ -90,7 +90,7 @@ Ade dipakai untuk alur peminjaman. Admin dipakai untuk mengelola alat dan mencet
 
 1. **Database Neon sudah aktif dan di-seed.** Schema, seed, dan pengujian endpoint/UI lolos pada 23 November 2026.
 2. **Vercel sudah live.** API <https://sipinjam-api.vercel.app> dan web/PWA <https://sipinjam-web.vercel.app> dideploy 23 November 2026; login produksi sudah diuji lewat browser.
-3. **APK sudah dibangun.** Profil `preview`, versi 1.0.0 (versionCode 2): [unduh APK](https://expo.dev/artifacts/eas/cnhzBGzjVDpaiPKB1YFJgt6mAOwNNV0E2s4RhUA_t7I.apk).
+3. **APK sudah dibangun.** Profil `preview`, versi 1.0.0 (versionCode 3, redesign + dialog in-app): [unduh APK](https://expo.dev/artifacts/eas/yZKSU9Ud03O6qGysK9tfH1i4ZC4gHAVnzTOOxjvGw3U.apk).
 4. **Aplikasi Windows sudah dibangun** dengan Electron (`desktop/release/SiPinjam-1.0.0-Windows.exe`); exe tidak di-commit dan belum ditandatangani.
 5. **Kamera perlu diuji di perangkat nyata.** Pemindaian kamera belum diuji di HP; di PC memakai webcam.
 6. **Layar admin sudah ada.** CRUD alat dan QR tersedia untuk role admin; layar khusus laboran belum dibuat.

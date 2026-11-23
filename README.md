@@ -10,7 +10,7 @@ Ade Raihan Hanafi - NIM 21120124140118
 | Bentuk | Alamat | Catatan |
 | --- | --- | --- |
 | Web / PWA (PC dan Android) | <https://sipinjam-web.vercel.app> | Buka di Chrome/Edge, lalu **Install app** untuk memasangnya seperti aplikasi desktop |
-| APK Android | [Unduh APK](https://expo.dev/artifacts/eas/cnhzBGzjVDpaiPKB1YFJgt6mAOwNNV0E2s4RhUA_t7I.apk) · [halaman build](https://expo.dev/accounts/aderaihanhanafi/projects/sipinjam/builds/9658091b-9c2a-4c93-84c4-e0018ec06d6b) | Profil `preview`, build type `apk`, versi 1.0.0 (versionCode 2) |
+| APK Android | [Unduh APK](https://expo.dev/artifacts/eas/yZKSU9Ud03O6qGysK9tfH1i4ZC4gHAVnzTOOxjvGw3U.apk) · [halaman build](https://expo.dev/accounts/aderaihanhanafi/projects/sipinjam/builds/0256482b-9221-40d3-adbd-157da0aae0b8) | Profil `preview`, build type `apk`, versi 1.0.0 (versionCode 3), redesign Forest & Sage |
 | API produksi | <https://sipinjam-api.vercel.app> | Cek <https://sipinjam-api.vercel.app/health> |
 | Desktop Windows | `desktop/release/SiPinjam-1.0.0-Windows.exe` | Dibangun lokal dengan Electron; tidak di-commit karena berukuran ±107 MB |
 
@@ -271,7 +271,7 @@ npx eas-cli login
 npx eas-cli build --platform android --profile preview
 ```
 
-Profil `preview` memakai `android.buildType: apk`, `autoIncrement: true`, dan `EXPO_PUBLIC_API_URL` produksi. Build terakhir: versi 1.0.0 (versionCode 2), commit `40ef63d` — [unduh APK](https://expo.dev/artifacts/eas/cnhzBGzjVDpaiPKB1YFJgt6mAOwNNV0E2s4RhUA_t7I.apk).
+Profil `preview` memakai `android.buildType: apk`, `autoIncrement: true`, dan `EXPO_PUBLIC_API_URL` produksi. Build terakhir: versi 1.0.0 (versionCode 3), commit `96c386d` — [unduh APK](https://expo.dev/artifacts/eas/yZKSU9Ud03O6qGysK9tfH1i4ZC4gHAVnzTOOxjvGw3U.apk).
 
 Pasang di HP dengan membuka tautan APK, atau di emulator dengan:
 
