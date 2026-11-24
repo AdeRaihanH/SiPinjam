@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import SheetModal from './SheetModal';
 import { colors, radius, type, weight } from '../theme/tokens';
 import { formatTanggal } from '../lib/format';
+import { LOAN_MAX_DAYS } from '../lib/loanRules';
 
 export default function DatePickerField({
   label = 'Tanggal kembali',
@@ -42,7 +43,7 @@ export default function DatePickerField({
         <Ionicons name="calendar-outline" size={18} color={colors.muted} />
         <View style={styles.copy}>
           <Text style={styles.value}>{formatTanggal(value, 'EEEE, d MMMM yyyy')}</Text>
-          <Text style={styles.hint}>Pilih 1–3 hari dari hari ini</Text>
+          <Text style={styles.hint}>Pilih 1–{LOAN_MAX_DAYS} hari dari hari ini</Text>
         </View>
         <Ionicons name="chevron-down" size={16} color={colors.faint} />
       </Pressable>
@@ -52,7 +53,7 @@ export default function DatePickerField({
         visible={open}
         onClose={() => setOpen(false)}
         title="Pilih tanggal kembali"
-        subtitle="Durasi peminjaman maksimal 3 hari."
+        subtitle={`Durasi peminjaman maksimal ${LOAN_MAX_DAYS} hari.`}
       >
         <View style={styles.options}>
           {options.map((date) => {

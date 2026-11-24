@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { LOAN_MAX_ITEMS } from '../lib/constants.js';
 import { isDateISO } from '../lib/dates.js';
 
 const tanggalSchema = z.string().refine(isDateISO, 'Format tanggal harus YYYY-MM-DD');
@@ -16,7 +17,7 @@ export const createLoanSchema = z.object({
     }),
   )
     .min(1, 'Pilih minimal satu alat')
-    .max(3, 'Maksimal 3 alat per pinjaman')
+    .max(LOAN_MAX_ITEMS, `Maksimal ${LOAN_MAX_ITEMS} alat per pinjaman`)
     .superRefine((items, ctx) => {
       const ids = items.map((item) => item.tool_id);
       if (new Set(ids).size !== ids.length) {

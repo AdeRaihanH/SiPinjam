@@ -1,8 +1,8 @@
 import { env } from '../config/env.js';
-import { diffDaysISO } from './dates.js';
+import { hariTerlambat } from './dates.js';
 import { statusEfektif } from './loanRules.js';
 
-export function memberPublic(member) {
+export function serializeMember(member) {
   return {
     id: member.id,
     nama: member.nama,
@@ -13,7 +13,7 @@ export function memberPublic(member) {
   };
 }
 
-export function kategoriDari(row) {
+function serializeCategory(row) {
   const kategori = row.categories || row.category || null;
   return kategori
     ? {
@@ -25,8 +25,8 @@ export function kategoriDari(row) {
     : null;
 }
 
-export function serializeTool(row, { riwayat } = {}) {
-  const tool = {
+export function serializeTool(row) {
+  return {
     id: row.id,
     kode: row.kode,
     nama: row.nama,
@@ -35,10 +35,20 @@ export function serializeTool(row, { riwayat } = {}) {
     stok_tersedia: Number(row.stok_tersedia ?? row.stok_total ?? 0),
     kondisi: row.kondisi,
     foto_url: row.foto_url || null,
-    kategori: kategoriDari(row),
+    kategori: serializeCategory(row),
   };
-  if (riwayat) tool.riwayat = riwayat;
-  return tool;
+}
+
+export function serializePopularTool(row) {
+  return {
+    id: row.id,
+    kode: row.kode,
+    nama: row.nama,
+    foto_url: row.foto_url || null,
+    kondisi: row.kondisi,
+    kategori: serializeCategory(row),
+    total_dipinjam: Number(row.total_dipinjam),
+  };
 }
 
 function serializeItem(item) {
@@ -54,7 +64,7 @@ function serializeItem(item) {
         nama: tool.nama,
         foto_url: tool.foto_url || null,
         kondisi: tool.kondisi,
-        kategori: kategoriDari(tool),
+        kategori: serializeCategory(tool),
       }
       : null,
   };
@@ -70,12 +80,12 @@ export function serializeLoan(row, today, { items = true, member = false } = {})
     : (row.ringkasan_alat || '');
   const status = statusEfektif(row, today);
   const hariTelat = row.status === 'dikembalikan'
-    ? Math.max(0, diffDaysISO(
+    ? hariTerlambat(
       row.tanggal_kembali_rencana,
       row.tanggal_kembali_aktual || row.tanggal_kembali_rencana,
-    ))
+    )
     : status === 'terlambat'
-      ? diffDaysISO(row.tanggal_kembali_rencana, today)
+      ? hariTerlambat(row.tanggal_kembali_rencana, today)
       : 0;
   const dendaBerjalan = row.status === 'dipinjam' ? hariTelat * env.dendaPerHari : 0;
   const totalDenda = row.status === 'dikembalikan' ? Number(row.denda || 0) : dendaBerjalan;
@@ -91,6 +101,7 @@ export function serializeLoan(row, today, { items = true, member = false } = {})
     denda: Number(row.denda || 0),
     denda_berjalan: dendaBerjalan,
     total_denda: totalDenda,
+    denda_per_hari: env.dendaPerHari,
     hari_terlambat: hariTelat,
     catatan: row.catatan || '',
     jumlah_item: daftarItem.length || Number(row.jumlah_item || 0),

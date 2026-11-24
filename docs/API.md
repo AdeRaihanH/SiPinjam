@@ -55,7 +55,7 @@ Error:
 | `dikembalikan` | kolom `loans.status` | Sudah dikembalikan |
 | `terlambat` | dihitung | `dipinjam` dan `tanggal_kembali_rencana < hari ini` (WIB) |
 
-`denda` diisi saat pengembalian. `denda_berjalan` dihitung untuk pinjaman aktif yang lewat tenggat. `total_denda` = denda final (jika selesai) atau denda berjalan (jika aktif).
+`denda` diisi saat pengembalian. `denda_berjalan` dihitung untuk pinjaman aktif yang lewat tenggat. `total_denda` = denda final (jika selesai) atau denda berjalan (jika aktif). `denda_per_hari` adalah tarif yang dipakai server.
 
 ## QR
 
@@ -74,9 +74,9 @@ Pendaftaran mandiri **khusus praktikan**. Nama lengkap, NIM, dan kata sandi waji
 
 ```json
 {
-  "nama": "Ade Raihan Hanafi",
-  "nim": "21120124140118",
-  "password": "rahasia123"
+  "nama": "Nama Praktikan",
+  "nim": "1234567890",
+  "password": "kata-sandi-anda"
 }
 ```
 
@@ -88,8 +88,8 @@ Aturan: nama 3–100 karakter, NIM 8–20 digit angka dan unik, kata sandi 8–7
     "token": "eyJhbGciOiJIUzI1NiIs...",
     "member": {
       "id": "...",
-      "nama": "Ade Raihan Hanafi",
-      "nim": "21120124140118",
+      "nama": "Nama Praktikan",
+      "nim": "1234567890",
       "email": null,
       "role": "praktikan",
       "avatar_url": null
@@ -103,7 +103,7 @@ NIM yang sudah dipakai menghasilkan `409 CONFLICT`. Body tidak valid menghasilka
 ### POST `/auth/login`
 
 ```json
-{ "nim": "21120124140118", "password": "praktikum123" }
+{ "nim": "1234567890", "password": "kata-sandi-anda" }
 ```
 
 `200`:
@@ -113,10 +113,10 @@ NIM yang sudah dipakai menghasilkan `409 CONFLICT`. Body tidak valid menghasilka
   "data": {
     "token": "eyJhbGciOiJIUzI1NiIs...",
     "member": {
-      "id": "a0000001-0000-4000-8000-000000000001",
-      "nama": "Ade Raihan Hanafi",
-      "nim": "21120124140118",
-      "email": "demo@sipinjam.id",
+      "id": "...",
+      "nama": "Nama Praktikan",
+      "nim": "1234567890",
+      "email": null,
       "role": "praktikan",
       "avatar_url": null
     }
@@ -128,7 +128,7 @@ NIM yang sudah dipakai menghasilkan `409 CONFLICT`. Body tidak valid menghasilka
 
 Header Bearer. Respons `{ "data": { "member": { ... } } }`.
 
-Akun admin memakai NIM `2112012414000` dan kata sandi `admin123`; token-nya membawa `role: "admin"`. Endpoint tulis alat wajib memakai token admin.
+Akun admin dibuat lewat SQL (lihat README) dan token-nya membawa `role: "admin"`. Endpoint tulis alat wajib memakai token admin.
 
 ## Alat (admin)
 
@@ -305,6 +305,7 @@ Praktikan hanya boleh membuka pinjaman miliknya; admin boleh membuka semua. `403
     "denda": 0,
     "denda_berjalan": 2000,
     "total_denda": 2000,
+    "denda_per_hari": 2000,
     "hari_terlambat": 1,
     "catatan": "",
     "jumlah_item": 1,
@@ -326,7 +327,7 @@ Praktikan hanya boleh membuka pinjaman miliknya; admin boleh membuka semua. `403
         }
       }
     ],
-    "member": { "id": "...", "nama": "Ade Raihan Hanafi", "nim": "21120124140118" }
+    "member": { "id": "...", "nama": "Nama Praktikan", "nim": "1234567890" }
   }
 }
 ```

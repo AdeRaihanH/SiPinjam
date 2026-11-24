@@ -1,8 +1,7 @@
+import { DEFAULT_FINE_PER_DAY } from './constants.js';
 import { diffDaysISO, hariTerlambat } from './dates.js';
 
-const DENDA_PER_HARI = 2000;
-
-export function hitungDenda(dueISO, actualISO, tarif = DENDA_PER_HARI) {
+export function hitungDenda(dueISO, actualISO, tarif = DEFAULT_FINE_PER_DAY) {
   return hariTerlambat(dueISO, actualISO) * tarif;
 }
 

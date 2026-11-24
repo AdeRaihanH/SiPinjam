@@ -26,54 +26,48 @@ const LOAN_SELECT = `
   join members m on m.id = l.member_id
 `;
 
+const STATUS_FILTERS = {
+  aktif: "l.status = 'dipinjam'",
+  selesai: "l.status = 'dikembalikan'",
+};
+
+async function listLoans(db, { memberId = null, status, limit, offset }) {
+  const filters = [];
+  const params = [];
+
+  if (memberId) {
+    params.push(memberId);
+    filters.push(`l.member_id = $${params.length}`);
+  }
+
+  const statusFilter = STATUS_FILTERS[status];
+  if (statusFilter) filters.push(statusFilter);
+
+  const where = filters.length ? `where ${filters.join(' and ')}` : '';
+  const [rows, countRows] = await Promise.all([
+    db.query(
+      `${LOAN_SELECT} ${where}
+       order by l.created_at desc
+       limit $${params.length + 1} offset $${params.length + 2}`,
+      [...params, limit, offset],
+    ),
+    db.query(
+      `select count(*)::int as count from loans l ${where}`,
+      params,
+    ),
+  ]);
+
+  return { rows, count: countRows[0]?.count || 0 };
+}
+
 export function createLoanModel(db) {
   return {
-    async listByMember(memberId, { status, limit, offset }) {
-      const filters = ['l.member_id = $1'];
-      const params = [memberId];
-
-      if (status === 'aktif') filters.push("l.status = 'dipinjam'");
-      if (status === 'selesai') filters.push("l.status = 'dikembalikan'");
-
-      const where = `where ${filters.join(' and ')}`;
-      const [rows, countRows] = await Promise.all([
-        db.query(
-          `${LOAN_SELECT} ${where}
-           order by l.created_at desc
-           limit $${params.length + 1} offset $${params.length + 2}`,
-          [...params, limit, offset],
-        ),
-        db.query(
-          `select count(*)::int as count from loans l ${where}`,
-          params,
-        ),
-      ]);
-
-      return { rows, count: countRows[0]?.count || 0 };
+    listByMember(memberId, query) {
+      return listLoans(db, { memberId, ...query });
     },
 
-    async listAll({ status, limit, offset }) {
-      const filters = [];
-      const params = [];
-
-      if (status === 'aktif') filters.push("l.status = 'dipinjam'");
-      if (status === 'selesai') filters.push("l.status = 'dikembalikan'");
-
-      const where = filters.length ? `where ${filters.join(' and ')}` : '';
-      const [rows, countRows] = await Promise.all([
-        db.query(
-          `${LOAN_SELECT} ${where}
-           order by l.created_at desc
-           limit $${params.length + 1} offset $${params.length + 2}`,
-          [...params, limit, offset],
-        ),
-        db.query(
-          `select count(*)::int as count from loans l ${where}`,
-          params,
-        ),
-      ]);
-
-      return { rows, count: countRows[0]?.count || 0 };
+    listAll(query) {
+      return listLoans(db, query);
     },
 
     async findById(id) {

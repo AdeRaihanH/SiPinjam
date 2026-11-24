@@ -6,9 +6,12 @@ export function safeParse(value) {
   if (value instanceof Date) {
     return Number.isNaN(value.getTime()) ? null : value;
   }
-  const raw = String(value);
-  const normalized = raw.includes('T') ? raw : raw.replace(' ', 'T');
-  const date = normalized.includes('T') ? new Date(normalized) : parseISO(normalized);
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  const hasTime = raw.includes('T') || raw.includes(' ');
+  const date = hasTime ? new Date(raw.replace(' ', 'T')) : parseISO(raw);
   return Number.isNaN(date.getTime()) ? null : date;
 }
 

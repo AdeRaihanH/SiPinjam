@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import { ApiError, asyncHandler } from '../lib/errors.js';
 import { sendData } from '../lib/response.js';
-import { memberPublic } from '../lib/serializers.js';
+import { serializeMember } from '../lib/serializers.js';
 import { loginSchema, registerSchema } from '../validators/authValidator.js';
 import { validate } from '../validators/validate.js';
 
@@ -37,7 +37,7 @@ export function createAuthController({ members }) {
 
       return sendData(res, {
         token: buatToken(member),
-        member: memberPublic(member),
+        member: serializeMember(member),
       }, 201);
     }),
 
@@ -50,13 +50,13 @@ export function createAuthController({ members }) {
         throw new ApiError(401, 'UNAUTHORIZED', 'NIM atau kata sandi salah');
       }
 
-      return sendData(res, { token: buatToken(member), member: memberPublic(member) });
+      return sendData(res, { token: buatToken(member), member: serializeMember(member) });
     }),
 
     me: asyncHandler(async (req, res) => {
       const member = await members.findById(req.auth.id);
       if (!member) throw new ApiError(401, 'UNAUTHORIZED', 'Akun tidak ditemukan');
-      return sendData(res, { member: memberPublic(member) });
+      return sendData(res, { member: serializeMember(member) });
     }),
   };
 }

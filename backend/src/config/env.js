@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { DEFAULT_FINE_PER_DAY } from '../lib/constants.js';
 
 dotenv.config();
 
@@ -17,5 +18,5 @@ export const env = {
   jwtSecret,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   corsOrigin: process.env.CORS_ORIGIN || '*',
-  dendaPerHari: Number(process.env.DENDA_PER_HARI || 2000),
+  dendaPerHari: Number(process.env.DENDA_PER_HARI || DEFAULT_FINE_PER_DAY),
 };

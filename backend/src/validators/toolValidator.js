@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TOOL_CODE_PREFIX_BY_CATEGORY_SLUG } from '../lib/constants.js';
 
 const optionalUuid = z.preprocess(
   (value) => (value === '' || value == null ? undefined : value),
@@ -10,7 +11,8 @@ const optionalSearch = z.preprocess(
   z.string().trim().max(80, 'Kata kunci maksimal 80 karakter').optional(),
 );
 
-const KODE_PATTERN = /^(ELK|JAR|ALK|KOM)-\d{3}$/;
+const KODE_PREFIXES = Object.values(TOOL_CODE_PREFIX_BY_CATEGORY_SLUG).join('|');
+const KODE_PATTERN = new RegExp(`^(${KODE_PREFIXES})-\\d{3}$`);
 
 const optionalKode = z.preprocess(
   (value) => (typeof value === 'string' ? value.trim().toUpperCase() : value),

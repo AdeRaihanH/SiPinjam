@@ -1,7 +1,8 @@
 import QRCode from 'qrcode';
 
+import { TOOL_CODE_PREFIX_BY_CATEGORY_SLUG } from '../lib/constants.js';
 import { todayISO } from '../lib/dates.js';
-import { ApiError, asyncHandler } from '../lib/errors.js';
+import { ApiError, asyncHandler, validationError } from '../lib/errors.js';
 import { parseScanCode, statusEfektif } from '../lib/loanRules.js';
 import { sendData, sendList } from '../lib/response.js';
 import { serializeTool } from '../lib/serializers.js';
@@ -13,13 +14,6 @@ import {
   uuidParamSchema,
 } from '../validators/toolValidator.js';
 import { validate } from '../validators/validate.js';
-
-const PREFIX_BY_SLUG = {
-  elektronika: 'ELK',
-  jaringan: 'JAR',
-  'alat-ukur': 'ALK',
-  komponen: 'KOM',
-};
 
 function serializeRiwayat(row, today) {
   return {
@@ -40,6 +34,34 @@ async function detailDenganRiwayat(tools, tool, today) {
     ...serializeTool(tool),
     riwayat: riwayat.map((row) => serializeRiwayat(row, today)),
   };
+}
+
+async function findToolOrThrow(tools, id) {
+  const tool = await tools.findById(id);
+  if (!tool) throw new ApiError(404, 'NOT_FOUND', 'Alat tidak ditemukan');
+  return tool;
+}
+
+async function findToolByKodeOrThrow(tools, kode) {
+  const tool = await tools.findByKode(kode);
+  if (!tool) throw new ApiError(404, 'NOT_FOUND', 'Alat tidak ditemukan');
+  return tool;
+}
+
+async function resolveCategoryPrefix(categories, categoryId) {
+  const category = await categories.findById(categoryId);
+  if (!category) throw validationError('category_id', 'Kategori tidak ditemukan');
+
+  const prefix = TOOL_CODE_PREFIX_BY_CATEGORY_SLUG[category.slug];
+  if (!prefix) throw validationError('category_id', 'Kategori tidak mendukung kode alat');
+
+  return prefix;
+}
+
+function assertKodePrefix(kode, prefix) {
+  if (!kode.startsWith(`${prefix}-`)) {
+    throw validationError('kode', `Kode alat harus berawalan ${prefix}-`);
+  }
 }
 
 export function createToolController({ tools, categories }) {
@@ -63,8 +85,7 @@ export function createToolController({ tools, categories }) {
 
     detail: asyncHandler(async (req, res) => {
       const { id } = validate(uuidParamSchema, req.params);
-      const tool = await tools.findById(id);
-      if (!tool) throw new ApiError(404, 'NOT_FOUND', 'Alat tidak ditemukan');
+      const tool = await findToolOrThrow(tools, id);
       return sendData(res, await detailDenganRiwayat(tools, tool, todayISO()));
     }),
 
@@ -73,32 +94,14 @@ export function createToolController({ tools, categories }) {
       const kode = parseScanCode(params.kode, 'tool');
       if (!kode) throw new ApiError(404, 'NOT_FOUND', 'Alat tidak ditemukan');
 
-      const tool = await tools.findByKode(kode);
-      if (!tool) throw new ApiError(404, 'NOT_FOUND', 'Alat tidak ditemukan');
+      const tool = await findToolByKodeOrThrow(tools, kode);
       return sendData(res, await detailDenganRiwayat(tools, tool, todayISO()));
     }),
 
     create: asyncHandler(async (req, res) => {
       const body = validate(createToolSchema, req.body);
-      const category = await categories.findById(body.category_id);
-      if (!category) {
-        throw new ApiError(422, 'VALIDATION_ERROR', 'Kategori tidak ditemukan', [
-          { field: 'category_id', message: 'Kategori tidak ditemukan' },
-        ]);
-      }
-
-      const prefix = PREFIX_BY_SLUG[category.slug];
-      if (!prefix) {
-        throw new ApiError(422, 'VALIDATION_ERROR', 'Kategori tidak mendukung kode alat', [
-          { field: 'category_id', message: 'Kategori tidak mendukung kode alat' },
-        ]);
-      }
-
-      if (body.kode && !body.kode.startsWith(`${prefix}-`)) {
-        throw new ApiError(422, 'VALIDATION_ERROR', `Kode alat harus berawalan ${prefix}-`, [
-          { field: 'kode', message: `Kode alat harus berawalan ${prefix}-` },
-        ]);
-      }
+      const prefix = await resolveCategoryPrefix(categories, body.category_id);
+      if (body.kode) assertKodePrefix(body.kode, prefix);
 
       const kode = body.kode || await tools.nextKode(prefix);
       const id = await tools.create({
@@ -114,24 +117,12 @@ export function createToolController({ tools, categories }) {
     update: asyncHandler(async (req, res) => {
       const { id } = validate(uuidParamSchema, req.params);
       const body = validate(updateToolSchema, req.body);
-      const existing = await tools.findById(id);
-      if (!existing) throw new ApiError(404, 'NOT_FOUND', 'Alat tidak ditemukan');
+      const existing = await findToolOrThrow(tools, id);
 
       const categoryId = body.category_id ?? existing.category_id;
-      const category = categoryId ? await categories.findById(categoryId) : null;
-      if (!category) {
-        throw new ApiError(422, 'VALIDATION_ERROR', 'Kategori tidak ditemukan', [
-          { field: 'category_id', message: 'Kategori tidak ditemukan' },
-        ]);
-      }
-
+      const prefix = await resolveCategoryPrefix(categories, categoryId);
       const kode = body.kode ?? existing.kode;
-      const prefix = PREFIX_BY_SLUG[category.slug];
-      if (prefix && !kode.startsWith(`${prefix}-`)) {
-        throw new ApiError(422, 'VALIDATION_ERROR', `Kode alat harus berawalan ${prefix}-`, [
-          { field: 'kode', message: `Kode alat harus berawalan ${prefix}-` },
-        ]);
-      }
+      assertKodePrefix(kode, prefix);
 
       await tools.update(id, {
         kode,
@@ -149,8 +140,7 @@ export function createToolController({ tools, categories }) {
 
     remove: asyncHandler(async (req, res) => {
       const { id } = validate(uuidParamSchema, req.params);
-      const existing = await tools.findById(id);
-      if (!existing) throw new ApiError(404, 'NOT_FOUND', 'Alat tidak ditemukan');
+      await findToolOrThrow(tools, id);
 
       const used = await tools.countLoanItems(id);
       if (used > 0) {
@@ -167,8 +157,7 @@ export function createToolController({ tools, categories }) {
 
     qr: asyncHandler(async (req, res) => {
       const { id } = validate(uuidParamSchema, req.params);
-      const tool = await tools.findById(id);
-      if (!tool) throw new ApiError(404, 'NOT_FOUND', 'Alat tidak ditemukan');
+      const tool = await findToolOrThrow(tools, id);
 
       const buffer = await QRCode.toBuffer(`SIPINJAM:TOOL:${tool.kode}`, {
         type: 'png',

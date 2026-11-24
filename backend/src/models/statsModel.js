@@ -1,5 +1,5 @@
 import { env } from '../config/env.js';
-import { diffDaysISO } from '../lib/dates.js';
+import { hariTerlambat } from '../lib/dates.js';
 
 export function createStatsModel(db) {
   return {
@@ -43,7 +43,7 @@ export function createStatsModel(db) {
           continue;
         }
         aktif += 1;
-        const hari = Math.max(0, diffDaysISO(loan.tanggal_kembali_rencana, today));
+        const hari = hariTerlambat(loan.tanggal_kembali_rencana, today);
         if (hari > 0) {
           terlambat += 1;
           dendaBerjalan += hari * env.dendaPerHari;

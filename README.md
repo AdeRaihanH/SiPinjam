@@ -1,6 +1,6 @@
 # SiPinjam
 
-Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemindaian QR Code, REST API Express, dan database PostgreSQL (Neon). Satu basis kode menghasilkan **APK Android**, **PWA untuk PC/HP**, dan **aplikasi Windows**.
+Aplikasi peminjaman alat laboratorium berbasis React Native (Expo) dengan pemindaian QR Code, REST API Express, dan database PostgreSQL (Neon). Keluaran utama adalah **APK Android**; dari basis kode React Native yang sama, Expo juga mengekspor **versi web (React Native Web)** sebagai keluaran tambahan.
 
 **Tugas Akhir Praktikum Pemrograman Perangkat Bergerak 2026**  
 Ade Raihan Hanafi - NIM 21120124140118
@@ -9,10 +9,9 @@ Ade Raihan Hanafi - NIM 21120124140118
 
 | Bentuk | Alamat | Catatan |
 | --- | --- | --- |
-| Web / PWA (PC dan Android) | <https://sipinjam-web.vercel.app> | Buka di Chrome/Edge, lalu **Install app** untuk memasangnya seperti aplikasi desktop |
+| Web (React Native Web, PC dan Android) | <https://sipinjam-web.vercel.app> | Build web dari kode React Native yang sama; opsional dipasang sebagai PWA lewat **Install app** di Chrome/Edge |
 | APK Android | [Unduh APK](https://expo.dev/artifacts/eas/yZKSU9Ud03O6qGysK9tfH1i4ZC4gHAVnzTOOxjvGw3U.apk) · [halaman build](https://expo.dev/accounts/aderaihanhanafi/projects/sipinjam/builds/0256482b-9221-40d3-adbd-157da0aae0b8) | Profil `preview`, build type `apk`, versi 1.0.0 (versionCode 3), redesign Forest & Sage |
 | API produksi | <https://sipinjam-api.vercel.app> | Cek <https://sipinjam-api.vercel.app/health> |
-| Desktop Windows | `desktop/release/SiPinjam-1.0.0-Windows.exe` | Dibangun lokal dengan Electron; tidak di-commit karena berukuran ±107 MB |
 
 ## Fitur
 
@@ -27,7 +26,7 @@ Ade Raihan Hanafi - NIM 21120124140118
 - Admin: tambah, edit, dan hapus alat; QR alat otomatis; simpan PNG atau cetak.
 - Admin melihat seluruh pinjaman praktikan (nama/NIM peminjam tampil di daftar dan detail) serta bisa memproses pengembalian.
 - Empat keadaan layar: loading, kosong, error dengan tombol coba lagi, dan berisi.
-- Dialog konfirmasi dan pesan memakai modal in-app yang konsisten di web, Android, dan Windows (bukan alert browser).
+- Dialog konfirmasi dan pesan memakai modal in-app yang konsisten di web dan Android (bukan alert browser).
 - Registrasi mandiri praktikan: nama lengkap, NIM, kata sandi, konfirmasi sandi, lalu auto-login sebagai `praktikan`.
 
 ## Arah desain
@@ -39,17 +38,26 @@ Redesign 2026 memakai arah **“Forest & Sage”**: hijau pinus dalam sebagai wa
 - Home memprioritaskan status laboratorium, pencarian, kategori, pinjaman aktif, alat populer, lalu katalog grid dua kolom.
 - Komponen baru: `ToolCard`, `PopularCard`, `LoanRow` (kartu jatuh tempo), `QRCodeCard`, `SheetModal`, `SegmentedControl`, `PressableScale`, dan `Reveal`.
 - Interaksi: press scale, fade/slide antar layar, segmented control animasi, skeleton, pull-to-refresh, haptics, dan sheet modal.
-- Ikon aplikasi, adaptive icon Android, splash, favicon, dan ikon PWA ikut diperbarui ke palet baru.
+- Ikon aplikasi, adaptive icon Android, splash, favicon, dan ikon web ikut diperbarui ke palet baru.
 - Layout responsif: padding 20, grid 48% + gap 12, dan frame web maksimal 520 px.
 
-## Akun
+## Akun dan peran
 
-| Akun | NIM | Kata sandi | Peran / isi seed |
-| --- | --- | --- | --- |
-| Ade Raihan Hanafi | `21120124140118` | `praktikum123` | Praktikan; 2 pinjaman aktif |
-| Admin Laboratorium | `2112012414000` | `admin123` | Admin; kelola alat/QR dan melihat semua pinjaman praktikan |
+Tidak ada akun demo atau kata sandi bawaan di repo ini.
 
-Ade dipakai untuk alur peminjaman. Admin dipakai untuk menambah, mengedit, menghapus alat, membuat QR alat, dan memantau semua pinjaman. Praktikan baru dapat mendaftar sendiri dari layar Login → **Daftar praktikan**; akun admin/laboran tetap dibuat oleh pengelola.
+- **Praktikan** mendaftar sendiri dari layar Login → **Daftar praktikan**; perannya otomatis `praktikan`.
+- **Admin/laboran** dibuat oleh pengelola. Jalankan SQL berikut di SQL Editor Neon dengan NIM dan sandi pilihan Anda (`pgcrypto` sudah aktif dari `schema.sql`):
+
+```sql
+insert into members (nama, nim, password_hash, role)
+values ('Admin Laboratorium', '<NIM_ADMIN>', crypt('<SANDI_ADMIN>', gen_salt('bf')), 'admin')
+on conflict (nim) do update
+  set nama = excluded.nama,
+      password_hash = excluded.password_hash,
+      role = 'admin';
+```
+
+Admin dipakai untuk menambah, mengedit, menghapus alat, membuat QR alat, dan memantau semua pinjaman praktikan.
 
 ## Tumpukan
 
@@ -68,39 +76,40 @@ SiPinjam/
     app.json
     eas.json
     .env.production     EXPO_PUBLIC_API_URL untuk build APK/web
-    public/             template index.html, manifest PWA, service worker, ikon
+    public/             template index.html, manifest web, service worker, ikon
     src/
       api/              client.js + satu modul per endpoint
       components/       Screen, Button, Card, StatusPill, StockBadge, dll.
       context/          AuthProvider, NotificationProvider
       hooks/            useAuth, useTools, useLoans, useNotifications, useStats
-      lib/              format tanggal/rupiah, parser QR, info aplikasi
+      lib/              format tanggal/rupiah, aturan pinjam, parser QR, info aplikasi
       navigation/       root stack, bottom tabs, tab bar
-      screens/          14 layar
+      screens/
+        auth/           Login, Register
+        catalog/        Katalog, Detail Alat, komponen katalog
+        loans/          Pinjaman, Form, Detail, Sukses, komponen pinjaman
+        scan/           Scan dan hasil pemindaian
+        notifications/  Notifikasi
+        profile/        Profil, Tentang
+        admin/          Kelola Alat, Form Alat, QR Alat
       theme/tokens.js   token warna, spasi, radius, tipografi
-  desktop/
-    main.js             jendela Electron + server statis lokal
-    scripts/copy-web.mjs  menyalin app/dist ke desktop/web
-    icon.ico
-    release/            hasil build .exe (diabaikan git)
   backend/
     api/index.js        entry point Vercel
     src/
       config/           env + koneksi Neon (db.js)
       controllers/      auth, category, tool, loan, notification, stats
-      lib/              tanggal, denda, serializer, error
+      lib/              tanggal, denda, serializer, error, konstanta aturan
       middleware/       JWT, error handler
       models/           query SQL per entitas
       routes/           router Express
       validators/       skema zod
     vercel.json
   database/
-    schema.sql          jalankan di SQL Editor Neon
-    seed.sql
+    schema.sql          skema tabel dan view
+    bootstrap.sql       kategori dasar + petunjuk admin pertama
   docs/
     API.md
     PANDUAN-TA.md
-    PHOTO-CREDITS.md
     postman_collection.json
   LICENSE
   README.md
@@ -110,7 +119,7 @@ SiPinjam/
 
 1. Buat proyek baru di [Neon](https://neon.tech), lalu salin **connection string** (pakai host `-pooler`).
 2. Buka **SQL Editor** Neon, jalankan isi `database/schema.sql`. **Perhatian:** file ini menghapus tabel SiPinjam yang sudah ada lalu membuatnya ulang.
-3. Masih di SQL Editor, jalankan `database/seed.sql` untuk mengisi data contoh.
+3. Masih di SQL Editor, jalankan `database/bootstrap.sql` untuk mengisi kategori dasar. File ini tidak membuat akun, alat, pinjaman, atau notifikasi contoh.
 4. Salin `backend/.env.example` menjadi `backend/.env`, lalu isi:
    - `DATABASE_URL` dengan connection string Neon (`...?sslmode=require`).
    - `JWT_SECRET` dengan string acak panjang.
@@ -124,11 +133,13 @@ npm run dev
 
 Cek `http://localhost:5000/health` sampai muncul `{ "data": { "status": "ok", "database": "connected" } }`.
 
+Setelah itu buat akun admin pertama memakai SQL pada bagian **Akun dan peran**. Praktikan cukup mendaftar dari aplikasi.
+
 Catatan: database hanya diakses backend. Tidak ada PostgREST/anon key maupun RLS; otorisasi dilakukan Express lewat JWT dan pengecekan pemilik data.
 
 ### Catatan database Neon
 
-Semua environment development dan QA memakai database **Neon** yang sama melalui `DATABASE_URL`. Tidak ada database lokal (PostgreSQL/SQLite) di repo ini — backend yang berjalan di laptop hanya proses Express yang terhubung ke Neon. Untuk mereset data QA, jalankan `database/seed.sql` di SQL Editor Neon.
+Semua environment development dan QA memakai database **Neon** yang sama melalui `DATABASE_URL`. Tidak ada database lokal (PostgreSQL/SQLite) di repo ini — backend yang berjalan di laptop hanya proses Express yang terhubung ke Neon. Untuk mengosongkan seluruh data dan memulai dari awal, jalankan `database/schema.sql` lalu `database/bootstrap.sql` di SQL Editor Neon. Keduanya bersifat destruktif terhadap tabel SiPinjam.
 
 ## Menjalankan aplikasi
 
@@ -140,29 +151,19 @@ npx expo start -c
 
 Buka Expo Go di HP (satu Wi-Fi dengan laptop) atau emulator. Di development, alamat API **dideteksi otomatis** dari host Metro/browser: web memakai `localhost`, HP memakai IP laptop dari Metro. `EXPO_PUBLIC_API_URL` hanya diperlukan untuk build APK/production.
 
-## Menjalankan aplikasi di PC
+## Menjalankan versi web di PC
 
-### PWA (tanpa build tambahan)
+### Versi web (React Native Web, tanpa build tambahan)
+
+Versi ini bukan proyek web terpisah: Expo mengekspor kode React Native yang sama ke web. Build tersebut menyertakan manifest dan service worker, sehingga opsional bisa dipasang seperti aplikasi.
 
 1. Buka <https://sipinjam-web.vercel.app> di Chrome atau Edge.
 2. Klik ikon **Install** di address bar, lalu **Install**. SiPinjam muncul di Start Menu dan berjalan di jendela sendiri.
 3. Pemindaian QR memakai webcam. Browser meminta izin kamera; ini berfungsi karena situs sudah HTTPS.
 
-### Aplikasi Windows (Electron)
-
-```bash
-cd app
-npx expo export --platform web
-cd ../desktop
-npm install
-npm run build
-```
-
-Hasil build: `desktop/release/SiPinjam-1.0.0-Windows.exe` (portable, tanpa installer). `npm start` menjalankan versi dev. Exe belum ditandatangani, jadi SmartScreen bisa menampilkan **More info → Run anyway**.
-
 ## Label QR alat
 
-Label QR siap cetak untuk 15 alat ada di [`docs/qr-alat.html`](docs/qr-alat.html). Buka di Chrome, pilih **Print**, ukuran A4, skala 100%. Setiap label berisi `SIPINJAM:TOOL:<kode>` (mis. `SIPINJAM:TOOL:ELK-001`), dan versi PNG per alat tersedia di `docs/qr-alat/`.
+QR alat dibuat dari data di database, bukan dari daftar statis. Login sebagai admin, buka **Kelola alat**, lalu pilih **QR** pada alat yang diinginkan untuk menyimpan PNG atau mencetak label. Endpoint `GET /api/v1/tools/:id/qr.png` juga menghasilkan PNG dari data alat yang tersimpan.
 
 QR pinjaman tidak perlu dicetak: nilainya `SIPINJAM:LOAN:PJM-YYMMDD-NNN` dan dibuat otomatis saat pinjaman diajukan.
 
@@ -243,9 +244,9 @@ Proyek produksi: `sipinjam-api` → <https://sipinjam-api.vercel.app>.
 4. `backend/vercel.json` mengarahkan semua request ke `api/index.js`.
 5. Uji `https://sipinjam-api.vercel.app/health` dan login.
 
-File `.vercelignore` di root mencegah `node_modules`, `dist`, dan hasil build desktop ikut terunggah.
+File `.vercelignore` di root mencegah `node_modules`, `dist`, dan cache build ikut terunggah.
 
-## Deploy web / PWA
+## Deploy versi web (React Native Web)
 
 Proyek produksi: `sipinjam-web` → <https://sipinjam-web.vercel.app>.
 
@@ -265,7 +266,7 @@ Deploy manual dari root repo:
 npx vercel --prod --project sipinjam-web
 ```
 
-File `app/public/index.html`, `manifest.webmanifest`, `sw.js`, dan `icons/` disalin Expo ke `dist/`, sehingga hasilnya bisa di-install sebagai PWA.
+Hasilnya adalah build web dari kode React Native yang sama. File `app/public/index.html`, `manifest.webmanifest`, `sw.js`, dan `icons/` disalin Expo ke `dist/`, sehingga build tersebut juga bisa dipasang sebagai PWA.
 
 ## Build APK
 
@@ -288,8 +289,8 @@ npx eas-cli build:run -p android --latest
 - Layar admin sudah tersedia untuk CRUD alat dan QR; layar khusus laboran belum dibuat.
 - Notifikasi bersifat in-app, bukan push notification.
 - Denda belum terhubung ke pembayaran.
-- Foto contoh memakai URL eksternal (Unsplash/Wikimedia via proxy); kredit di [`docs/PHOTO-CREDITS.md`](docs/PHOTO-CREDITS.md).
-- APK memakai keystore preview EAS dan belum diunggah ke Play Store; exe Windows belum ditandatangani.
+- Foto alat diisi lewat URL pada form admin; tidak ada foto contoh bawaan di repo.
+- APK memakai keystore preview EAS dan belum diunggah ke Play Store.
 - Pemindaian QR di PC memerlukan webcam dan izin kamera browser/Windows.
 
 ## Lisensi

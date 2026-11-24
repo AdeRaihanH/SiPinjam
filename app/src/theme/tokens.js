@@ -178,7 +178,7 @@ export const shadows = {
   },
 };
 
-export const categoryTones = {
+const categoryTones = {
   elektronika: { bg: '#E9EEF5', fg: '#3D5A78' },
   jaringan: { bg: '#E8F0E9', fg: '#3F6B4D' },
   'alat-ukur': { bg: '#F6EFE1', fg: '#8A6224' },

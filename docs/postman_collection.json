@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "a7c2e4d1-2f2f-4f57-9e45-8d1c7b6a5e31",
-    "name": "SiPinjam API (Supabase)",
-    "description": "Koleksi pengujian REST API SiPinjam. Jalankan Login lebih dulu agar token terisi, lalu Create Loan sebelum endpoint yang memakai {{loanId}} atau {{loanKode}}.",
+    "name": "SiPinjam API (Neon)",
+    "description": "Koleksi pengujian REST API SiPinjam dengan database Neon PostgreSQL. Isi variabel nim dan password dengan akun yang sudah terdaftar, jalankan Login agar token terisi, lalu Create Loan sebelum endpoint yang memakai {{loanId}} atau {{loanKode}}.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -16,7 +16,11 @@
     { "key": "rootUrl", "value": "http://localhost:5000" },
     { "key": "token", "value": "" },
     { "key": "memberId", "value": "" },
-    { "key": "toolId", "value": "b0000010-0000-4000-8000-000000000010" },
+    { "key": "nim", "value": "" },
+    { "key": "password", "value": "" },
+    { "key": "toolId", "value": "" },
+    { "key": "toolKode", "value": "" },
+    { "key": "search", "value": "" },
     { "key": "loanId", "value": "" },
     { "key": "loanKode", "value": "" },
     { "key": "notificationId", "value": "" },
@@ -30,14 +34,14 @@
         "method": "GET",
         "header": [],
         "url": "{{rootUrl}}/health",
-        "description": "Health check + koneksi Supabase."
+        "description": "Health check + koneksi Neon PostgreSQL."
       }
     },
     {
       "name": "Auth",
       "item": [
         {
-          "name": "Login demo",
+          "name": "Login",
           "event": [
             {
               "listen": "test",
@@ -62,7 +66,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nim\": \"21120124140118\",\n  \"password\": \"praktikum123\"\n}"
+              "raw": "{\n  \"nim\": \"{{nim}}\",\n  \"password\": \"{{password}}\"\n}"
             },
             "url": "{{baseUrl}}/auth/login"
           }
@@ -102,11 +106,11 @@
           }
         },
         {
-          "name": "Cari osiloskop",
+          "name": "Cari alat",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/tools?search=osilo"
+            "url": "{{baseUrl}}/tools?search={{search}}"
           }
         },
         {
@@ -130,7 +134,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/tools/kode/SIPINJAM%3ATOOL%3AALK-002"
+            "url": "{{baseUrl}}/tools/kode/SIPINJAM%3ATOOL%3A{{toolKode}}"
           }
         }
       ]
@@ -176,7 +180,7 @@
               "raw": "{\n  \"tanggal_kembali_rencana\": \"{{tanggalKembali}}\",\n  \"catatan\": \"Uji dari Postman\",\n  \"items\": [\n    { \"tool_id\": \"{{toolId}}\", \"jumlah\": 1 }\n  ]\n}"
             },
             "url": "{{baseUrl}}/loans",
-            "description": "Akun demo tidak memiliki pinjaman terlambat. Jika alat sudah aktif, ganti toolId atau kembalikan pinjaman terlebih dahulu."
+            "description": "Pastikan alat yang dipilih tersedia. Ganti toolId dengan ID alat dari respons katalog."
           }
         },
         {

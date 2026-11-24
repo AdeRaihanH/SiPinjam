@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 
 import { API_BASE_URL } from '../api/client';
 
-export function toolQrUrl(toolId) {
+function toolQrUrl(toolId) {
   return `${API_BASE_URL}/tools/${toolId}/qr.png`;
 }
 

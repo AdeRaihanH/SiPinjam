@@ -1,5 +1,5 @@
 -- SiPinjam - skema PostgreSQL (Neon)
--- Jalankan seluruh file ini di database Neon SEBELUM seed.sql.
+-- Jalankan seluruh file ini di database Neon SEBELUM bootstrap.sql.
 --
 -- Catatan keamanan:
 -- - Database hanya diakses backend Express lewat DATABASE_URL; tidak ada akses langsung dari app.

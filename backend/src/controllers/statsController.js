@@ -1,13 +1,9 @@
-import { z } from 'zod';
 import { todayISO } from '../lib/dates.js';
 import { asyncHandler } from '../lib/errors.js';
 import { sendData } from '../lib/response.js';
-import { kategoriDari } from '../lib/serializers.js';
+import { serializePopularTool } from '../lib/serializers.js';
+import { popularToolsSchema } from '../validators/statsValidator.js';
 import { validate } from '../validators/validate.js';
-
-const populerSchema = z.object({
-  limit: z.coerce.number().int().min(1).max(20).default(5),
-});
 
 export function createStatsController({ stats }) {
   return {
@@ -17,17 +13,9 @@ export function createStatsController({ stats }) {
     }),
 
     populer: asyncHandler(async (req, res) => {
-      const { limit } = validate(populerSchema, req.query);
+      const { limit } = validate(popularToolsSchema, req.query);
       const rows = await stats.populer(limit);
-      return sendData(res, rows.map((row) => ({
-        id: row.id,
-        kode: row.kode,
-        nama: row.nama,
-        foto_url: row.foto_url || null,
-        kondisi: row.kondisi,
-        kategori: kategoriDari(row),
-        total_dipinjam: Number(row.total_dipinjam),
-      })));
+      return sendData(res, rows.map(serializePopularTool));
     }),
   };
 }

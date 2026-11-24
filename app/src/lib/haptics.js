@@ -12,10 +12,6 @@ export function tap() {
   run(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light));
 }
 
-export function press() {
-  run(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium));
-}
-
 export function select() {
   run(() => Haptics.selectionAsync());
 }

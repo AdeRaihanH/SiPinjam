@@ -1,11 +1,12 @@
 import { env } from '../config/env.js';
+import { LOAN_MAX_DAYS } from '../lib/constants.js';
 import {
   addDaysISO,
   atJakartaMorning,
   formatTanggal,
   todayISO,
 } from '../lib/dates.js';
-import { ApiError, asyncHandler } from '../lib/errors.js';
+import { ApiError, asyncHandler, validationError } from '../lib/errors.js';
 import {
   buatKodePinjam,
   hitungDenda,
@@ -17,13 +18,34 @@ import { createLoanSchema, loanListSchema } from '../validators/loanValidator.js
 import { kodeParamSchema, uuidParamSchema } from '../validators/toolValidator.js';
 import { validate } from '../validators/validate.js';
 
-function pastikanPemilik(loan, member) {
+function assertOwner(loan, member) {
   if (loan.member_id !== member.id && member.role !== 'admin') {
     throw new ApiError(403, 'FORBIDDEN', 'Anda tidak berhak mengakses pinjaman ini');
   }
 }
 
-function notifikasiPinjaman(loan, memberId, dueDate) {
+async function findLoanOrThrow(loans, id) {
+  const loan = await loans.findById(id);
+  if (!loan) throw new ApiError(404, 'NOT_FOUND', 'Pinjaman tidak ditemukan');
+  return loan;
+}
+
+function assertReturnDate(returnDate, today) {
+  if (returnDate <= today) {
+    const message = 'Tanggal kembali minimal besok (durasi 1 hari)';
+    throw validationError('tanggal_kembali_rencana', message);
+  }
+
+  const lastDate = addDaysISO(today, LOAN_MAX_DAYS);
+  if (returnDate > lastDate) {
+    throw validationError(
+      'tanggal_kembali_rencana',
+      `Durasi peminjaman maksimal ${LOAN_MAX_DAYS} hari`,
+    );
+  }
+}
+
+function buildLoanNotifications(loan, memberId, dueDate) {
   const hMinusSatu = addDaysISO(dueDate, -1);
   return [
     {
@@ -68,9 +90,8 @@ export function createLoanController({ loans, tools, notifications }) {
 
     detail: asyncHandler(async (req, res) => {
       const { id } = validate(uuidParamSchema, req.params);
-      const loan = await loans.findById(id);
-      if (!loan) throw new ApiError(404, 'NOT_FOUND', 'Pinjaman tidak ditemukan');
-      pastikanPemilik(loan, req.auth);
+      const loan = await findLoanOrThrow(loans, id);
+      assertOwner(loan, req.auth);
       return sendData(res, serializeLoan(loan, todayISO(), { member: true }));
     }),
 
@@ -81,25 +102,14 @@ export function createLoanController({ loans, tools, notifications }) {
 
       const loan = await loans.findByKode(kode);
       if (!loan) throw new ApiError(404, 'NOT_FOUND', 'Pinjaman tidak ditemukan');
-      pastikanPemilik(loan, req.auth);
+      assertOwner(loan, req.auth);
       return sendData(res, serializeLoan(loan, todayISO()));
     }),
 
     create: asyncHandler(async (req, res) => {
       const body = validate(createLoanSchema, req.body);
       const today = todayISO();
-      const batasAkhir = addDaysISO(today, 3);
-
-      if (body.tanggal_kembali_rencana <= today) {
-        throw new ApiError(422, 'VALIDATION_ERROR', 'Tanggal kembali minimal besok (durasi 1 hari)', [
-          { field: 'tanggal_kembali_rencana', message: 'Tanggal kembali minimal besok (durasi 1 hari)' },
-        ]);
-      }
-      if (body.tanggal_kembali_rencana > batasAkhir) {
-        throw new ApiError(422, 'VALIDATION_ERROR', 'Durasi peminjaman maksimal 3 hari', [
-          { field: 'tanggal_kembali_rencana', message: 'Durasi peminjaman maksimal 3 hari' },
-        ]);
-      }
+      assertReturnDate(body.tanggal_kembali_rencana, today);
 
       const overdue = await loans.countOverdue(req.auth.id, today);
       if (overdue > 0) {
@@ -158,7 +168,7 @@ export function createLoanController({ loans, tools, notifications }) {
 
       try {
         await notifications.insertMany(
-          notifikasiPinjaman(header, req.auth.id, body.tanggal_kembali_rencana),
+          buildLoanNotifications(header, req.auth.id, body.tanggal_kembali_rencana),
         );
       } catch (error) {
         console.error('[sipinjam] gagal membuat notifikasi pinjaman:', error.message);
@@ -170,9 +180,8 @@ export function createLoanController({ loans, tools, notifications }) {
 
     returnLoan: asyncHandler(async (req, res) => {
       const { id } = validate(uuidParamSchema, req.params);
-      const loan = await loans.findById(id);
-      if (!loan) throw new ApiError(404, 'NOT_FOUND', 'Pinjaman tidak ditemukan');
-      pastikanPemilik(loan, req.auth);
+      const loan = await findLoanOrThrow(loans, id);
+      assertOwner(loan, req.auth);
 
       if (loan.status === 'dikembalikan') {
         throw new ApiError(409, 'CONFLICT', 'Pinjaman sudah dikembalikan');
