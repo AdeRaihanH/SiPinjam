@@ -10,6 +10,7 @@ import HeroGlow from '../../components/HeroGlow';
 import Screen from '../../components/Screen';
 import StackHeader from '../../components/StackHeader';
 import { API_BASE_URL } from '../../api/client';
+import { useAuth } from '../../hooks/useAuth';
 import { APP_VERSION, LICENSE, REPO_URL } from '../../lib/appInfo';
 import { showMessage } from '../../lib/dialog';
 import { colors, gradients, layout, radius, shadows, type, weight } from '../../theme/tokens';
@@ -24,6 +25,9 @@ function InfoRow({ label, value, last = false }) {
 }
 
 export default function TentangScreen() {
+  const { member } = useAuth();
+  const lengkap = member?.role === 'admin';
+
   async function openRepo() {
     try {
       await Linking.openURL(REPO_URL);
@@ -59,18 +63,39 @@ export default function TentangScreen() {
           </Text>
         </LinearGradient>
 
-        <Card padded={false}>
-          <InfoRow label="Base URL API" value={API_BASE_URL} />
-          <InfoRow label="Platform" value="React Native · Expo" />
-          <InfoRow label="Database" value="Neon PostgreSQL" />
-          <InfoRow label="Versi aplikasi" value={APP_VERSION} last />
+        <Card style={styles.license}>
+          <View style={styles.licenseHead}>
+            <View style={styles.licenseIcon}>
+              <Ionicons name="bulb-outline" size={17} color={colors.primary} />
+            </View>
+            <Text style={styles.licenseTitle}>Latar belakang</Text>
+          </View>
+          <Text style={styles.licenseText}>
+            SiPinjam dibuat untuk menertibkan peminjaman alat di Laboratorium
+            Komputer. Pencatatan manual rentan menimbulkan antrean, stok yang
+            tidak terpantau, dan keterlambatan pengembalian. Melalui katalog
+            real-time, QR Code, pengingat jatuh tempo, dan denda yang transparan,
+            praktikan dan laboran memakai data peminjaman yang sama dan dapat
+            dipertanggungjawabkan.
+          </Text>
         </Card>
 
-        <Card padded={false}>
-          <InfoRow label="Pengembang" value="Ade Raihan Hanafi" />
-          <InfoRow label="NIM" value="21120124140118" />
-          <InfoRow label="Mata kuliah" value="Praktikum Pemrograman Perangkat Bergerak" last />
-        </Card>
+        {lengkap ? (
+          <Card padded={false}>
+            <InfoRow label="Base URL API" value={API_BASE_URL} />
+            <InfoRow label="Platform" value="React Native · Expo" />
+            <InfoRow label="Database" value="Neon PostgreSQL" />
+            <InfoRow label="Versi aplikasi" value={APP_VERSION} last />
+          </Card>
+        ) : null}
+
+        {lengkap ? (
+          <Card padded={false}>
+            <InfoRow label="Pengembang" value="Ade Raihan Hanafi" />
+            <InfoRow label="NIM" value="21120124140118" />
+            <InfoRow label="Mata kuliah" value="Praktikum Pemrograman Perangkat Bergerak" last />
+          </Card>
+        ) : null}
 
         <Card style={styles.license}>
           <View style={styles.licenseHead}>
@@ -85,16 +110,20 @@ export default function TentangScreen() {
           </Text>
         </Card>
 
-        <Button
-          title="Buka repositori GitHub"
-          icon="logo-github"
-          variant="secondary"
-          onPress={openRepo}
-        />
+        {lengkap ? (
+          <Button
+            title="Buka repositori GitHub"
+            icon="logo-github"
+            variant="secondary"
+            onPress={openRepo}
+          />
+        ) : null}
 
-        <Pressable onPress={openRepo} style={styles.link}>
-          <Text style={styles.linkText}>{REPO_URL}</Text>
-        </Pressable>
+        {lengkap ? (
+          <Pressable onPress={openRepo} style={styles.link}>
+            <Text style={styles.linkText}>{REPO_URL}</Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
     </Screen>
   );

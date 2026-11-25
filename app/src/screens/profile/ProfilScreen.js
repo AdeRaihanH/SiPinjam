@@ -190,7 +190,7 @@ export default function ProfilScreen({ navigation }) {
         <MenuRow
           icon="information-circle-outline"
           label="Tentang aplikasi"
-          description="Versi, API, dan lisensi."
+          description={member?.role === 'admin' ? 'Versi, API, dan lisensi.' : 'Versi dan lisensi.'}
           onPress={() => navigation.navigate('Tentang')}
         />
         <MenuRow
